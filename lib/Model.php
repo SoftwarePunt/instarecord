@@ -8,6 +8,34 @@ namespace Instasell\Instarecord;
 class Model
 {
     /**
+     * An array containing properties and their last known values.
+     * This is used to track "dirty" (changed) properties.
+     * 
+     * @var array
+     */
+    protected $lastKnownValues;
+
+    /**
+     * Initializes a new instance of this model which can be inserted into the database.
+     * 
+     * @param array|null $initialValues Optionally, an array of initial property values to set on the model.
+     */
+    public function __construct(?array $initialValues = null)
+    {
+        if ($initialValues) {
+            $availablePropertyNames = $this->getPropertyNames();
+            
+            foreach ($initialValues as $propertyName => $propertyValue) {
+                if (in_array($propertyName, $availablePropertyNames)) {
+                    $this->$propertyName = $propertyValue;
+                }
+            }
+        }
+        
+        $this->lastKnownValues = $this->getProperties();
+    }
+
+    /**
      * Gets a list of the names of all this model's properties.
      * 
      * Properties are public variables defined in the class that can be get or set.
@@ -27,6 +55,43 @@ class Model
         }
         
         return $properties;
+    }
+
+    /**
+     * Gets a key/value list of all properties and their values.
+     * 
+     * @return array An array containing property values, indexed by property name.
+     */
+    public function getProperties(): array
+    {
+        $propertyList = [];
+        
+        foreach ($this->getPropertyNames() as $propertyName) {
+            $propertyList[$propertyName] = $this->$propertyName;    
+        }
+        
+        return $propertyList;
+    }
+
+    /**
+     * Gets a key/value list of all properties that have been modified.
+     * 
+     * @return array An array containing property values, indexed by property name.
+     */
+    public function getDirtyProperties(): array
+    {
+        $propertiesThen = $this->lastKnownValues;
+        $propertiesNow = $this->getProperties();
+        $propertiesDiff = [];
+        
+        foreach ($propertiesNow as $propertyName => $propertyValue) {
+            if (!isset($propertiesThen[$propertyName]) || $propertiesThen[$propertyName] !== $propertiesNow[$propertyName]) {
+                // This property either was not previously known, or its value has changed in some way.
+                $propertiesDiff[$propertyName] = $propertyValue;
+            }
+        }
+        
+        return $propertiesDiff;
     }
 
     /**

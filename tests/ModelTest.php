@@ -7,6 +7,46 @@ use PHPUnit\Framework\TestCase;
 
 class ModelTest extends TestCase
 {
+    public function testConstructWithDefaults()
+    {
+        $user = new User([
+            'id' => 123,
+            'userName' => 'Henk'
+        ]);
+        
+        $this->assertEquals(123, $user->id);
+        $this->assertEquals('Henk', $user->userName);
+    }
+    
+    public function testGetProperties()
+    {
+        $values = [
+            'id' => 123,
+            'userName' => 'Henk'
+        ];
+        
+        $user = new User($values);
+        
+        $this->assertEquals($values['id'], $user->getProperties()['id']);
+        $this->assertEquals($values['userName'], $user->getProperties()['userName']);
+    }
+    
+    public function testGetDirtyProperties()
+    {
+        $values = [
+            'id' => 123,
+            'userName' => 'Henk'
+        ];
+
+        $user = new User($values);
+        
+        $this->assertEmpty($user->getDirtyProperties());
+        
+        $user->userName = 'Jan';
+
+        $this->assertEquals(['userName' => 'Jan'], $user->getDirtyProperties());
+    }
+    
     public function testGetPropertyNames()
     {
         $sampleUserModel = new User();
