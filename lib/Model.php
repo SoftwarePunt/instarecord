@@ -46,4 +46,54 @@ class Model
         
         return $columnNames;
     }
+
+    /**
+     * Inserts this instance a new record in the database.
+     * 
+     * @see update()
+     * @return bool
+     */
+    public function create(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Updates this instance's database record, based on its primary key.
+     * Only "dirty" properties will be updated. If nothing was updated, this function won't do anything.
+     * This function will fail if primary key is not set.
+     * 
+     * @see create()
+     * @return bool Returns whether updating the record succeeded. Also returns true if there was nothing to update.
+     */
+    public function update(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Deletes the record.
+     * 
+     * @return bool Returns whether delete succeeded.
+     */
+    public function delete(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Commits the updated information in this model and its' underlying relationships to the database.
+     * 
+     * If this record does not yet have primary key information, it will cause a new record to be inserted (create).
+     * Instead, if this record does already have primary key information, it will cause the record to be updated.
+     * If this is an existing record, but nothing was updated, this function won't do anything but still return true.
+     * 
+     * @see create()
+     * @see update()
+     * @return bool Returns whether saving the data succeeded.
+     */
+    public function save(): bool
+    {
+        return false;
+    }
 }
