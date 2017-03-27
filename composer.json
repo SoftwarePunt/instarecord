@@ -1,0 +1,25 @@
+{
+    "name": "instasell/instarecord",
+    "description": "ActiveRecord Database ORM layer for MySQL",
+    "type": "framework",
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "license": "Proprietary",
+    "authors": [
+        {
+            "name": "Roy de Jong",
+            "email": "roy@softwarepunt.nl"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Instasell\\Instarecord\\": "lib/",
+            "Instasell\\Instarecord\\Tests\\": "tests/"
+        }
+    }
+}

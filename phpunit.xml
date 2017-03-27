@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="phpunit.php" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" processIsolation="false" stopOnError="false" stopOnFailure="false" syntaxCheck="true" verbose="true" beStrictAboutTestsThatDoNotTestAnything="false">
+    <testsuites>
+        <testsuite name="Instarecord Framework Tests">
+            <directory suffix="Test.php">./tests</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="false" processUncoveredFilesFromWhitelist="false">
+            <directory suffix=".php">lib/</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+    </logging>
+</phpunit>
