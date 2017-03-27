@@ -32,7 +32,7 @@ class Model
             }
         }
         
-        $this->lastKnownValues = $this->getProperties();
+        $this->markAllPropertiesClean();
     }
 
     /**
@@ -92,6 +92,22 @@ class Model
         }
         
         return $propertiesDiff;
+    }
+
+    /**
+     * Marks all properties as "clean" by updating all last known property values.
+     */
+    public function markAllPropertiesClean(): void
+    {
+        $this->lastKnownValues = $this->getProperties();
+    }
+
+    /**
+     * Marks all properties as "dirty" by resetting all last known property values.
+     */
+    public function markAllPropertiesDirty(): void
+    {
+        $this->lastKnownValues = [];
     }
 
     /**

@@ -47,6 +47,43 @@ class ModelTest extends TestCase
         $this->assertEquals(['userName' => 'Jan'], $user->getDirtyProperties());
     }
     
+    public function testMarkAllDirty()
+    {
+        $values = [
+            'id' => 123,
+            'userName' => 'Henk'
+        ];
+
+        $user = new User($values);
+
+        $this->assertEmpty($user->getDirtyProperties());
+        
+        $user->markAllPropertiesDirty();
+        
+        $this->assertNotEmpty($user->getDirtyProperties());
+    }
+
+    /**
+     * @depends testMarkAllDirty
+     */
+    public function testMarkAllClean()
+    {
+        $values = [
+            'id' => 123,
+            'userName' => 'Henk'
+        ];
+
+        $user = new User($values);
+
+        $user->markAllPropertiesDirty();
+
+        $this->assertNotEmpty($user->getDirtyProperties());
+        
+        $user->markAllPropertiesClean();
+
+        $this->assertEmpty($user->getDirtyProperties());
+    }
+    
     public function testGetPropertyNames()
     {
         $sampleUserModel = new User();
