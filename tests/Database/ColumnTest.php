@@ -3,7 +3,8 @@
 namespace Instasell\Instarecord\Tests\Database;
 
 use Instasell\Instarecord\Database\Column;
-use Instasell\Instarecord\Table;
+use Instasell\Instarecord\Database\Table;
+use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
 
 class ColumnTest extends TestCase
@@ -16,5 +17,14 @@ class ColumnTest extends TestCase
         $this->assertEquals("mysimplename",         Column::getDefaultColumnName("mysimplename"));
         $this->assertEquals("some4_numbers234",     Column::getDefaultColumnName("Some4Numbers234"));
         $this->assertEquals("test123_string",       Column::getDefaultColumnName("TEST123String"));
+    }
+
+    public function testCustomColumnNames()
+    {
+        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
+        $annotationBag = new AnnotationsBag(['column' => 'custom_column_name']);
+        $column = new Column($table, 'myPropName', $annotationBag);
+
+        $this->assertEquals('custom_column_name', $column->getColumnName(), "A custom @columnn annotation should override the default column name");
     }
 }
