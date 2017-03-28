@@ -129,4 +129,19 @@ class TextTransforms
 
         return $string;
     }
+
+    /**
+     * Removes the namespace component from a fully qualified class name.
+     *
+     * @param string $className Fully qualified class name.
+     * @return string Unqualified class name.
+     */
+    public static function removeNamespaceFromClassName(string $className)
+    {
+        if (preg_match('@\\\\([\w]+)$@', $className, $matches)) {
+            $className = $matches[1];
+        }
+
+        return $className;
+    }
 }

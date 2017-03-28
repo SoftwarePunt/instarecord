@@ -29,8 +29,8 @@ class ModelTest extends TestCase
         
         $user = new User($values);
         
-        $this->assertEquals($values['id'], $user->getProperties()['id']);
-        $this->assertEquals($values['userName'], $user->getProperties()['userName']);
+        $this->assertEquals($values['id'], $user->getPropertyValues()['id']);
+        $this->assertEquals($values['userName'], $user->getPropertyValues()['userName']);
     }
     
     public function testGetDirtyProperties()
@@ -106,6 +106,20 @@ class ModelTest extends TestCase
         $this->assertContains('id', $propertyList, 'The "id" property should be returned');
         $this->assertContains('user_name', $propertyList, 'The "user_name" property should be returned and translated');
         $this->assertNotContains('secretNotWritable', $propertyList, 'Private properties should not be included in property list');
+    }
+
+    public function testGetColumnNameForPropertyName()
+    {
+        $sampleUserModel = new User();
+        $this->assertEquals('id', $sampleUserModel->getColumnNameForPropertyName('id'));
+        $this->assertEquals('user_name', $sampleUserModel->getColumnNameForPropertyName('userName'));
+    }
+
+    public function testGetPropertyNameForColumnName()
+    {
+        $sampleUserModel = new User();
+        $this->assertEquals('id', $sampleUserModel->getPropertyNameForColumnName('id'));
+        $this->assertEquals('userName', $sampleUserModel->getPropertyNameForColumnName('user_name'));
     }
     
     public function testGetTableName()

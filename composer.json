@@ -3,7 +3,8 @@
     "description": "ActiveRecord Database ORM layer for MySQL",
     "type": "framework",
     "require": {
-        "php": ">=7.1"
+        "php": ">=7.1",
+        "minime/annotations": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0"

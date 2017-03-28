@@ -2,40 +2,88 @@
 
 namespace Instasell\Instarecord\Database;
 
+use Minime\Annotations\Interfaces\AnnotationsBagInterface;
+
 /**
  * Represents a Column within a Table.
  */
 class Column
 {
     /**
-     * Given a column name, normalizes it to its property name.
-     * The normalization process takes a MySQL compliant "column_name" and converts it to a more PHP-like $columnName.
+     * The table this column is a part of.
      *
-     * @param string $columnName The column name from the database, to be converted to its property equivalent.
+     * @var Table
+     */
+    protected $table;
+
+    /**
+     * The name of the property associated with this column on the model.
+     *
+     * @var string
+     */
+    protected $propertyName;
+
+    /**
+     * The name of the column in the database.
+     *
+     * @var string
+     */
+    protected $columnName;
+
+    /**
+     * A list of annotations set on this column in php code.
+     *
+     * @var AnnotationsBagInterface
+     */
+    protected $annotations;
+
+    /**
+     * Column constructor.
+     *
+     * @param Table $table The table this column is a part of.
+     * @param string $propertyName The name of the property associated with this column on the model.
+     * @param AnnotationsBagInterface $annotations Attributes extracted from annotations.
+     */
+    public function __construct(Table $table, string $propertyName, AnnotationsBagInterface $annotations)
+    {
+        $this->table = $table;
+        $this->propertyName = $propertyName;
+        $this->annotations = $annotations;
+
+        $this->getColumnName();
+    }
+
+    /**
+     * Gets the name of the column in the database.
+     *
      * @return string
      */
-    public static function getPropertyNameForColumn(string $columnName)
+    public function getColumnName(): string
     {
-        $columnName = preg_replace('/[_-]+/', '_', trim($columnName));
-        $columnName = str_replace(' ', '_', $columnName);
-
-        $camelized = '';
-
-        for ($i = 0, $n = strlen($columnName); $i < $n; ++$i) {
-            if ($columnName[$i] == '_' && $i + 1 < $n) {
-                $camelized .= strtoupper($columnName[++$i]);
-            } else {
-                $camelized .= $columnName[$i];
-            }
+        if ($this->columnName) {
+            // Already calculated
+            return $this->columnName;
         }
 
-        $camelized = trim($camelized, ' _');
-
-        if (strlen($camelized) > 0) {
-            $camelized[0] = strtolower($camelized[0]);
+        if ($this->annotations->has('column')) {
+            // User defined column name
+            $this->columnName = $this->annotations->get('column');
+            return $this->columnName;
         }
 
-        return $camelized;
+        // Assume default column name based on standard conventions
+        $this->columnName = self::getDefaultColumnName($this->propertyName);
+        return $this->propertyName;
+    }
+
+    /**
+     * Gets the name of this column's associated property on the model.
+     *
+     * @return string
+     */
+    public function getPropertyName(): string
+    {
+        return $this->propertyName;
     }
 
     /**
@@ -45,7 +93,7 @@ class Column
      * @param string $propertyName The property name from the code, to be converted to its column equivalent.
      * @return string
      */
-    public static function getColumNameForProperty(string $propertyName)
+    public static function getDefaultColumnName(string $propertyName)
     {
         preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $propertyName, $matches);
 

@@ -2,6 +2,7 @@
 
 namespace Instasell\Instarecord;
 
+use Instasell\Instarecord\Config\ModelConfig;
 use Instasell\Instarecord\Database\ModelQuery;
 use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\Database\Table;
@@ -17,7 +18,14 @@ class Model
      * 
      * @var array
      */
-    protected $lastKnownValues;
+    protected $_trackedModelValues;
+
+    /**
+     * Contains table and column information.
+     *
+     * @var Table
+     */
+    protected $_tableInfo;
 
     /**
      * Initializes a new instance of this model which can be inserted into the database.
@@ -26,18 +34,20 @@ class Model
      */
     public function __construct(?array $initialValues = null)
     {
+        $this->_tableInfo = Table::getTableInfo(get_class($this));
+
         if ($initialValues) {
             $availablePropertyNames = $this->getPropertyNames();
             
             foreach ($initialValues as $nameInArray => $valueInArray) {
-                $propertyName = Column::getPropertyNameForColumn($nameInArray);
+                $propertyName = $this->getPropertyNameForColumnName($nameInArray);
 
                 if (in_array($propertyName, $availablePropertyNames)) {
                     $this->$propertyName = $valueInArray;
                 }
             }
         }
-        
+
         $this->markAllPropertiesClean();
     }
 
@@ -68,7 +78,7 @@ class Model
      * 
      * @return array An array containing property values, indexed by property name.
      */
-    public function getProperties(): array
+    public function getPropertyValues(): array
     {
         $propertyList = [];
         
@@ -84,13 +94,13 @@ class Model
      *
      * @return array An array containing property values, indexed by property name.
      */
-    public function getColumns(): array
+    public function getColumnValues(): array
     {
-        $properties = $this->getProperties();
+        $properties = $this->getPropertyValues();
         $columns = [];
 
         foreach ($properties as $propertyName => $propertyValue) {
-            $columns[Column::getColumNameForProperty($propertyName)] = $propertyValue;
+            $columns[$this->getColumnNameForPropertyName($propertyName)] = $propertyValue;
         }
 
         return $columns;
@@ -103,8 +113,8 @@ class Model
      */
     public function getDirtyProperties(): array
     {
-        $propertiesThen = $this->lastKnownValues;
-        $propertiesNow = $this->getProperties();
+        $propertiesThen = $this->_trackedModelValues;
+        $propertiesNow = $this->getPropertyValues();
         $propertiesDiff = [];
         
         foreach ($propertiesNow as $propertyName => $propertyValue) {
@@ -128,7 +138,7 @@ class Model
         $dirtyColumns = [];
 
         foreach ($dirtyProperties as $propertyName => $propertyValue) {
-            $dirtyColumns[Column::getColumNameForProperty($propertyName)] = $propertyValue;
+            $dirtyColumns[Column::getDefaultColumnName($propertyName)] = $propertyValue;
         }
 
         return $dirtyColumns;
@@ -139,7 +149,7 @@ class Model
      */
     public function markAllPropertiesClean(): void
     {
-        $this->lastKnownValues = $this->getProperties();
+        $this->_trackedModelValues = $this->getPropertyValues();
     }
 
     /**
@@ -147,7 +157,7 @@ class Model
      */
     public function markAllPropertiesDirty(): void
     {
-        $this->lastKnownValues = [];
+        $this->_trackedModelValues = [];
     }
 
     /**
@@ -162,7 +172,7 @@ class Model
         $columnNames = [];
         
         foreach ($propertyNames as $propertyName) {
-            $columnNames[] = Column::getColumNameForProperty($propertyName);
+            $columnNames[] = Column::getDefaultColumnName($propertyName);
         }
         
         return $columnNames;
@@ -223,7 +233,7 @@ class Model
         
         $insertPkValue = $this->query()
             ->insert()
-            ->values($this->getColumns())
+            ->values($this->getColumnValues())
             ->executeInsert();
         
         // TODO Only get inserted PK value if it is known to be an auto increment column
@@ -334,5 +344,49 @@ class Model
         return $referenceModel->query()
             ->select('*')
             ->queryAllModels();
+    }
+
+    /**
+     * Get table information.
+     *
+     * @return Table
+     */
+    public function getTableInfo(): Table
+    {
+        return $this->_tableInfo;
+    }
+
+    /**
+     * Converts a property name into its column name.
+     *
+     * @param string $propertyName
+     * @return string
+     */
+    public function getColumnNameForPropertyName(string $propertyName)
+    {
+        $columnInfo = $this->_tableInfo->getColumnByPropertyName($propertyName);
+
+        if ($columnInfo) {
+            return $columnInfo->getColumnName();
+        }
+
+        return Column::getDefaultColumnName($propertyName);
+    }
+
+    /**
+     * Converts a column name into its property name.
+     *
+     * @param string $columnName
+     * @return string
+     */
+    public function getPropertyNameForColumnName(string $columnName)
+    {
+        $columnInfo = $this->_tableInfo->getColumnByName($columnName);
+
+        if ($columnInfo) {
+            return $columnInfo->getPropertyName();
+        }
+
+        return $columnName;
     }
 }

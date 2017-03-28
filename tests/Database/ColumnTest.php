@@ -10,17 +10,11 @@ class ColumnTest extends TestCase
 {
     public function testTranslateColumnName()
     {
-        $this->assertEquals("my_simple_name",       Column::getColumNameForProperty("my_simple_name"));
-        $this->assertEquals("my_simple_name",       Column::getColumNameForProperty("mySimpleName"));
-        $this->assertEquals("my_simple_name",       Column::getColumNameForProperty("MySimpleName"));
-        $this->assertEquals("mysimplename",         Column::getColumNameForProperty("mysimplename"));
-        $this->assertEquals("some4_numbers234",     Column::getColumNameForProperty("Some4Numbers234"));
-        $this->assertEquals("test123_string",       Column::getColumNameForProperty("TEST123String"));
-    }
-
-    public function testTranslatePropertyName()
-    {
-        $this->assertEquals("mySimpleName",       Column::getPropertyNameForColumn("my_simple_name"));
-        $this->assertEquals("mySimpleName",       Column::getPropertyNameForColumn("mySimpleName"));
+        $this->assertEquals("my_simple_name",       Column::getDefaultColumnName("my_simple_name"));
+        $this->assertEquals("my_simple_name",       Column::getDefaultColumnName("mySimpleName"));
+        $this->assertEquals("my_simple_name",       Column::getDefaultColumnName("MySimpleName"));
+        $this->assertEquals("mysimplename",         Column::getDefaultColumnName("mysimplename"));
+        $this->assertEquals("some4_numbers234",     Column::getDefaultColumnName("Some4Numbers234"));
+        $this->assertEquals("test123_string",       Column::getDefaultColumnName("TEST123String"));
     }
 }
