@@ -180,4 +180,29 @@ class ModelTest extends TestCase
         // 3. Ensure it was updated in the database
         $this->assertEquals($idAfterInsertion, $newUser->id, 'Updating should never result in a modified primary key');
     }
+
+    /**
+     * @runInSeparateProcess 
+     */
+    public function testDelete()
+    {
+        $config = Instarecord::config();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+
+        // 1. Insert user
+        $newUser = new User();
+        $newUser->userName = "will-be-deleted";
+        $newUser->save();
+        
+        // 2. Delete user
+        $this->assertTrue($newUser->delete(), 'Delete should return true');
+        
+        // 3. Insert the user again, noting that no "duplicate key" exceptions are raised
+        $newUser2 = new User();
+        $newUser2->userName = "will-be-deleted";
+        $newUser2->save(); 
+    }
 }
