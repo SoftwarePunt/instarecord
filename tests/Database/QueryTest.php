@@ -5,6 +5,7 @@ namespace Instasell\Instarecord\Tests\Database;
 use Instasell\Instarecord\Config\DatabaseConfig;
 use Instasell\Instarecord\Database\Connection;
 use Instasell\Instarecord\Database\Query;
+use Instasell\Instarecord\DatabaseAdapter;
 use PHPUnit\Framework\TestCase;
 
 class QueryTest extends TestCase
@@ -117,5 +118,38 @@ class QueryTest extends TestCase
             ->createStatementText();
 
         $this->assertEquals('DELETE FROM fruits WHERE type = ? AND `color` = ? LIMIT 5;', $queryString);
+    }
+    
+    public function testStatementGeneration()
+    {
+        $config = new DatabaseConfig();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+
+        $connection = new Connection($config);
+        
+        $query = new Query($connection);
+
+        $this->assertFalse($connection->isOpen(), 'Creating a new Query should not result in the connection opening');
+        
+        $query = $query->delete()
+            ->from('clothes')
+            ->where('`type` = ? AND `color` = ?', 'tshirt', 'blue');
+        
+        $pdoStatementText = $query->createStatementText();
+        $pdoStatement = $query->createStatement();
+        
+        $this->assertTrue($connection->isOpen(), 'Creating a PDO statement via a Query should result in the connection opening (lazy / on demand connecting)');
+        $this->assertInstanceOf('\PDOStatement', $pdoStatement);
+        $this->assertEquals($pdoStatementText, $pdoStatement->queryString, 'Generated PDO statement should match query text');
+        
+        ob_start();
+        $pdoStatement->debugDumpParams();
+        $debugParamsDump = ob_get_contents();
+        ob_end_clean();
+        
+        $this->assertContains("Params:  2", $debugParamsDump,"Expecting two bound parameters");
     }
 }
