@@ -3,6 +3,8 @@
 namespace Instasell\Instarecord;
 
 use Instasell\Instarecord\Database\ModelQuery;
+use Instasell\Instarecord\Database\Column;
+use Instasell\Instarecord\Database\Table;
 
 /**
  * The base class for all Instasell models.
@@ -86,7 +88,7 @@ class Model
         $columns = [];
 
         foreach ($properties as $propertyName => $propertyValue) {
-            $columns[Table::translateColumnName($propertyName)] = $propertyValue;
+            $columns[Column::getColumNameForProperty($propertyName)] = $propertyValue;
         }
 
         return $columns;
@@ -124,7 +126,7 @@ class Model
         $dirtyColumns = [];
 
         foreach ($dirtyProperties as $propertyName => $propertyValue) {
-            $dirtyColumns[Table::translateColumnName($propertyName)] = $propertyValue;
+            $dirtyColumns[Column::getColumNameForProperty($propertyName)] = $propertyValue;
         }
 
         return $dirtyColumns;
@@ -158,7 +160,7 @@ class Model
         $columnNames = [];
         
         foreach ($propertyNames as $propertyName) {
-            $columnNames[] = Table::translateColumnName($propertyName);
+            $columnNames[] = Column::getColumNameForProperty($propertyName);
         }
         
         return $columnNames;
@@ -171,11 +173,7 @@ class Model
      */
     public function getTableName(): string
     {
-        $name = Table::translateTableName(get_class($this));
-        if ($name == 'models') {
-            exit;
-        }
-        return $name;
+        return Table::getTableNameForClass(get_class($this));
     }
 
     /**
