@@ -122,7 +122,7 @@ class Query
      * @param string $selectText The select text: which columns to select.
      * @return Query|$this
      */
-    public function select(string $selectText): Query
+    public function select(string $selectText = '*'): Query
     {
         $this->statementType = self::QUERY_TYPE_SELECT;
         $this->selectStatement = $selectText;
@@ -231,7 +231,7 @@ class Query
      * @param string $statementText Raw SQL "WHERE" statement text.
      * @param array ...$params Bound parameter list.
      * @throws QueryBuilderException
-     * @return Query
+     * @return Query|$this
      */
     public function where(string $statementText, ...$params): Query
     {

@@ -179,7 +179,18 @@ class Model
     }
 
     /**
-     * Gets the name of the primary key value.
+     * Gets the name of the primary key column.
+     *
+     * @return string
+     */
+    public function getPrimaryKeyColumnName(): string
+    {
+        // TODO Do this better (@annotations seem like a clever idea)
+        return "id";
+    }
+
+    /**
+     * Gets the name of the primary key property.
      * 
      * @return string
      */
@@ -283,5 +294,45 @@ class Model
         } 
         
         return $this->create();
+    }
+
+    /**
+     * Fetches a instance of this model by its primary key value.
+     * 
+     * @param string $keyValue The primary key value to seek out.
+     * @return Model|$this
+     */
+    public static function fetch(string $keyValue): Model
+    {
+        $className = get_called_class();
+        $referenceModel = new $className();
+        
+        /**
+         * @var $referenceModel Model
+         */
+        $primaryKeyName = $referenceModel->getPrimaryKeyColumnName();
+
+        return $referenceModel->query()
+            ->select('*')
+            ->where("{$primaryKeyName} = ?", $keyValue)
+            ->querySingleModel();
+    }
+
+    /**
+     * Fetches all records in the database as a collection of model instances.
+     * 
+     * @return array
+     */
+    public static function all(): array
+    {
+        $className = get_called_class();
+        $referenceModel = new $className();
+        
+        /**
+         * @var $referenceModel Model
+         */
+        return $referenceModel->query()
+            ->select('*')
+            ->queryAllModels();
     }
 }

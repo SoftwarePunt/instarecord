@@ -191,7 +191,7 @@ class ModelTest extends TestCase
         $config->username = TEST_USER_NAME;
         $config->password = TEST_PASSWORD;
         $config->database = TEST_DATABASE_NAME;
-
+        
         // 1. Insert user
         $newUser = new User();
         $newUser->userName = "will-be-deleted";
@@ -204,5 +204,55 @@ class ModelTest extends TestCase
         $newUser2 = new User();
         $newUser2->userName = "will-be-deleted";
         $newUser2->save(); 
+    }
+    
+    public function testFetch()
+    {
+        $config = Instarecord::config();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+        
+        // 1. Insert user
+        $newUser = new User();
+        $newUser->userName = "imma-be-fetched-please";
+        $newUser->save();
+        
+        // 2. Fetch user
+        $fetchUser = User::fetch($newUser->id);
+        
+        $this->assertEquals($newUser->id, $fetchUser->id, 'Fetch should return a single user object based on the primary key');
+    }
+
+    public function testFetchAll()
+    {
+        $config = Instarecord::config();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+
+        // 1. Insert user
+        $newUser = new User();
+        $newUser->userName = "imma-be-listfetched-please";
+        $newUser->save();
+
+        // 2. Fetch user list
+        $fetchUserList = User::all();
+
+        $this->assertNotEmpty($fetchUserList, 'Expected nonempty user list');
+
+        $containsOurItem = false;
+        
+        foreach ($fetchUserList as $fetchUserListItem) {
+            $this->assertInstanceOf("Instasell\\Instarecord\\Tests\\Samples\\User", $fetchUserListItem, 'Expected a list of user models');
+            
+            if ($fetchUserListItem->id === $newUser->id) {
+                $containsOurItem = true;
+            }
+        }
+        
+        $this->assertTrue($containsOurItem, 'Expected to find our inserted user record in the all() list');
     }
 }
