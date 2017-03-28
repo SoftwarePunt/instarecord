@@ -98,6 +98,17 @@ class Connection
     {
         $this->open();
         
-        return $this->pdo->prepare($statementText);
+        try {
+            $statement = $this->pdo->prepare($statementText);
+        }
+        catch (\PDOException $ex) {
+            throw new DatabaseException("Database error: Could not prepare a new statement: {$ex->getMessage()}", $ex->getCode(), $ex);
+        }
+            
+        if (!$statement) {
+            throw new DatabaseException("Database error: Could not prepare a new statement on this connection");
+        }
+        
+        return $statement;
     }
 }

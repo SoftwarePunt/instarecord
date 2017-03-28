@@ -11,24 +11,24 @@ class Query
     const QUERY_TYPE_INSERT = 1;
     const QUERY_TYPE_UPDATE = 2;
     const QUERY_TYPE_DELETE = 3;
-    
+
     /**
      * The connection on which this query is being performed.
-     * 
+     *
      * @var Connection
      */
     protected $connection;
 
     /**
      * The list of bound parameters to this query.
-     * 
+     *
      * @var array
      */
     protected $parameters;
 
     /**
      * The type of query to be executed.
-     * 
+     *
      * @see Query::QUERY_TYPE_*
      * @var int
      */
@@ -36,7 +36,7 @@ class Query
 
     /**
      * The select statement for the query.
-     * 
+     *
      * @default *
      * @var string
      */
@@ -44,33 +44,51 @@ class Query
 
     /**
      * The table name that is being queried on.
-     * 
+     *
      * @var string
      */
     protected $tableName;
 
     /**
      * The values to be updated or inserted (SET or VALUES).
-     * 
+     *
      * @var array
      */
     protected $dataValues;
 
     /**
-     * Constructs a new, blank query.
+     * Limit to apply to query results (max records to return or change).
+     * If set to NULL, no limit should be applied.
      * 
+     * @default null
+     * @var int|null
+     */
+    protected $limit;
+
+    /**
+     * Offset to apply to query results (records to skip).
+     * If set to NULL, no limit should be applied.
+     * 
+     * @default null
+     * @var int|null
+     */
+    protected $offset;
+
+    /**
+     * Constructs a new, blank query.
+     *
      * @param Connection $connection The connection to perform the query on.
      */
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
-        
+
         $this->reset();
     }
 
     /**
      * Resets the query to a blank slate.
-     * 
+     *
      * @return Query
      */
     public function reset(): Query
@@ -80,14 +98,15 @@ class Query
         $this->selectStatement = "*";
         $this->tableName = null;
         $this->dataValues = [];
-        
+        $this->limit = null;
+        $this->offset = null;
+
         return $this;
     }
-    
 
     /**
      * Begins a SELECT statement.
-     * 
+     *
      * @param string $selectText The select text: which columns to select.
      * @return Query|$this
      */
@@ -108,10 +127,10 @@ class Query
         $this->statementType = self::QUERY_TYPE_INSERT;
         return $this;
     }
-    
+
     /**
      * Begins a UPDATE statement.
-     * 
+     *
      * @param string $tableName
      * @return Query
      */
@@ -124,7 +143,7 @@ class Query
 
     /**
      * Begins a DELETE statement.
-     * 
+     *
      * @return Query|$this
      */
     public function delete(): Query
@@ -135,7 +154,7 @@ class Query
 
     /**
      * Adds a FROM statement onto a SELECT or DELETE query.
-     * 
+     *
      * @param string $tableName
      * @return Query
      */
@@ -147,7 +166,7 @@ class Query
 
     /**
      * Adds an INTO statement onto a INSERT query.
-     * 
+     *
      * @param string $tableName
      * @return Query
      */
@@ -159,7 +178,7 @@ class Query
 
     /**
      * Sets the values to be insert on an INSERT statement.
-     * 
+     *
      * @param array $values Associative array of the values to be set, optionally indexed by column names.
      * @return Query
      */
@@ -171,28 +190,52 @@ class Query
 
     /**
      * Sets the values to be SET on an UPDATE statement.
-     * 
+     *
      * @param array $values Associative array of the values to be set, indexed by column names.
      * @throws QueryBuilderException
-     * @return Query
+     * @return Query|$this
      */
     public function set(array $values): Query
     {
         $keys = array_keys($values);
         $firstParameterKey = array_shift($keys);
         $valuesAreIndexedByName = is_string($firstParameterKey);
-        
+
         if (!$valuesAreIndexedByName) {
             throw new QueryBuilderException("Query format error: The values in the SET block MUST be indexed by column name, not by column index number.");
         }
-        
+
         $this->dataValues = $values;
         return $this;
     }
 
     /**
-     * Binds a query parameter.
+     * Applies an LIMIT to the statement.
      * 
+     * @param int|null $limit Set limit to a number, or set to NULL or ZERO to make this query limitless.
+     * @return Query|$this
+     */
+    public function limit(?int $limit): Query
+    {
+        $this->limit = ($limit && $limit > 0) ? $limit : null;
+        return $this;
+    }
+
+    /**
+     * Applies an OFFSET to the statement.
+     *
+     * @param int|null $offset Set offset amount to a number, or set to NULL or ZERO to not apply an offset.
+     * @return Query|$this
+     */
+    public function offset(?int $offset): Query
+    {
+        $this->offset = ($offset && $offset > 0) ? $offset : null;
+        return $this;
+    }
+
+    /**
+     * Binds a query parameter.
+     *
      * @param mixed $param
      * @return Query
      */
@@ -205,16 +248,16 @@ class Query
     /**
      * Generates the statement (query) text.
      * This process will use the data configured on this query object to generate an SQL statement.
-     * 
+     *
      * Calling this function will result in all bound parameters being reset.
-     * 
+     *
      * @return string
      */
     public function createStatementText(): string
     {
         // Reset bound parameters
         $this->parameters = [];
-        
+
         // Begin building query
         $statementText = '';
 
@@ -233,18 +276,18 @@ class Query
         if (!empty($this->dataValues)) {
             $columnIndexes = array_keys($this->dataValues);
             $columnValues = array_values($this->dataValues);
-            
+
             if ($this->statementType == self::QUERY_TYPE_UPDATE) {
                 $statementText .= " SET ";
 
                 for ($i = 0; $i < count($columnValues); $i++) {
                     $columnName = $columnIndexes[$i];
                     $columnValue = $columnValues[$i];
-                    
+
                     if ($i > 0) {
                         $statementText .= ", ";
                     }
-                    
+
                     $statementText .= "`{$columnName}` = ?";
                     $this->bindParam($columnValue);
                 }
@@ -269,7 +312,7 @@ class Query
 
                     $statementText .= ")";
                 }
-                
+
                 $statementText .= " VALUES (";
 
                 for ($i = 0; $i < count($columnValues); $i++) {
@@ -285,31 +328,39 @@ class Query
 
                 $statementText .= ")";
             }
-
-            
         }
         
+        // Apply LIMIT
+        if ($this->limit) {
+            $statementText .= " LIMIT {$this->limit}";
+        }
+
+        // Apply OFFSET
+        if ($this->offset) {
+            $statementText .= " OFFSET {$this->offset}";
+        }
+
         $statementText .= ';';
         return $statementText;
     }
 
     /**
      * Returns the prepared PDO statement.
-     * 
+     *
      * @return \PDOStatement
      */
     public function createStatement(): \PDOStatement
     {
         // Prepare statement
         $statement = $this->connection->createStatement($this->createStatementText());
-        
+
         // Bind parameters to it
         $i = 0;
-        
+
         foreach ($this->parameters as $paramNumber => $paramValue) {
             $statement->bindParam(++$i, $paramValue);
         }
-        
+
         // Ready to execute
         return $statement;
     }

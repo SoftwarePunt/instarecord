@@ -42,10 +42,23 @@ class QueryTest extends TestCase
         
         $queryString = $query->update('users')
             ->set($data)
-            ->from('users')
             ->createStatementText();
 
         $this->assertEquals('UPDATE users SET `is_active` = ?, `is_friendly` = ?;', $queryString);
+    }
+
+    /**
+     * @expectedException Instasell\Instarecord\Database\QueryBuilderException
+     * @expectedExceptionMessage Query format error
+     */
+    public function testCannotUpdateWithColumnIndexNumbers()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $data = [true, false];
+
+        $queryString = $query->update('users')
+            ->set($data);
     }
     
     public function testSimpleInsertWithColumnNames()
@@ -59,7 +72,7 @@ class QueryTest extends TestCase
 
         $queryString = $query->insert()
             ->values($data)
-            ->from('users')
+            ->into('users')
             ->createStatementText();
 
         $this->assertEquals('INSERT INTO users (`id`, `user_name`) VALUES (?, ?);', $queryString);   
@@ -73,9 +86,23 @@ class QueryTest extends TestCase
 
         $queryString = $query->insert()
             ->values($data)
-            ->from('users')
+            ->into('users')
             ->createStatementText();
 
         $this->assertEquals('INSERT INTO users VALUES (?, ?);', $queryString);
+    }
+    
+    public function testLimitAndOffset()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+        
+        $queryString = $query->update('users')
+            ->set(['a' => 'b'])
+            ->from('users')
+            ->limit(123)
+            ->offset(456)
+            ->createStatementText();
+
+        $this->assertEquals('UPDATE users SET `a` = ? LIMIT 123 OFFSET 456;', $queryString);
     }
 }
