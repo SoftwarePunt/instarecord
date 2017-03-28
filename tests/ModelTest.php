@@ -223,6 +223,7 @@ class ModelTest extends TestCase
         $fetchUser = User::fetch($newUser->id);
         
         $this->assertEquals($newUser->id, $fetchUser->id, 'Fetch should return a single user object based on the primary key');
+        $this->assertEquals('imma-be-fetched-please', $fetchUser->userName, 'Columns should be translated: userName should be filled with user_name value');
     }
 
     public function testFetchAll()
