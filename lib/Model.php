@@ -43,9 +43,9 @@ class Model
      * 
      * @return array
      */
-    public function getPropertyNames(): array
+    public static function getPropertyNames(): array
     {
-        $rfClass = new \ReflectionClass($this);
+        $rfClass = new \ReflectionClass(get_called_class());
         $rfProperties = $rfClass->getProperties(\ReflectionProperty::IS_PUBLIC);
 
         $properties = [];
@@ -116,9 +116,9 @@ class Model
      * 
      * @return array
      */
-    public function getColumnNames(): array
+    public static function getColumnNames(): array
     {
-        $propertyNames = $this->getPropertyNames();
+        $propertyNames = self::getPropertyNames();
         $columnNames = [];
         
         foreach ($propertyNames as $propertyName) {
