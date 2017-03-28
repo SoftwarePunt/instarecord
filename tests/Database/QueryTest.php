@@ -105,4 +105,17 @@ class QueryTest extends TestCase
 
         $this->assertEquals('UPDATE users SET `a` = ? LIMIT 123 OFFSET 456;', $queryString);
     }
+
+    public function testWhere()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->delete()
+            ->from('fruits')
+            ->where('type = ? AND `color` = ?', 'apples', 'red')
+            ->limit(5)
+            ->createStatementText();
+
+        $this->assertEquals('DELETE FROM fruits WHERE type = ? AND `color` = ? LIMIT 5;', $queryString);
+    }
 }

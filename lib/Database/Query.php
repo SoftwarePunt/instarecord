@@ -75,6 +75,17 @@ class Query
     protected $offset;
 
     /**
+     * Contains an array of WHERE statement.
+     * 
+     * Each entry in this array is another row (sub array):
+     * - Parameter one (index zero) is the raw query text
+     * - Each parameter following it is a bound parameter 
+     * 
+     * @var array
+     */
+    protected $whereStatements;
+
+    /**
      * Constructs a new, blank query.
      *
      * @param Connection $connection The connection to perform the query on.
@@ -100,6 +111,7 @@ class Query
         $this->dataValues = [];
         $this->limit = null;
         $this->offset = null;
+        $this->whereStatements = [];
 
         return $this;
     }
@@ -209,6 +221,35 @@ class Query
         return $this;
     }
 
+    /**
+     * Applies a WHERE clause to the query.
+     * 
+     * @param string $statementText Raw SQL "WHERE" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query
+     */
+    public function where(string $statementText, ...$params): Query
+    {
+        // Verify parameter count to prevent (to aid the developer, really)
+        $paramCountExpected = substr_count($statementText, '?');
+        $paramCountActual = count($params);
+        
+        if ($paramCountExpected !== $paramCountActual) {
+            throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\"."); 
+        }
+
+        // Register the WHERE statement data as a new row 
+        $whereStatement = [$statementText];
+        
+        foreach ($params as $param) {
+            $whereStatement[] = $param;
+        }
+        
+        $this->whereStatements[] = $whereStatement;
+        return $this;
+    }
+    
     /**
      * Applies an LIMIT to the statement.
      * 
@@ -327,6 +368,20 @@ class Query
                 }
 
                 $statementText .= ")";
+            }
+        }
+        
+        // Apply WHERE
+        if (!empty($this->whereStatements)) {
+            $statementText .= " WHERE ";
+            
+            foreach ($this->whereStatements as $statementData) {
+                $whereStatementText = array_shift($statementData);
+                $statementText .= $whereStatementText;
+                
+                foreach ($statementData as $parameter) {
+                    $this->bindParam($parameter);
+                }
             }
         }
         
