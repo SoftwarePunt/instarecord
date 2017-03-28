@@ -222,7 +222,7 @@ class Query
     }
 
     /**
-     * Applies a WHERE clause to the query.
+     * Adds an additional WHERE clause to the query.
      * 
      * @param string $statementText Raw SQL "WHERE" statement text.
      * @param array ...$params Bound parameter list.
