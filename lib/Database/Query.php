@@ -419,4 +419,19 @@ class Query
         // Ready to execute
         return $statement;
     }
+
+    /**
+     * Executes the query statement without gathering results.
+     * 
+     * @throws DatabaseException
+     */
+    public function execute(): void
+    {
+        $statement = $this->createStatement();
+        
+        if (!$statement->execute()) {
+            $errorInfo = $statement->errorInfo();
+            throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
+        }
+    }
 }

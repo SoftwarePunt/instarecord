@@ -152,4 +152,32 @@ class QueryTest extends TestCase
         
         $this->assertContains("Params:  2", $debugParamsDump,"Expecting two bound parameters");
     }
+
+    /**
+     * @expectedException Instasell\Instarecord\Database\DatabaseException
+     * @expectedExceptionMessage Table 'testdb.fruits' doesn't exist
+     */
+    public function testExecute()
+    {
+        $config = new DatabaseConfig();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+
+        $connection = new Connection($config);
+
+        $query = new Query($connection);
+
+        $query->delete()
+            ->from('fruits')
+            ->where('type = ? AND `color` = ?', 'apples', 'red')
+            ->limit(5)
+            ->execute();
+        
+        // Testing exception because it will show several things:
+        //  a) Communication / connection is up and running, execute is working
+        //  b) Syntax of the command was valid and correct because of the table-specific error
+        //  c) Error handling for execute failures is working correctly
+    }
 }
