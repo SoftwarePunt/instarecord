@@ -34,16 +34,29 @@ class ModelQuery extends Query
         parent::__construct($connection);
         
         if (!class_exists($modelName)) {
-            throw new DatabaseException("ModelQuery: Invalid model name, not a loadable class: {$modelName}")
+            throw new DatabaseException("ModelQuery: Invalid model name, not a loadable class: {$modelName}");
         }
         
         $this->referenceModel = new $modelName;
         
         if (!$this->referenceModel instanceof Model) {
-            throw new DatabaseException("ModelQuery: Invalid model class, does not extend from Model: {$modelName}")
+            throw new DatabaseException("ModelQuery: Invalid model class, does not extend from Model: {$modelName}");
         }
         
         // Preset the table name for this query
         $this->from($this->referenceModel->getTableName());
+    }
+
+    /**
+     * Adds a WHERE constraint to match the primary key in the given model instance.
+     * 
+     * @param Model $instance
+     * @return ModelQuery|$this
+     */
+    public function wherePrimaryKeyMatches(Model $instance): ModelQuery
+    {
+        $columnName = $this->referenceModel->getPrimaryKeyPropertyName();
+        $this->where("{$columnName} = ?", $instance->$columnName);
+        return $this;
     }
 }

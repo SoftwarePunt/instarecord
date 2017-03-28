@@ -143,13 +143,17 @@ class Query
     /**
      * Begins a UPDATE statement.
      *
-     * @param string $tableName
+     * @param string|null $tableName
      * @return Query
      */
-    public function update(string $tableName): Query
+    public function update(?string $tableName = null): Query
     {
         $this->statementType = self::QUERY_TYPE_UPDATE;
-        $this->tableName = $tableName;
+        
+        if ($tableName) {
+            $this->tableName = $tableName;    
+        }
+        
         return $this;
     }
 

@@ -2,6 +2,8 @@
 
 namespace Instasell\Instarecord\Tests;
 
+use Instasell\Instarecord\DatabaseAdapter;
+use Instasell\Instarecord\Instarecord;
 use Instasell\Instarecord\Tests\Samples\User;
 use PHPUnit\Framework\TestCase;
 
@@ -109,24 +111,42 @@ class ModelTest extends TestCase
     public function testGetTableName()
     {
         $sampleUserModel = new User();
-        $this->assertEquals('users', $sampleUserModel::getTableName());
+        $this->assertEquals('users', $sampleUserModel->getTableName());
     }
-    
-//    public function testCreateSimple()
-//    {
-//        $newUser = new User();
-//        $newUser->userName = "my-test-user";
-//        
-//        $this->assertTrue($newUser->create(), 'Creating a new record should return TRUE');
-//        $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key');
-//    }
-//    
-//    public function testCreateViaSave()
-//    {
-//        $newUser = new User();
-//        $newUser->userName = "my-test-user";
-//
-//        $this->assertTrue($newUser->save(), 'Creating a new record should return TRUE (via save)');
-//        $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key (via save)');
-//    }
+
+    /**
+     * @runInSeparateProcess 
+     */
+    public function testCreateSimple()
+    {
+        $config = Instarecord::config();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+
+        $newUser = new User();
+        $newUser->userName = "my-test-user";
+        
+        $this->assertTrue($newUser->create(), 'Creating a new record should return TRUE');
+        $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key');
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCreateViaSave()
+    {
+        $config = Instarecord::config();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+        
+        $newUser = new User();
+        $newUser->userName = "my-test-user";
+
+        $this->assertTrue($newUser->save(), 'Creating a new record should return TRUE (via save)');
+        $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key (via save)');
+    }
 }

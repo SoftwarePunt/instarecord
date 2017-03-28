@@ -1,6 +1,7 @@
 <?php
 
 namespace Instasell\Instarecord;
+
 use Instasell\Instarecord\Database\ModelQuery;
 
 /**
@@ -44,9 +45,9 @@ class Model
      * 
      * @return array
      */
-    public static function getPropertyNames(): array
+    public function getPropertyNames(): array
     {
-        $rfClass = new \ReflectionClass(get_called_class());
+        $rfClass = new \ReflectionClass($this);
         $rfProperties = $rfClass->getProperties(\ReflectionProperty::IS_PUBLIC);
 
         $properties = [];
@@ -117,9 +118,9 @@ class Model
      * 
      * @return array
      */
-    public static function getColumnNames(): array
+    public function getColumnNames(): array
     {
-        $propertyNames = self::getPropertyNames();
+        $propertyNames = $this->getPropertyNames();
         $columnNames = [];
         
         foreach ($propertyNames as $propertyName) {
@@ -134,9 +135,20 @@ class Model
      * 
      * @return string
      */
-    public static function getTableName(): string
+    public function getTableName(): string
     {
-        return Table::translateTableName(get_called_class());
+        return Table::translateTableName(get_class($this));
+    }
+
+    /**
+     * Gets the name of the primary key value.
+     * 
+     * @return string
+     */
+    public function getPrimaryKeyPropertyName(): string
+    {
+        // TODO Do this better (@annotations seem like a clever idea)
+        return "id";
     }
 
     /**
@@ -144,9 +156,9 @@ class Model
      * 
      * @return ModelQuery
      */
-    public static function query(): ModelQuery
+    public function query(): ModelQuery
     {
-        return new ModelQuery(Instarecord::connection(), get_called_class());
+        return new ModelQuery(Instarecord::connection(), get_class());
     }
 
     /**
@@ -157,7 +169,15 @@ class Model
      */
     public function create(): bool
     {
-        return false;
+        $primaryKeyName = $this->getPrimaryKeyPropertyName();
+        $this->$primaryKeyName = null;
+        
+        $this->query()
+            ->insert()
+            ->values($this->getProperties())
+            ->execute();
+    
+        return true;
     }
 
     /**
@@ -170,7 +190,13 @@ class Model
      */
     public function update(): bool
     {
-        return false;
+        $this->query()
+            ->wherePrimaryKeyMatches($this)
+            ->update()
+            ->set($this->getDirtyProperties())
+            ->execute();
+        
+        return true;
     }
 
     /**
@@ -180,7 +206,12 @@ class Model
      */
     public function delete(): bool
     {
-        return false;
+        $this->query()
+            ->wherePrimaryKeyMatches($this)
+            ->delete()
+            ->execute();
+        
+        return true;
     }
 
     /**
@@ -196,6 +227,12 @@ class Model
      */
     public function save(): bool
     {
-        return false;
+        $primaryKeyName = $this->getPrimaryKeyPropertyName();
+        
+        if (!empty($this->$primaryKeyName)) {
+            $this->update();
+        } 
+        
+        return $this->create();
     }
 }
