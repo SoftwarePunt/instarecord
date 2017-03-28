@@ -29,9 +29,11 @@ class Model
         if ($initialValues) {
             $availablePropertyNames = $this->getPropertyNames();
             
-            foreach ($initialValues as $propertyName => $propertyValue) {
+            foreach ($initialValues as $nameInArray => $valueInArray) {
+                $propertyName = Column::getPropertyNameForColumn($nameInArray);
+
                 if (in_array($propertyName, $availablePropertyNames)) {
-                    $this->$propertyName = $propertyValue;
+                    $this->$propertyName = $valueInArray;
                 }
             }
         }

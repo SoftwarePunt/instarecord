@@ -19,7 +19,7 @@ class ModelQuery extends Query
     /**
      * A blank reference for the model we are managing.
      *
-     * @var
+     * @var Model
      */
     protected $referenceModel;
 

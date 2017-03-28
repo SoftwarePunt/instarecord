@@ -6,10 +6,11 @@ use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\Table;
 use PHPUnit\Framework\TestCase;
 
-class TableTest extends TestCase
+class ColumnTest extends TestCase
 {
     public function testTranslateColumnName()
     {
+        $this->assertEquals("my_simple_name",       Column::getColumNameForProperty("my_simple_name"));
         $this->assertEquals("my_simple_name",       Column::getColumNameForProperty("mySimpleName"));
         $this->assertEquals("my_simple_name",       Column::getColumNameForProperty("MySimpleName"));
         $this->assertEquals("mysimplename",         Column::getColumNameForProperty("mysimplename"));
@@ -20,5 +21,6 @@ class TableTest extends TestCase
     public function testTranslatePropertyName()
     {
         $this->assertEquals("mySimpleName",       Column::getPropertyNameForColumn("my_simple_name"));
+        $this->assertEquals("mySimpleName",       Column::getPropertyNameForColumn("mySimpleName"));
     }
 }
