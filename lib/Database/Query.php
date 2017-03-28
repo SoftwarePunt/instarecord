@@ -425,18 +425,33 @@ class Query
     }
 
     /**
+     * Generates the statement, executes it, checks it for errors, and returns it on success.
+     *
+     * @throws DatabaseException
+     * @return \PDOStatement The executed statement.
+     */
+    protected function executeStatementInternal(): \PDOStatement
+    {
+        $statement = $this->createStatement();
+
+        if (!$statement->execute()) {
+            $errorInfo = $statement->errorInfo();
+            throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
+        }
+
+        return $statement;
+    }
+    
+    /**
      * Executes the query statement without gathering results.
      * 
      * @throws DatabaseException
      */
     public function execute(): void
     {
-        $statement = $this->createStatement();
-        
-        if (!$statement->execute()) {
-            $errorInfo = $statement->errorInfo();
-            throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
-        }
+        $stmt = $this->executeStatementInternal();
+        $stmt->closeCursor();
+        $stmt = null;
     }
 
     /**
@@ -448,5 +463,52 @@ class Query
     {
         $this->execute();
         return $this->connection->lastInsertId();
+    }
+
+    /**
+     * Executes the query, retrieves all data, and returns it in an associative array.
+     * 
+     * @return array
+     */
+    public function queryAllRows(): array
+    {
+        $statement = $this->executeStatementInternal();
+        
+        $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        
+        $statement->closeCursor();
+        $statement = null;
+        
+        return $results;
+    }
+
+    /**
+     * Executes the query, limiting it to one row, and retrieve and return only that row as an associative array.
+     * 
+     * @return array|null
+     */
+    public function querySingleRow(): ?array
+    {
+        // Modify limit to one as we are executing this expecting no more than one row
+        $originalLimit = $this->limit;
+        $this->limit(1);
+        
+        // Execute statement, only read one row
+        $statement = $this->executeStatementInternal();
+        $firstRow = $statement->fetch(\PDO::FETCH_ASSOC);
+        
+        // Close statement
+        $statement->closeCursor();
+        $statement = null;
+        
+        // Restore original limit
+        $this->limit($originalLimit);
+        
+        // Return row, or null if row wasn't found
+        if ($firstRow) {
+            return $firstRow;    
+        }
+        
+        return null;
     }
 }

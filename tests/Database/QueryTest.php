@@ -5,7 +5,7 @@ namespace Instasell\Instarecord\Tests\Database;
 use Instasell\Instarecord\Config\DatabaseConfig;
 use Instasell\Instarecord\Database\Connection;
 use Instasell\Instarecord\Database\Query;
-use Instasell\Instarecord\DatabaseAdapter;
+use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
 
 class QueryTest extends TestCase
@@ -122,12 +122,7 @@ class QueryTest extends TestCase
     
     public function testStatementGeneration()
     {
-        $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
-
+        $config = new TestDatabaseConfig();
         $connection = new Connection($config);
         
         $query = new Query($connection);
@@ -159,12 +154,7 @@ class QueryTest extends TestCase
      */
     public function testExecute()
     {
-        $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
-
+        $config = new TestDatabaseConfig();
         $connection = new Connection($config);
 
         $query = new Query($connection);
@@ -179,5 +169,73 @@ class QueryTest extends TestCase
         //  a) Communication / connection is up and running, execute is working
         //  b) Syntax of the command was valid and correct because of the table-specific error
         //  c) Error handling for execute failures is working correctly
+    }
+
+    public function testExecuteInsertWithAutoIncrement()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+
+        $query = new Query($connection);
+
+        $aiId = $query->insert()
+            ->from('users')
+            ->values(['user_name' => 'ai-me-yay'])
+            ->executeInsert();
+        
+        $this->assertNotEmpty($aiId, 'Auto incremented ID return value expected');
+        $this->assertGreaterThan(0, $aiId, 'Auto incremented ID return value non-negative ID expected');
+    }
+
+    /**
+     * @depends testExecuteInsertWithAutoIncrement
+     */
+    public function testQueryAllRows()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+
+        $query = new Query($connection);
+        $query->select('*');
+        $query->from('users');
+        $allRows = $query->queryAllRows();
+        
+        $this->assertNotEmpty($allRows, 'Expected a nonempty row resultset');
+        $this->assertNotEmpty($allRows[0], 'Expected a row subarray in the resultset');
+        $this->assertArrayHasKey('user_name', $allRows[0], 'Expected a row subarray as assoc array with column names as indexes');
+    }
+
+    /**
+     * @depends testExecuteInsertWithAutoIncrement
+     */
+    public function testQuerySingleRow()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+
+        $query = new Query($connection);
+        $query->select('*');
+        $query->from('users');
+        $singleRow = $query->querySingleRow();
+
+        $this->assertNotEmpty($singleRow, 'Expected a single row as result');
+        $this->assertArrayHasKey('user_name', $singleRow, 'Expected a row as assoc array with column names as indexes');
+    }
+
+    /**
+     * @depends testExecuteInsertWithAutoIncrement
+     */
+    public function testQuerySingleRowReturnsNullIfNotFound()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+
+        $query = new Query($connection);
+        $query->select('*');
+        $query->from('users');
+        $query->where('id < 0');
+        $singleRow = $query->querySingleRow();
+
+        $this->assertNull($singleRow, 'Expected no results, with a return value of NULL');
     }
 }
