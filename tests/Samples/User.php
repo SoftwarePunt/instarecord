@@ -17,6 +17,7 @@ class User extends Model
     public $id;
 
     /**
+     * @myCustomAnnotation
      * @var string
      */
     public $userName;
