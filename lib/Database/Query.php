@@ -417,7 +417,7 @@ class Query
         $i = 0;
 
         foreach ($this->parameters as $paramNumber => $paramValue) {
-            $statement->bindParam(++$i, $paramValue);
+            $statement->bindValue(++$i, $paramValue);
         }
 
         // Ready to execute
