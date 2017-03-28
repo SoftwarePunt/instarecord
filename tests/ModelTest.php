@@ -126,7 +126,7 @@ class ModelTest extends TestCase
         $config->database = TEST_DATABASE_NAME;
 
         $newUser = new User();
-        $newUser->userName = "my-test-user";
+        $newUser->userName = "my-test-user-one";
         
         $this->assertTrue($newUser->create(), 'Creating a new record should return TRUE');
         $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key');
@@ -144,7 +144,7 @@ class ModelTest extends TestCase
         $config->database = TEST_DATABASE_NAME;
         
         $newUser = new User();
-        $newUser->userName = "my-test-user";
+        $newUser->userName = "my-test-user-two";
 
         $this->assertTrue($newUser->save(), 'Creating a new record should return TRUE (via save)');
         $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key (via save)');

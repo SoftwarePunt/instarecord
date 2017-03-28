@@ -76,6 +76,23 @@ class Model
     }
 
     /**
+     * Gets a key/value list of all columns and their values.
+     *
+     * @return array An array containing property values, indexed by property name.
+     */
+    public function getColumns(): array
+    {
+        $properties = $this->getProperties();
+        $columns = [];
+
+        foreach ($properties as $propertyName => $propertyValue) {
+            $columns[Table::translateColumnName($propertyName)] = $propertyValue;
+        }
+
+        return $columns;
+    }
+
+    /**
      * Gets a key/value list of all properties that have been modified.
      * 
      * @return array An array containing property values, indexed by property name.
@@ -94,6 +111,23 @@ class Model
         }
         
         return $propertiesDiff;
+    }
+
+    /**
+     * Gets a key/value list of all columns and their values that have been modified.
+     *
+     * @return array An array containing property values, indexed by property name.
+     */
+    public function getDirtyColumns(): array
+    {
+        $dirtyProperties = $this->getDirtyProperties();
+        $dirtyColumns = [];
+
+        foreach ($dirtyProperties as $propertyName => $propertyValue) {
+            $dirtyColumns[Table::translateColumnName($propertyName)] = $propertyValue;
+        }
+
+        return $dirtyColumns;
     }
 
     /**
@@ -137,7 +171,11 @@ class Model
      */
     public function getTableName(): string
     {
-        return Table::translateTableName(get_class($this));
+        $name = Table::translateTableName(get_class($this));
+        if ($name == 'models') {
+            exit;
+        }
+        return $name;
     }
 
     /**
@@ -158,7 +196,7 @@ class Model
      */
     public function query(): ModelQuery
     {
-        return new ModelQuery(Instarecord::connection(), get_class());
+        return new ModelQuery(Instarecord::connection(), get_class($this));
     }
 
     /**
@@ -172,11 +210,14 @@ class Model
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
         $this->$primaryKeyName = null;
         
-        $this->query()
+        $insertPkValue = $this->query()
             ->insert()
-            ->values($this->getProperties())
-            ->execute();
-    
+            ->values($this->getColumns())
+            ->executeInsert();
+        
+        // TODO Only get inserted PK value if it is known to be an auto increment column
+        
+        $this->$primaryKeyName = $insertPkValue;
         return true;
     }
 
@@ -190,10 +231,16 @@ class Model
      */
     public function update(): bool
     {
+        $modifiedData = $this->getDirtyColumns();
+        
+        if (empty($modifiedData)) {
+            return true;
+        }
+        
         $this->query()
             ->wherePrimaryKeyMatches($this)
             ->update()
-            ->set($this->getDirtyProperties())
+            ->set($modifiedData)
             ->execute();
         
         return true;

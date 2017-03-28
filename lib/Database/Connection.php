@@ -111,4 +111,18 @@ class Connection
         
         return $statement;
     }
+
+    /**
+     * Gets the last primary key value that was inserted on this connection.
+     * 
+     * @return string|null
+     */
+    public function lastInsertId(): ?string
+    {
+        if ($this->isOpen()) {
+            return $this->pdo->lastInsertId();
+        }
+        
+        return null;
+    }
 }

@@ -438,4 +438,15 @@ class Query
             throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
         }
     }
+
+    /**
+     * Executes the query, retrieving the inserted auto incremented primary key (if any).
+     * 
+     * @return null|string
+     */
+    public function executeInsert(): ?string
+    {
+        $this->execute();
+        return $this->connection->lastInsertId();
+    }
 }
