@@ -218,6 +218,7 @@ class Model
         // TODO Only get inserted PK value if it is known to be an auto increment column
         
         $this->$primaryKeyName = $insertPkValue;
+        $this->markAllPropertiesClean();
         return true;
     }
 
@@ -243,6 +244,7 @@ class Model
             ->set($modifiedData)
             ->execute();
         
+        $this->markAllPropertiesClean();
         return true;
     }
 
@@ -277,7 +279,7 @@ class Model
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
         
         if (!empty($this->$primaryKeyName)) {
-            $this->update();
+            return $this->update();
         } 
         
         return $this->create();

@@ -130,6 +130,7 @@ class ModelTest extends TestCase
         
         $this->assertTrue($newUser->create(), 'Creating a new record should return TRUE');
         $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key');
+        $this->assertEmpty($newUser->getDirtyProperties(), 'After creating an item, all properties should be clean');
     }
 
     /**
@@ -148,5 +149,35 @@ class ModelTest extends TestCase
 
         $this->assertTrue($newUser->save(), 'Creating a new record should return TRUE (via save)');
         $this->assertNotEmpty($newUser->id, 'Creating a new record should update its primary key (via save)');
+        $this->assertEmpty($newUser->getDirtyProperties(), 'After saving an item, all properties should be clean');
+    }
+
+    /**
+     * @depends testCreateViaSave
+     * @runInSeparateProcess 
+     */
+    public function testUpdateCreatedRecordViaSave()
+    {
+        $config = Instarecord::config();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->username = TEST_USER_NAME;
+        $config->password = TEST_PASSWORD;
+        $config->database = TEST_DATABASE_NAME;
+
+        // 1. Insert user
+        $newUser = new User();
+        $newUser->userName = "my-test-user-three";
+        $newUser->save();
+        
+        $idAfterInsertion = $newUser->id + 0;
+
+        // 2. Modify it
+        $newUser->userName = 'blah-blah-blah';
+        
+        $this->assertArrayHasKey('userName', $newUser->getDirtyProperties(), 'userName should now be flagged as a dirty property');
+        $this->assertTrue($newUser->save(), 'Update should return true');
+        
+        // 3. Ensure it was updated in the database
+        $this->assertEquals($idAfterInsertion, $newUser->id, 'Updating should never result in a modified primary key');
     }
 }
