@@ -85,4 +85,19 @@ class Connection
     {
         return $this->pdo != null;
     }
+
+    /**
+     * Creates a new PDO database statement.
+     * Causes the connection to open if it is currently closed.
+     * 
+     * @throws DatabaseException
+     * @param string $statementText
+     * @return \PDOStatement
+     */
+    public function createStatement(string $statementText): \PDOStatement
+    {
+        $this->open();
+        
+        return $this->pdo->prepare($statementText);
+    }
 }
