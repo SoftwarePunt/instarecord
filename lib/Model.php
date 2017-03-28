@@ -1,6 +1,7 @@
 <?php
 
 namespace Instasell\Instarecord;
+use Instasell\Instarecord\Database\ModelQuery;
 
 /**
  * The base class for all Instasell models.
@@ -126,6 +127,26 @@ class Model
         }
         
         return $columnNames;
+    }
+
+    /**
+     * Gets the normalized and pluralized table name for this model.
+     * 
+     * @return string
+     */
+    public static function getTableName(): string
+    {
+        return Table::translateTableName(get_called_class());
+    }
+
+    /**
+     * Creates and returns a new query based on this model.
+     * 
+     * @return ModelQuery
+     */
+    public static function query(): ModelQuery
+    {
+        return new ModelQuery(Instarecord::connection(), get_called_class());
     }
 
     /**

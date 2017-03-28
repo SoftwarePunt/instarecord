@@ -106,6 +106,12 @@ class ModelTest extends TestCase
         $this->assertNotContains('secretNotWritable', $propertyList, 'Private properties should not be included in property list');
     }
     
+    public function testGetTableName()
+    {
+        $sampleUserModel = new User();
+        $this->assertEquals('users', $sampleUserModel::getTableName());
+    }
+    
 //    public function testCreateSimple()
 //    {
 //        $newUser = new User();
