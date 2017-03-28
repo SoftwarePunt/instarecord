@@ -4,9 +4,52 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "fcd924ca8ff3dde4d883044303bc72f7",
-    "content-hash": "76b0e022fa6d9232a24c461915ad4c79",
-    "packages": [],
+    "hash": "1eab4ae350b0b08316dd8dfccda360f9",
+    "content-hash": "328f0d3dccbc696f734f8edbf7e6776c",
+    "packages": [
+        {
+            "name": "ad7six/dsn",
+            "version": "0.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AD7six/php-dsn.git",
+                "reference": "cb75d8d6660a5110876574815fbb4ad65d576d71"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AD7six/php-dsn/zipball/cb75d8d6660a5110876574815fbb4ad65d576d71",
+                "reference": "cb75d8d6660a5110876574815fbb4ad65d576d71",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "suggest": {
+                "josegonzalez/dotenv": "0.1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AD7six\\Dsn\\": "src",
+                    "AD7six\\Dsn\\Test\\": "tests"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andy Dawson",
+                    "email": "andydawson76@gmail.com",
+                    "homepage": "http://ad7six.com",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "A utility for parsing and generating service DSNs",
+            "time": "2015-03-28 07:40:11"
+        }
+    ],
     "packages-dev": [
         {
             "name": "doctrine/instantiator",
