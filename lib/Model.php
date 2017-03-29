@@ -215,9 +215,9 @@ class Model
      * 
      * @return ModelQuery
      */
-    public function query(): ModelQuery
+    public static function query(): ModelQuery
     {
-        return new ModelQuery(Instarecord::connection(), get_class($this));
+        return new ModelQuery(Instarecord::connection(), get_called_class());
     }
 
     /**
