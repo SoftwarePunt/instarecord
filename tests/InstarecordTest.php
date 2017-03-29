@@ -3,6 +3,7 @@
 namespace Instasell\Instarecord\Tests;
 
 use Instasell\Instarecord\Instarecord;
+use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
 
 class InstarecordTest extends TestCase
@@ -14,6 +15,19 @@ class InstarecordTest extends TestCase
     {
         $configObject = Instarecord::config();
         $this->assertInstanceOf('Instasell\Instarecord\Config\DatabaseConfig', $configObject, 'A default config object should be created and returned');
+    }
+
+    /**
+     * @runInSeparateProcess 
+     */
+    public function testReplaceConfig()
+    {
+        $configObjectDefault = Instarecord::config();
+        $myConfigObject = new TestDatabaseConfig();
+        $configObjectNow = Instarecord::config($myConfigObject);
+        
+        $this->assertSame($myConfigObject, $configObjectNow, 'Passing config object to config() should cause original config to be replaced');
+        $this->assertNotSame($configObjectNow, $configObjectDefault, 'Passing config object to config() should cause original config to be replaced');
     }
 
     /**

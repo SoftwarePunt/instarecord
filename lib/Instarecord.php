@@ -28,10 +28,15 @@ class Instarecord
     /**
      * Returns the database configuration.
      *
-     * @return DatabaseConfig
+     * @param $replaceConfigWith DatabaseConfig If provided, replace database config with this object.
+     * @return DatabaseConfig The active database config.
      */
-    public static function config(): DatabaseConfig
+    public static function config(?DatabaseConfig $replaceConfigWith = null): DatabaseConfig
     {
+        if ($replaceConfigWith) {
+            self::$config = $replaceConfigWith;
+        }
+        
         if (!self::$config) {
             self::$config = new DatabaseConfig();
         }
