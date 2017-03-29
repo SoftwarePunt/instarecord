@@ -4,6 +4,7 @@ namespace Instasell\Instarecord\Tests;
 
 use Instasell\Instarecord\DatabaseAdapter;
 use Instasell\Instarecord\Instarecord;
+use Instasell\Instarecord\Tests\Database\DataFormattingTest;
 use Instasell\Instarecord\Tests\Samples\User;
 use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
@@ -254,5 +255,20 @@ class ModelTest extends TestCase
         $allUsersViaAll = User::all();
         
         $this->assertEquals($allUsersViaQuery, $allUsersViaAll);
+    }
+
+    public function testModelInsertsFormattedValues()
+    {
+        Instarecord::config(new TestDatabaseConfig());
+
+        // Insert user with a formatted DateTime as their name, because why not
+        $newUser = new User();
+        $testFormatStr = '1970-11-12 01:03:04';
+        $newUser->userName = new \DateTime($testFormatStr);
+        $newUser->save();
+        
+        // The fact no errors have occurred is a good first step: it means we inserted valid data.
+        $refetchedUser = User::fetch($newUser->id);
+        $this->assertEquals($testFormatStr, $refetchedUser->userName);
     }
 }

@@ -91,6 +91,7 @@ class Model
 
     /**
      * Gets a key/value list of all columns and their values.
+     * This involves the translation of 
      *
      * @return array An array containing property values, indexed by property name.
      */
@@ -100,7 +101,14 @@ class Model
         $columns = [];
 
         foreach ($properties as $propertyName => $propertyValue) {
-            $columns[$this->getColumnNameForPropertyName($propertyName)] = $propertyValue;
+            $columnInfo = $this->getColumnForPropertyName($propertyName);
+            
+            if ($columnInfo) {
+                $columnName = $columnInfo->getColumnName();
+                $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
+
+                $columns[$columnName] = $columnValue;    
+            }
         }
 
         return $columns;
@@ -357,6 +365,23 @@ class Model
     }
 
     /**
+     * Gets column info for a given property name.
+     *
+     * @param string $propertyName
+     * @return Column|null
+     */
+    public function getColumnForPropertyName(string $propertyName): ?Column
+    {
+        $columnInfo = $this->_tableInfo->getColumnByPropertyName($propertyName);
+
+        if ($columnInfo) {
+            return $columnInfo;
+        }
+
+        return null;
+    }
+
+    /**
      * Converts a property name into its column name.
      *
      * @param string $propertyName
@@ -364,7 +389,7 @@ class Model
      */
     public function getColumnNameForPropertyName(string $propertyName)
     {
-        $columnInfo = $this->_tableInfo->getColumnByPropertyName($propertyName);
+        $columnInfo = $this->getColumnForPropertyName($propertyName);
 
         if ($columnInfo) {
             return $columnInfo->getColumnName();
