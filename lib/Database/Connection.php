@@ -87,17 +87,20 @@ class Connection
     }
 
     /**
-     * Creates a new PDO database statement.
+     * Creates and executes a new PDO database statement, returning it if successful.
      * Causes the connection to open if it is currently closed.
      * 
      * @throws DatabaseException
-     * @param string $statementText
+     * @param string $statementText The statement (query) text.
+     * @param array $parameters The parameters to be bound.
      * @return \PDOStatement
      */
-    public function createStatement(string $statementText): \PDOStatement
+    public function executeStatement(string $statementText, array $parameters = []): \PDOStatement
     {
+        // Ensure the connection is open
         $this->open();
         
+        // Create the new PDO statement object based on provided text
         try {
             $statement = $this->pdo->prepare($statementText);
         }
@@ -108,7 +111,21 @@ class Connection
         if (!$statement) {
             throw new DatabaseException("Database error: Could not prepare a new statement on this connection");
         }
+
+        // Bind the parameters to the statement as values (one-based index numbers)
+        $i = 0;
+
+        foreach ($parameters as $paramNumber => $paramValue) {
+            $statement->bindValue(++$i, $paramValue);
+        }
         
+        // Attempt to execute the statement, throwing an error on failure
+        if (!$statement->execute()) {
+            $errorInfo = $statement->errorInfo();
+            throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
+        }
+        
+        // If we got this far, connect & execute was a success and we have a result object
         return $statement;
     }
 

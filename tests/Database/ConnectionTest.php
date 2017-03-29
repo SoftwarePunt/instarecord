@@ -5,6 +5,7 @@ namespace Instasell\Instarecord\Tests\Database;
 use Instasell\Instarecord\Config\DatabaseConfig;
 use Instasell\Instarecord\Database\Connection;;
 use Instasell\Instarecord\DatabaseAdapter;
+use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
 
 class ConnectionTest extends TestCase
@@ -54,19 +55,17 @@ class ConnectionTest extends TestCase
     /**
      * @depends testConnectionIsInitiallyClosed
      */
-    public function testCreateStatement()
+    public function testExecuteStatement()
     {
-        $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
-
+        $config = new TestDatabaseConfig();
         $connection = new Connection($config);
         
-        $statement = $connection->createStatement("SELECT * FROM users;");
+        $statement = $connection->executeStatement("SELECT * FROM users;");
         
         $this->assertTrue($connection->isOpen(), 'Creating a statement should open the connection');
-        $this->assertInstanceOf('\PDOStatement', $statement, 'Expected a raw PDOStatement');
+        $this->assertInstanceOf('\PDOStatement', $statement, 'Expected a raw PDOStatement as a result');
+        
+        $resultSet = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertInternalType('array', $resultSet, 'Expected assoc array as result with no errors');
     }
 }

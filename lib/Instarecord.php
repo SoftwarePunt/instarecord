@@ -40,7 +40,8 @@ class Instarecord
     }
 
     /**
-     * Returns the Instarecord database connection, creating it if not yet initialized, but does not open it.
+     * Returns the Instarecord database connection, creating it if not yet initialized.
+     * It is important to configure Instarecord before referencing its connection.
      *
      * @param bool $forceReconnect
      * @return Connection

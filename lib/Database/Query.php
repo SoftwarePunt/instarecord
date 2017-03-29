@@ -404,42 +404,14 @@ class Query
     }
 
     /**
-     * Returns the prepared PDO statement.
-     *
-     * @return \PDOStatement
-     */
-    public function createStatement(): \PDOStatement
-    {
-        // Prepare statement
-        $statement = $this->connection->createStatement($this->createStatementText());
-
-        // Bind parameters to it
-        $i = 0;
-
-        foreach ($this->parameters as $paramNumber => $paramValue) {
-            $statement->bindValue(++$i, $paramValue);
-        }
-
-        // Ready to execute
-        return $statement;
-    }
-
-    /**
      * Generates the statement, executes it, checks it for errors, and returns it on success.
      *
      * @throws DatabaseException
      * @return \PDOStatement The executed statement.
      */
-    protected function executeStatementInternal(): \PDOStatement
+    protected function executeStatement(): \PDOStatement
     {
-        $statement = $this->createStatement();
-
-        if (!$statement->execute()) {
-            $errorInfo = $statement->errorInfo();
-            throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
-        }
-
-        return $statement;
+        return $this->connection->executeStatement($this->createStatementText(), $this->parameters);
     }
     
     /**
@@ -449,7 +421,7 @@ class Query
      */
     public function execute(): void
     {
-        $stmt = $this->executeStatementInternal();
+        $stmt = $this->executeStatement();
         $stmt->closeCursor();
         $stmt = null;
     }
@@ -472,7 +444,7 @@ class Query
      */
     public function queryAllRows(): array
     {
-        $statement = $this->executeStatementInternal();
+        $statement = $this->executeStatement();
         
         $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
         
@@ -494,7 +466,7 @@ class Query
         $this->limit(1);
         
         // Execute statement, only read one row
-        $statement = $this->executeStatementInternal();
+        $statement = $this->executeStatement();
         $firstRow = $statement->fetch(\PDO::FETCH_ASSOC);
         
         // Close statement

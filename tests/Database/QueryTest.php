@@ -119,34 +119,6 @@ class QueryTest extends TestCase
 
         $this->assertEquals('DELETE FROM fruits WHERE type = ? AND `color` = ? LIMIT 5;', $queryString);
     }
-    
-    public function testStatementGeneration()
-    {
-        $config = new TestDatabaseConfig();
-        $connection = new Connection($config);
-        
-        $query = new Query($connection);
-
-        $this->assertFalse($connection->isOpen(), 'Creating a new Query should not result in the connection opening');
-        
-        $query = $query->delete()
-            ->from('clothes')
-            ->where('`type` = ? AND `color` = ?', 'tshirt', 'blue');
-        
-        $pdoStatementText = $query->createStatementText();
-        $pdoStatement = $query->createStatement();
-        
-        $this->assertTrue($connection->isOpen(), 'Creating a PDO statement via a Query should result in the connection opening (lazy / on demand connecting)');
-        $this->assertInstanceOf('\PDOStatement', $pdoStatement);
-        $this->assertEquals($pdoStatementText, $pdoStatement->queryString, 'Generated PDO statement should match query text');
-        
-        ob_start();
-        $pdoStatement->debugDumpParams();
-        $debugParamsDump = ob_get_contents();
-        ob_end_clean();
-        
-        $this->assertContains("Params:  2", $debugParamsDump,"Expecting two bound parameters");
-    }
 
     /**
      * @expectedException Instasell\Instarecord\Database\DatabaseException
