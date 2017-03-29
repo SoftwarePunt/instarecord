@@ -2,6 +2,7 @@
 
 namespace Instasell\Instarecord\Database;
 
+use Instasell\Instarecord\Utils\TextTransforms;
 use Minime\Annotations\Interfaces\AnnotationsBagInterface;
 
 /**
@@ -9,6 +10,11 @@ use Minime\Annotations\Interfaces\AnnotationsBagInterface;
  */
 class Column
 {
+    const TYPE_STRING = "string";
+    const TYPE_DATE_TIME = "datetime";
+    
+    const DATE_TIME_FORMAT = "Y-m-d H:i:s";
+    
     /**
      * The table this column is a part of.
      *
@@ -38,6 +44,13 @@ class Column
     protected $annotations;
 
     /**
+     * The data type of the column.
+     * 
+     * @var string
+     */
+    protected $dataType;
+
+    /**
      * Column constructor.
      *
      * @param Table $table The table this column is a part of.
@@ -49,8 +62,29 @@ class Column
         $this->table = $table;
         $this->propertyName = $propertyName;
         $this->annotations = $annotations;
-
+        
+        $this->determineDataType();
         $this->getColumnName();
+    }
+
+    /**
+     * Determines and sets the column data type based on the "@var" annotation.
+     */
+    protected function determineDataType(): void
+    {
+        $this->dataType = self::TYPE_STRING;
+        
+        if ($this->annotations->has('var')) {
+            $varKeyword = $this->annotations->get('var');
+            $varKeyword = TextTransforms::removeNamespaceFromClassName($varKeyword);
+            $varKeyword = strtolower($varKeyword);
+            
+            switch ($varKeyword) {
+                case "datetime":
+                    $this->dataType = self::TYPE_DATE_TIME;
+                    break;
+            }
+        }
     }
 
     /**
@@ -84,6 +118,36 @@ class Column
     public function getPropertyName(): string
     {
         return $this->propertyName;
+    }
+
+    /**
+     * Formats a PHP value for database insertion according to this column's formatting rules.
+     * 
+     * @param mixed $input PHP value
+     * @return string Database string for insertion
+     */
+    public function formatDatabaseValue($input): string
+    {
+        if ($input instanceof \DateTime) {
+            return $input->format(self::DATE_TIME_FORMAT);
+        }
+        
+        return strval($input);
+    }
+
+    /**
+     * Parses a value from the database to PHP format according to this column's formatting rules.
+     * 
+     * @param string $input Database value, string retrieved from data row
+     * @return mixed PHP value
+     */
+    public function parseDatabaseValue(string $input)
+    {
+        if ($this->dataType == self::TYPE_DATE_TIME) {
+            return \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input);
+        }
+        
+        return strval($input);
     }
 
     /**
