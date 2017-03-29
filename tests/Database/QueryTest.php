@@ -21,6 +21,16 @@ class QueryTest extends TestCase
         $this->assertEquals('SELECT * FROM users;', $queryString);
     }
     
+    public function testPerformsSelectByDefault()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->from('users')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM users;', $queryString);
+    }
+    
     public function testSimpleDelete()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
