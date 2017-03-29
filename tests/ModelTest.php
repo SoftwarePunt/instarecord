@@ -5,6 +5,7 @@ namespace Instasell\Instarecord\Tests;
 use Instasell\Instarecord\DatabaseAdapter;
 use Instasell\Instarecord\Instarecord;
 use Instasell\Instarecord\Tests\Samples\User;
+use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
 
 class ModelTest extends TestCase
@@ -133,11 +134,7 @@ class ModelTest extends TestCase
      */
     public function testCreateSimple()
     {
-        $config = Instarecord::config();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
+        Instarecord::config(new TestDatabaseConfig());
 
         $newUser = new User();
         $newUser->userName = "my-test-user-one";
@@ -152,11 +149,7 @@ class ModelTest extends TestCase
      */
     public function testCreateViaSave()
     {
-        $config = Instarecord::config();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
+        Instarecord::config(new TestDatabaseConfig());
         
         $newUser = new User();
         $newUser->userName = "my-test-user-two";
@@ -172,11 +165,7 @@ class ModelTest extends TestCase
      */
     public function testUpdateCreatedRecordViaSave()
     {
-        $config = Instarecord::config();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
+        Instarecord::config(new TestDatabaseConfig());
 
         // 1. Insert user
         $newUser = new User();
@@ -200,11 +189,7 @@ class ModelTest extends TestCase
      */
     public function testDelete()
     {
-        $config = Instarecord::config();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
+        Instarecord::config(new TestDatabaseConfig());
         
         // 1. Insert user
         $newUser = new User();
@@ -222,11 +207,7 @@ class ModelTest extends TestCase
     
     public function testFetch()
     {
-        $config = Instarecord::config();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
+        Instarecord::config(new TestDatabaseConfig());
         
         // 1. Insert user
         $newUser = new User();
@@ -242,11 +223,7 @@ class ModelTest extends TestCase
 
     public function testFetchAll()
     {
-        $config = Instarecord::config();
-        $config->adapter = DatabaseAdapter::MYSQL;
-        $config->username = TEST_USER_NAME;
-        $config->password = TEST_PASSWORD;
-        $config->database = TEST_DATABASE_NAME;
+        Instarecord::config(new TestDatabaseConfig());
 
         // 1. Insert user
         $newUser = new User();
@@ -269,5 +246,13 @@ class ModelTest extends TestCase
         }
         
         $this->assertTrue($containsOurItem, 'Expected to find our inserted user record in the all() list');
+    }
+    
+    public function testModelQueryUsesTableAndSelectAsDefaults()
+    {
+        $allUsersViaQuery = User::query()->queryAllModels();
+        $allUsersViaAll = User::all();
+        
+        $this->assertEquals($allUsersViaQuery, $allUsersViaAll);
     }
 }
