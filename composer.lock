@@ -4,30 +4,31 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e34dad7a53f4ae431f828f5a47ff1e26",
+    "hash": "b2227f03f96e60556ffa503a393b23b2",
+    "content-hash": "d3517876b5df13244598158d2efce89e",
     "packages": [
         {
             "name": "minime/annotations",
-            "version": "dev-master",
+            "version": "v3.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/marcioAlmada/annotations.git",
-                "reference": "675bc47b9ce85207826c25bb5dd6ff2459c801d6"
+                "reference": "b7aa7be246d49dcf901f6795441989f7895731a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marcioAlmada/annotations/zipball/675bc47b9ce85207826c25bb5dd6ff2459c801d6",
-                "reference": "675bc47b9ce85207826c25bb5dd6ff2459c801d6",
+                "url": "https://api.github.com/repos/marcioAlmada/annotations/zipball/b7aa7be246d49dcf901f6795441989f7895731a6",
+                "reference": "b7aa7be246d49dcf901f6795441989f7895731a6",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "nikic/php-parser": "~2.0",
+                "nikic/php-parser": "~1.0",
                 "php": ">=5.4.0",
                 "regex-guard/regex-guard": "~1.0"
             },
             "require-dev": {
-                "mockery/mockery": "^0.9"
+                "mockery/mockery": "dev-master"
             },
             "type": "library",
             "autoload": {
@@ -54,42 +55,36 @@
                 "php",
                 "reflection"
             ],
-            "time": "2017-01-31 13:16:16"
+            "time": "2016-09-19 15:32:27"
         },
         {
             "name": "nikic/php-parser",
-            "version": "2.x-dev",
+            "version": "1.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "4dd659edadffdc2143e4753df655d866dbfeedf0"
+                "reference": "c4bbc8e236a1f21b2b17cfbf3d46aa6ece69b9f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/4dd659edadffdc2143e4753df655d866dbfeedf0",
-                "reference": "4dd659edadffdc2143e4753df655d866dbfeedf0",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/c4bbc8e236a1f21b2b17cfbf3d46aa6ece69b9f7",
+                "reference": "c4bbc8e236a1f21b2b17cfbf3d46aa6ece69b9f7",
                 "shasum": ""
             },
             "require": {
                 "ext-tokenizer": "*",
-                "php": ">=5.4"
+                "php": ">=5.3"
             },
-            "require-dev": {
-                "phpunit/phpunit": "~4.0"
-            },
-            "bin": [
-                "bin/php-parse"
-            ],
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.1-dev"
+                    "dev-master": "1.4-dev"
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "PhpParser\\": "lib/PhpParser"
-                }
+                "files": [
+                    "lib/bootstrap.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -105,7 +100,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2016-09-16 12:04:44"
+            "time": "2016-01-15 21:03:42"
         },
         {
             "name": "regex-guard/regex-guard",
@@ -150,7 +145,7 @@
                 "support",
                 "utils"
             ],
-            "time": "2014-09-17T18:04:00+00:00"
+            "time": "2014-09-17 18:04:00"
         }
     ],
     "packages-dev": [
@@ -248,7 +243,7 @@
                 "object",
                 "object graph"
             ],
-            "time": "2017-01-26T22:05:40+00:00"
+            "time": "2017-01-26 22:05:40"
         },
         {
             "name": "phar-io/manifest",
@@ -350,7 +345,7 @@
                 }
             ],
             "description": "Library for handling version information and constraints",
-            "time": "2017-03-05T17:38:23+00:00"
+            "time": "2017-03-05 17:38:23"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -449,7 +444,7 @@
                 }
             ],
             "description": "With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.",
-            "time": "2016-09-30T07:12:33+00:00"
+            "time": "2016-09-30 07:12:33"
         },
         {
             "name": "phpdocumentor/type-resolver",
@@ -496,7 +491,7 @@
                     "email": "me@mikevanriel.com"
                 }
             ],
-            "time": "2016-11-25T06:54:22+00:00"
+            "time": "2016-11-25 06:54:22"
         },
         {
             "name": "phpspec/prophecy",
@@ -710,7 +705,7 @@
             "keywords": [
                 "template"
             ],
-            "time": "2015-06-21T13:50:34+00:00"
+            "time": "2015-06-21 13:50:34"
         },
         {
             "name": "phpunit/php-timer",
@@ -1334,12 +1329,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/object-reflector.git",
-                "reference": "afd5797e7af7c9f529879ad5e8e8abe126c89dab"
+                "reference": "1ba1e85da45b02f48a8097c09e92d6387427a199"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/object-reflector/zipball/afd5797e7af7c9f529879ad5e8e8abe126c89dab",
-                "reference": "afd5797e7af7c9f529879ad5e8e8abe126c89dab",
+                "url": "https://api.github.com/repos/sebastianbergmann/object-reflector/zipball/1ba1e85da45b02f48a8097c09e92d6387427a199",
+                "reference": "1ba1e85da45b02f48a8097c09e92d6387427a199",
                 "shasum": ""
             },
             "require": {
@@ -1371,7 +1366,7 @@
             ],
             "description": "Allows reflection of object attributes, including inherited and non-public ones",
             "homepage": "https://github.com/sebastianbergmann/object-reflector/",
-            "time": "2017-03-16 14:05:21"
+            "time": "2017-03-29 08:48:23"
         },
         {
             "name": "sebastian/recursion-context",
@@ -1564,9 +1559,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "minime/annotations": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
