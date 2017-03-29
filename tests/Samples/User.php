@@ -21,4 +21,9 @@ class User extends Model
      * @var string
      */
     public $userName;
+
+    /**
+     * @var \DateTime
+     */
+    public $joinDate;
 }

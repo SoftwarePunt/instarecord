@@ -32,23 +32,45 @@ class Model
      * 
      * @param array|null $initialValues Optionally, an array of initial property values to set on the model.
      */
-    public function __construct(?array $initialValues = null)
+    public function __construct(?array $initialValues = [])
     {
         $this->_tableInfo = Table::getTableInfo(get_class($this));
 
-        if ($initialValues) {
-            $availablePropertyNames = $this->getPropertyNames();
-            
-            foreach ($initialValues as $nameInArray => $valueInArray) {
-                $propertyName = $this->getPropertyNameForColumnName($nameInArray);
-
-                if (in_array($propertyName, $availablePropertyNames)) {
-                    $this->$propertyName = $valueInArray;
-                }
-            }
-        }
-
+        $this->setInitialValues($initialValues);
         $this->markAllPropertiesClean();
+    }
+
+    /**
+     * Applies a set of initial values as properties on this model.
+     * 
+     * @param array $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
+     */
+    protected function setInitialValues(array $initialValues): void
+    {
+        foreach ($this->getPropertyNames() as $propertyName) {
+            $this->$propertyName = null;
+        }
+        
+        foreach ($initialValues as $nameInArray => $valueInArray) {
+            // Can we find the column by its name?
+            $columnInfo = $this->getColumnByName($nameInArray);
+
+            if (!$columnInfo) {
+                // Can we find the column by its property name?
+                $columnInfo = $this->getColumnForPropertyName($nameInArray);
+            }
+
+            if (!$columnInfo) {
+                // Okay, we can't find this column at all, ignore this property
+                continue;
+            }
+
+            // Set the value, parsing it where needed
+            $propertyName = $columnInfo->getPropertyName();
+            $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
+
+            $this->$propertyName = $propertyValue;
+        }
     }
 
     /**
@@ -126,7 +148,7 @@ class Model
         $propertiesDiff = [];
         
         foreach ($propertiesNow as $propertyName => $propertyValue) {
-            if (!isset($propertiesThen[$propertyName]) || $propertiesThen[$propertyName] !== $propertiesNow[$propertyName]) {
+            if (!array_key_exists($propertyName, $propertiesThen) || $propertiesThen[$propertyName] !== $propertiesNow[$propertyName]) {
                 // This property either was not previously known, or its value has changed in some way.
                 $propertiesDiff[$propertyName] = $propertyValue;
             }
@@ -362,6 +384,23 @@ class Model
     public function getTableInfo(): Table
     {
         return $this->_tableInfo;
+    }
+
+    /**
+     * Gets column info by its name.
+     *
+     * @param string $columnName
+     * @return Column|null
+     */
+    public function getColumnByName(string $columnName): ?Column
+    {
+        $columnInfo = $this->_tableInfo->getColumnByName($columnName);
+
+        if ($columnInfo) {
+            return $columnInfo;
+        }
+
+        return null;
     }
 
     /**

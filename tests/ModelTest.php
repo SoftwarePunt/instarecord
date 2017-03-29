@@ -2,6 +2,7 @@
 
 namespace Instasell\Instarecord\Tests;
 
+use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\DatabaseAdapter;
 use Instasell\Instarecord\Instarecord;
 use Instasell\Instarecord\Tests\Database\DataFormattingTest;
@@ -257,18 +258,21 @@ class ModelTest extends TestCase
         $this->assertEquals($allUsersViaQuery, $allUsersViaAll);
     }
 
-    public function testModelInsertsFormattedValues()
+    public function testModelInsertsFormattedValuesAndParsesIncomingValues()
     {
         Instarecord::config(new TestDatabaseConfig());
 
         // Insert user with a formatted DateTime as their name, because why not
         $newUser = new User();
         $testFormatStr = '1970-11-12 01:03:04';
-        $newUser->userName = new \DateTime($testFormatStr);
+        $newUser->joinDate = new \DateTime($testFormatStr);
         $newUser->save();
         
         // The fact no errors have occurred is a good first step: it means we inserted valid data.
+        // Now re-fetch into a new model, and ensure that we get a nice datetime object parsed from the db.
         $refetchedUser = User::fetch($newUser->id);
-        $this->assertEquals($testFormatStr, $refetchedUser->userName);
+        
+        $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
+        $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
     }
 }
