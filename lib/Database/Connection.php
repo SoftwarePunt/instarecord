@@ -5,6 +5,7 @@ namespace Instasell\Instarecord\Database;
 use Instasell\Instarecord\Config\ConfigException;
 use Instasell\Instarecord\Config\DatabaseConfig;
 use Instasell\Instarecord\DatabaseAdapter;
+use Instasell\Instarecord\Logging\QueryLogger;
 
 /**
  * Represents a connection to the database.
@@ -33,6 +34,13 @@ class Connection
     protected $pdo;
 
     /**
+     * The query logger, if applicable.
+     * 
+     * @var QueryLogger
+     */
+    protected $queryLogger;
+
+    /**
      * Constructs a new, uninitialized database connection for a given adapter.
      * 
      * @throws ConfigException
@@ -42,6 +50,17 @@ class Connection
     {
         $this->config = $config;
         $this->adapter = DatabaseAdapter::createInstance($config->adapter);
+        $this->queryLogger = null;
+    }
+
+    /**
+     * Sets the query logger on this connection instance.
+     * 
+     * @param QueryLogger $logger
+     */
+    public function setQueryLogger(QueryLogger $logger)
+    {
+        $this->queryLogger = $logger; 
     }
 
     /**
@@ -120,7 +139,23 @@ class Connection
         }
         
         // Attempt to execute the statement, throwing an error on failure
+        $queryTimeStart = microtime(true);
+        $queryFailed = false;
+        
         if (!$statement->execute()) {
+            $queryFailed = true;
+        }
+        
+        // Query complete, log it
+        if ($this->queryLogger) {
+            $queryTimeEnd = microtime(true);
+            $queryRunTime = ($queryTimeEnd - $queryTimeStart);
+            
+            $this->queryLogger->onQueryComplete($statementText, $parameters, $queryRunTime);
+        }
+        
+        // If this was a failure, throw up now
+        if ($queryFailed) {
             $errorInfo = $statement->errorInfo();
             throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
         }
