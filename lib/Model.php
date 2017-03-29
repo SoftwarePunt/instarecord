@@ -45,31 +45,33 @@ class Model
      * 
      * @param array $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
      */
-    protected function setInitialValues(array $initialValues): void
+    protected function setInitialValues(?array $initialValues): void
     {
         foreach ($this->getPropertyNames() as $propertyName) {
             $this->$propertyName = null;
         }
         
-        foreach ($initialValues as $nameInArray => $valueInArray) {
-            // Can we find the column by its name?
-            $columnInfo = $this->getColumnByName($nameInArray);
+        if ($initialValues) {
+            foreach ($initialValues as $nameInArray => $valueInArray) {
+                // Can we find the column by its name?
+                $columnInfo = $this->getColumnByName($nameInArray);
 
-            if (!$columnInfo) {
-                // Can we find the column by its property name?
-                $columnInfo = $this->getColumnForPropertyName($nameInArray);
+                if (!$columnInfo) {
+                    // Can we find the column by its property name?
+                    $columnInfo = $this->getColumnForPropertyName($nameInArray);
+                }
+
+                if (!$columnInfo) {
+                    // Okay, we can't find this column at all, ignore this property
+                    continue;
+                }
+
+                // Set the value, parsing it where needed
+                $propertyName = $columnInfo->getPropertyName();
+                $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
+
+                $this->$propertyName = $propertyValue;
             }
-
-            if (!$columnInfo) {
-                // Okay, we can't find this column at all, ignore this property
-                continue;
-            }
-
-            // Set the value, parsing it where needed
-            $propertyName = $columnInfo->getPropertyName();
-            $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
-
-            $this->$propertyName = $propertyValue;
         }
     }
 
