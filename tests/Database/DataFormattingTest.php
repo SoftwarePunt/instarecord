@@ -36,4 +36,18 @@ class DataFormattingTest extends TestCase
         $this->assertInstanceOf('\DateTime', $parsedDateTime, 'DateTime value should be parsed into DateTime object');
         $this->assertEquals($testDateTimeStr, $parsedDateTime->format(Column::DATE_TIME_FORMAT), 'DateTime parsing should maintain correct value');
     }
+
+    public function testFormatRetainsNulls()
+    {
+        $column = $this->_createTestColumn(['var' => '\DateTime']);
+
+        $this->assertEquals(null, $column->formatDatabaseValue(null), 'NULL should not be formatted; it should remain NULL');
+    }
+
+    public function testParseRetainsNulls()
+    {
+        $column = $this->_createTestColumn(['var' => '\DateTime']);
+
+        $this->assertNull($column->parseDatabaseValue(null), 'NULL should not be parsed; it should remain NULL');
+    }
 }

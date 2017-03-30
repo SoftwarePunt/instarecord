@@ -124,10 +124,14 @@ class Column
      * Formats a PHP value for database insertion according to this column's formatting rules.
      * 
      * @param mixed $input PHP value
-     * @return string Database string for insertion
+     * @return string|null Database string for insertion
      */
-    public function formatDatabaseValue($input): string
+    public function formatDatabaseValue($input): ?string
     {
+        if ($input === null) {
+            return null;
+        }
+
         if ($input instanceof \DateTime) {
             return $input->format(self::DATE_TIME_FORMAT);
         }
@@ -138,11 +142,15 @@ class Column
     /**
      * Parses a value from the database to PHP format according to this column's formatting rules.
      * 
-     * @param string $input Database value, string retrieved from data row
+     * @param string|null $input Database value, string retrieved from data row
      * @return mixed PHP value
      */
-    public function parseDatabaseValue(string $input)
+    public function parseDatabaseValue(?string $input)
     {
+        if ($input === null) {
+            return null;
+        }
+
         if ($this->dataType == self::TYPE_DATE_TIME) {
             return \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input);
         }

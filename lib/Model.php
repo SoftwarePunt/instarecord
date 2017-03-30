@@ -262,7 +262,7 @@ class Model
     {
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
         $this->$primaryKeyName = null;
-        
+
         $insertPkValue = $this->query()
             ->insert()
             ->values($this->getColumnValues())
