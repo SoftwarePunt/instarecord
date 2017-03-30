@@ -275,4 +275,11 @@ class ModelTest extends TestCase
         $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
         $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
     }
+    
+    public function testFetchReturnsNullForNoResult()
+    {
+        Instarecord::config(new TestDatabaseConfig());
+        
+        $this->assertNull(User::fetch(123123123));
+    }
 }

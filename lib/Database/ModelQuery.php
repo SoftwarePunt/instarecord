@@ -81,11 +81,16 @@ class ModelQuery extends Query
     /**
      * Queries a single row and returns it as a model instance.
      *
-     * @return Model
+     * @return Model|null Model instance, or NULL if there was no result.
      */
-    public function querySingleModel(): Model
+    public function querySingleModel(): ?Model
     {
         $row = $this->querySingleRow();
+        
+        if ($row == null) {
+            return null;
+        }
+        
         return new $this->modelName($row);
     }
 }
