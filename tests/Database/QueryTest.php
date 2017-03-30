@@ -207,6 +207,23 @@ class QueryTest extends TestCase
     /**
      * @depends testExecuteInsertWithAutoIncrement
      */
+    public function testQuerySingleRowReturnsNullOnNoResult()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+
+        $query = new Query($connection);
+        $query->select('*');
+        $query->from('users');
+        $query->where('id < 0');
+        $singleRow = $query->querySingleRow();
+
+        $this->assertNull($singleRow, 'Expected a single NULL as result');
+    }
+
+    /**
+     * @depends testExecuteInsertWithAutoIncrement
+     */
     public function testQuerySingleRowReturnsNullIfNotFound()
     {
         $config = new TestDatabaseConfig();
