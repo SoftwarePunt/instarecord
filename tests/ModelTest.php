@@ -52,6 +52,22 @@ class ModelTest extends TestCase
         $this->assertEquals(['userName' => 'Jan'], $user->getDirtyProperties());
     }
     
+    public function testGetDirtyColumns()
+    {
+        $values = [
+            'id' => 123,
+            'user_name' => 'Henk'
+        ];
+
+        $user = new User($values);
+
+        $this->assertEmpty($user->getDirtyColumns(), 'Dirty columns should initially be empty');
+
+        $user->userName = 'Jan';
+
+        $this->assertEquals(['user_name' => 'Jan'], $user->getDirtyColumns(), 'Changing a value should affect dirty columns');
+    }
+    
     public function testMarkAllDirty()
     {
         $values = [
@@ -272,6 +288,28 @@ class ModelTest extends TestCase
         // Now re-fetch into a new model, and ensure that we get a nice datetime object parsed from the db.
         $refetchedUser = User::fetch($newUser->id);
         
+        $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
+        $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
+    }
+
+    public function testModelUpdatesFormattedValues()
+    {
+        Instarecord::config(new TestDatabaseConfig());
+
+        // Create initial user
+        $newUser = new User();
+        $newUser->joinDate = null;
+        $newUser->save();
+        
+        // Update user with a new date time
+        $testFormatStr = '1993-06-11 03:55:51';
+        $newUser->joinDate = new \DateTime($testFormatStr);
+        $newUser->update();
+
+        // The fact no errors have occurred is a good first step: it means we updated the record with valid data.
+        // Now re-fetch into a new model, and ensure that we get a nice datetime object parsed from the db.
+        $refetchedUser = User::fetch($newUser->id);
+
         $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
         $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
     }
