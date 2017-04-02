@@ -12,6 +12,7 @@ class Column
 {
     const TYPE_STRING = "string";
     const TYPE_DATE_TIME = "datetime";
+    const TYPE_BOOLEAN = "bool";
     
     const DATE_TIME_FORMAT = "Y-m-d H:i:s";
     
@@ -83,6 +84,10 @@ class Column
                 case "datetime":
                     $this->dataType = self::TYPE_DATE_TIME;
                     break;
+                case "bool":
+                case "boolean":
+                    $this->dataType = self::TYPE_BOOLEAN;
+                    break;
             }
         }
     }
@@ -135,6 +140,30 @@ class Column
         if ($input instanceof \DateTime) {
             return $input->format(self::DATE_TIME_FORMAT);
         }
+
+        if ($input === true) {
+            return '1';
+        }
+
+        if ($input === false) {
+            return '0';
+        }
+
+        if ($this->dataType == self::TYPE_BOOLEAN) {
+            if ($input == 'false') {
+                return '0';
+            }
+
+            if (is_numeric($input) && $input <= 0) {
+                return '0';
+            }
+
+            if ($input) {
+                return '1';
+            }
+
+            return '0';
+        }
         
         return strval($input);
     }
@@ -153,6 +182,18 @@ class Column
 
         if ($this->dataType == self::TYPE_DATE_TIME) {
             return \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input);
+        }
+
+        if ($this->dataType == self::TYPE_BOOLEAN) {
+            if ($input) {
+                if ($input == 'false' || $input == '0') {
+                    return false;
+                }
+
+                return true;
+            } else {
+                return false;
+            }
         }
         
         return strval($input);
