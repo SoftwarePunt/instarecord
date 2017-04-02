@@ -170,7 +170,14 @@ class Model
         $dirtyColumns = [];
 
         foreach ($dirtyProperties as $propertyName => $propertyValue) {
-            $dirtyColumns[Column::getDefaultColumnName($propertyName)] = $propertyValue;
+            $columnInfo = $this->getColumnForPropertyName($propertyName);
+
+            if ($columnInfo) {
+                $columnName = $columnInfo->getColumnName();
+                $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
+
+                $dirtyColumns[$columnName] = $columnValue;
+            }
         }
 
         return $dirtyColumns;
