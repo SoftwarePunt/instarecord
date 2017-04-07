@@ -59,7 +59,7 @@ class Query
     /**
      * Limit to apply to query results (max records to return or change).
      * If set to NULL, no limit should be applied.
-     * 
+     *
      * @default null
      * @var int|null
      */
@@ -68,7 +68,7 @@ class Query
     /**
      * Offset to apply to query results (records to skip).
      * If set to NULL, no limit should be applied.
-     * 
+     *
      * @default null
      * @var int|null
      */
@@ -76,11 +76,11 @@ class Query
 
     /**
      * Contains an array of WHERE statement.
-     * 
+     *
      * Each entry in this array is another row (sub array):
      * - Parameter one (index zero) is the raw query text
-     * - Each parameter following it is a bound parameter 
-     * 
+     * - Each parameter following it is a bound parameter
+     *
      * @var array
      */
     protected $whereStatements;
@@ -100,7 +100,7 @@ class Query
     /**
      * Resets the query to a blank slate.
      *
-     * @return Query
+     * @return Query|$this
      */
     public function reset(): Query
     {
@@ -119,7 +119,7 @@ class Query
     /**
      * Begins a SELECT statement.
      *
-     * @param string $selectText The select text: which columns to select.
+     * @param string $selectText The select text: which columns to select. Defaults to "*". Unsafe value.
      * @return Query|$this
      */
     public function select(string $selectText = '*'): Query
@@ -130,9 +130,22 @@ class Query
     }
 
     /**
+     * Begins a SELECT COUNT(x) statement.
+     *
+     * @param string $countColumn The COUNT() text: which column to use for count. Defaults to "id". Unsafe value.
+     * @return Query|$this
+     */
+    public function count(string $countColumn = 'id'): Query
+    {
+        $this->statementType = self::QUERY_TYPE_SELECT;
+        $this->selectStatement = "COUNT({$countColumn})";
+        return $this;
+    }
+
+    /**
      * Begins a INSERT statement.
      *
-     * @return Query
+     * @return Query|$this
      */
     public function insert(): Query
     {
@@ -144,16 +157,16 @@ class Query
      * Begins a UPDATE statement.
      *
      * @param string|null $tableName
-     * @return Query
+     * @return Query|$this
      */
     public function update(?string $tableName = null): Query
     {
         $this->statementType = self::QUERY_TYPE_UPDATE;
-        
+
         if ($tableName) {
-            $this->tableName = $tableName;    
+            $this->tableName = $tableName;
         }
-        
+
         return $this;
     }
 
@@ -172,7 +185,7 @@ class Query
      * Adds a FROM statement onto a SELECT or DELETE query.
      *
      * @param string $tableName
-     * @return Query
+     * @return Query|$this
      */
     public function from(string $tableName): Query
     {
@@ -184,7 +197,7 @@ class Query
      * Adds an INTO statement onto a INSERT query.
      *
      * @param string $tableName
-     * @return Query
+     * @return Query|$this
      */
     public function into(string $tableName): Query
     {
@@ -196,7 +209,7 @@ class Query
      * Sets the values to be insert on an INSERT statement.
      *
      * @param array $values Associative array of the values to be set, optionally indexed by column names.
-     * @return Query
+     * @return Query|$this
      */
     public function values(array $values): Query
     {
@@ -227,7 +240,7 @@ class Query
 
     /**
      * Adds an additional WHERE clause to the query.
-     * 
+     *
      * @param string $statementText Raw SQL "WHERE" statement text.
      * @param array ...$params Bound parameter list.
      * @throws QueryBuilderException
@@ -238,25 +251,25 @@ class Query
         // Verify parameter count to prevent (to aid the developer, really)
         $paramCountExpected = substr_count($statementText, '?');
         $paramCountActual = count($params);
-        
+
         if ($paramCountExpected !== $paramCountActual) {
-            throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\"."); 
+            throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\".");
         }
 
         // Register the WHERE statement data as a new row 
         $whereStatement = [$statementText];
-        
+
         foreach ($params as $param) {
             $whereStatement[] = $param;
         }
-        
+
         $this->whereStatements[] = $whereStatement;
         return $this;
     }
-    
+
     /**
      * Applies an LIMIT to the statement.
-     * 
+     *
      * @param int|null $limit Set limit to a number, or set to NULL or ZERO to make this query limitless.
      * @return Query|$this
      */
@@ -282,7 +295,7 @@ class Query
      * Binds a query parameter.
      *
      * @param mixed $param
-     * @return Query
+     * @return Query|$this
      */
     private function bindParam($param): Query
     {
@@ -374,21 +387,21 @@ class Query
                 $statementText .= ")";
             }
         }
-        
+
         // Apply WHERE
         if (!empty($this->whereStatements)) {
             $statementText .= " WHERE ";
-            
+
             foreach ($this->whereStatements as $statementData) {
                 $whereStatementText = array_shift($statementData);
                 $statementText .= $whereStatementText;
-                
+
                 foreach ($statementData as $parameter) {
                     $this->bindParam($parameter);
                 }
             }
         }
-        
+
         // Apply LIMIT
         if ($this->limit) {
             $statementText .= " LIMIT {$this->limit}";
@@ -413,10 +426,10 @@ class Query
     {
         return $this->connection->executeStatement($this->createStatementText(), $this->parameters);
     }
-    
+
     /**
      * Executes the query statement without gathering results.
-     * 
+     *
      * @throws DatabaseException
      */
     public function execute(): void
@@ -428,7 +441,7 @@ class Query
 
     /**
      * Executes the query, retrieving the inserted auto incremented primary key (if any).
-     * 
+     *
      * @return null|string
      */
     public function executeInsert(): ?string
@@ -439,24 +452,24 @@ class Query
 
     /**
      * Executes the query, retrieves all data, and returns it in an associative array.
-     * 
+     *
      * @return array
      */
     public function queryAllRows(): array
     {
         $statement = $this->executeStatement();
-        
+
         $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        
+
         $statement->closeCursor();
         $statement = null;
-        
+
         return $results;
     }
 
     /**
      * Executes the query, limiting it to one row, and retrieve and return only that row as an associative array.
-     * 
+     *
      * @return array|null
      */
     public function querySingleRow(): ?array
@@ -464,41 +477,41 @@ class Query
         // Modify limit to one as we are executing this expecting no more than one row, let's not waste any effort...
         // Note: This is useless for primary key queries thanks to the optimizer, but still relevant for non-pk queries
         $originalLimit = $this->limit;
-        $this->limit(1); 
-        
+        $this->limit(1);
+
         // Execute statement, only read one row
         $statement = $this->executeStatement();
         $firstRow = $statement->fetch(\PDO::FETCH_ASSOC);
-        
+
         // Close statement
         $statement->closeCursor();
         $statement = null;
-        
+
         // Restore original limit
         $this->limit($originalLimit);
-        
+
         // Return row, or null if row wasn't found
         if ($firstRow) {
-            return $firstRow;    
+            return $firstRow;
         }
-        
+
         return null;
     }
 
     /**
      * Executes the query, returning only the first value from the first row when possible.
-     * 
+     *
      * @return null|string The retrieved value as a string, or NULL if retrieval was not possible.
      */
     public function querySingleValue(): ?string
     {
         $statement = $this->executeStatement();
         $firstCol = $statement->fetchColumn(0);
-        
+
         if ($firstCol) {
             return $firstCol;
         }
-        
+
         return null;
     }
 }

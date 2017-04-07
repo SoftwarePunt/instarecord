@@ -23,6 +23,17 @@ class QueryTest extends TestCase
         $this->assertEquals('SELECT * FROM users;', $queryString);
     }
     
+    public function testSimpleSelectCount()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->count('num')
+            ->from('users')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT COUNT(num) FROM users;', $queryString);
+    }
+    
     public function testPerformsSelectByDefault()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
