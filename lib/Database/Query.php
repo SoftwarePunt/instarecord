@@ -461,9 +461,10 @@ class Query
      */
     public function querySingleRow(): ?array
     {
-        // Modify limit to one as we are executing this expecting no more than one row
+        // Modify limit to one as we are executing this expecting no more than one row, let's not waste any effort...
+        // Note: This is useless for primary key queries thanks to the optimizer, but still relevant for non-pk queries
         $originalLimit = $this->limit;
-        $this->limit(1);
+        $this->limit(1); 
         
         // Execute statement, only read one row
         $statement = $this->executeStatement();
@@ -479,6 +480,23 @@ class Query
         // Return row, or null if row wasn't found
         if ($firstRow) {
             return $firstRow;    
+        }
+        
+        return null;
+    }
+
+    /**
+     * Executes the query, returning only the first value from the first row when possible.
+     * 
+     * @return null|string The retrieved value as a string, or NULL if retrieval was not possible.
+     */
+    public function querySingleValue(): ?string
+    {
+        $statement = $this->executeStatement();
+        $firstCol = $statement->fetchColumn(0);
+        
+        if ($firstCol) {
+            return $firstCol;
         }
         
         return null;

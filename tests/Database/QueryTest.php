@@ -5,6 +5,8 @@ namespace Instasell\Instarecord\Tests\Database;
 use Instasell\Instarecord\Config\DatabaseConfig;
 use Instasell\Instarecord\Database\Connection;
 use Instasell\Instarecord\Database\Query;
+use Instasell\Instarecord\Instarecord;
+use Instasell\Instarecord\Tests\Samples\User;
 use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
 
@@ -236,5 +238,28 @@ class QueryTest extends TestCase
         $singleRow = $query->querySingleRow();
 
         $this->assertNull($singleRow, 'Expected no results, with a return value of NULL');
+    }
+
+    /**
+     * @runInSeparateProcess 
+     */
+    public function testQuerySingleValue()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+        
+        Instarecord::config($config);
+
+        $testUser = new User();
+        $testUser->userName = 'HenkTheSingleGuy';
+        $testUser->save();
+        
+        $query = new Query($connection);
+        $query->select('user_name');
+        $query->from('users');
+        $query->where('id = ?', $testUser->id);
+        $firstValue = $query->querySingleValue();
+        
+        $this->assertEquals($testUser->userName, $firstValue);
     }
 }
