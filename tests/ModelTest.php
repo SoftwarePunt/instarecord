@@ -147,6 +147,36 @@ class ModelTest extends TestCase
         $this->assertEquals('users', $sampleUserModel->getTableName());
     }
 
+    public function testSetColumnValues()
+    {
+        $user = new User();
+        $user->setColumnValues([
+            'id' => 5,
+            'user_name' => 'Bob'
+        ]);
+
+        $this->assertEquals('Bob', $user->userName);
+        $this->assertEquals(5, $user->id);
+        $this->assertNull($user->joinDate);
+    }
+
+    public function testGetAndSetColumnValues()
+    {
+        $user = new User();
+
+        $testSet = [
+            'id' => 5,
+            'user_name' => 'Bob'
+        ];
+
+        $user->setColumnValues($testSet);
+
+        $actualFromGet = $user->getColumnValues();
+
+        $this->assertEquals($testSet['id'], $actualFromGet['id']);
+        $this->assertEquals($testSet['user_name'], $actualFromGet['user_name']);
+    }
+
     /**
      * @runInSeparateProcess 
      */

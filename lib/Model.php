@@ -52,26 +52,7 @@ class Model
         }
         
         if ($initialValues) {
-            foreach ($initialValues as $nameInArray => $valueInArray) {
-                // Can we find the column by its name?
-                $columnInfo = $this->getColumnByName($nameInArray);
-
-                if (!$columnInfo) {
-                    // Can we find the column by its property name?
-                    $columnInfo = $this->getColumnForPropertyName($nameInArray);
-                }
-
-                if (!$columnInfo) {
-                    // Okay, we can't find this column at all, ignore this property
-                    continue;
-                }
-
-                // Set the value, parsing it where needed
-                $propertyName = $columnInfo->getPropertyName();
-                $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
-
-                $this->$propertyName = $propertyValue;
-            }
+            $this->setColumnValues($initialValues);
         }
     }
 
@@ -136,6 +117,35 @@ class Model
         }
 
         return $columns;
+    }
+
+    /**
+     * Applies a set of database values to this instance.
+     *
+     * @param array $values
+     */
+    public function setColumnValues(array $values): void
+    {
+        foreach ($values as $nameInArray => $valueInArray) {
+            // Can we find the column by its name?
+            $columnInfo = $this->getColumnByName($nameInArray);
+
+            if (!$columnInfo) {
+                // Can we find the column by its property name?
+                $columnInfo = $this->getColumnForPropertyName($nameInArray);
+            }
+
+            if (!$columnInfo) {
+                // Okay, we can't find this column at all, ignore this property
+                continue;
+            }
+
+            // Set the value, parsing it where needed
+            $propertyName = $columnInfo->getPropertyName();
+            $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
+
+            $this->$propertyName = $propertyValue;
+        }
     }
 
     /**
