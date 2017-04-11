@@ -358,11 +358,13 @@ class Model
     /**
      * Fetches a instance of this model by its primary key value.
      * 
-     * @param string $keyValue The primary key value to seek out.
+     * @param string|int $keyValue The primary key value to seek out.
      * @return Model|$this|null Fetched model instance, or NULL if there was no result.
      */
-    public static function fetch(string $keyValue): ?Model
+    public static function fetch($keyValue): ?Model
     {
+        $keyValue = strval($keyValue);
+        
         $className = get_called_class();
         $referenceModel = new $className();
         
