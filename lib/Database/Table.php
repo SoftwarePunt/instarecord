@@ -75,6 +75,16 @@ class Table
         if (!$this->referenceModel instanceof Model) {
             throw new ConfigException("Cannot determine table information for class that does not extend from Model: {$modelClassName}");
         }
+
+        // Parse class annotations to determine custom table name, etc
+        $annotationReader = Reader::createFromDefaults();
+        $classAnnotations = $annotationReader->getClassAnnotations($modelClassName);
+
+        foreach ($classAnnotations as $name => $value) {
+            if (strtolower($name) === "table") {
+                $this->tableName = $value;
+            }
+        }
     }
 
     /**

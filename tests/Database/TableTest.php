@@ -3,6 +3,7 @@
 namespace Instasell\Instarecord\Tests\Database;
 
 use Instasell\Instarecord\Database\Table;
+use Instasell\Instarecord\Tests\Samples\CustomTableNameModel;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -70,5 +71,14 @@ class TableTest extends TestCase
         // This isn't the prettiest solution but I'll sleep better at night knowing it's here
         Assert::assertAttributeContains('myCustomAnnotation', 'annotations', $userNameColumn);
         Assert::assertAttributeContains('string', 'annotations', $userNameColumn);
+    }
+    
+    public function testUsesCustomTableNameFromAnnotation()
+    {
+        $user = new CustomTableNameModel();
+        $table = $user->getTableInfo();
+        
+        $this->assertEquals('my_name', $table->getTableName());
+        $this->assertEquals($user->getTableName(), $table->getTableName());
     }
 }

@@ -4,6 +4,7 @@ namespace Instasell\Instarecord\Tests\Samples;
 
 use Instasell\Instarecord\Model;
 
+
 class User extends Model
 {
     /**
