@@ -177,4 +177,37 @@ class Connection
         
         return null;
     }
+
+    /**
+     * Begins a database transaction.
+     * This turns off auto commit mode for statements.
+     * 
+     * @return bool
+     */
+    public function beginTransaction(): bool
+    {
+        return $this->pdo->beginTransaction();
+    }
+
+    /**
+     * Commits a transaction to the database.
+     * This re-enables auto commit mode for statements.
+     * 
+     * @return bool
+     */
+    public function commitTransaction(): bool
+    {
+        return $this->pdo->commit();
+    }
+
+    /**
+     * Rolls back a transaction, reverting to the previous state.
+     * This re-enables auto commit mode for statements.
+     * 
+     * @return bool
+     */
+    public function rollbackTransaction(): bool
+    {
+        return $this->pdo->rollBack();
+    }
 }
