@@ -115,6 +115,18 @@ class QueryTest extends TestCase
 
         $this->assertEquals('INSERT INTO users VALUES (?, ?);', $queryString);
     }
+
+    public function testOrderBy()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select('*')
+            ->from('users')
+            ->orderBy("some_order_value ASC")
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM users ORDER BY some_order_value ASC;', $queryString);
+    }
     
     public function testLimitAndOffset()
     {

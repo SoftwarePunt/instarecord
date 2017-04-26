@@ -57,6 +57,14 @@ class Query
     protected $dataValues;
 
     /**
+     * Controls the ORDER BY structure.
+     * 
+     * @default null
+     * @var string|null
+     */
+    protected $orderBy;
+
+    /**
      * Limit to apply to query results (max records to return or change).
      * If set to NULL, no limit should be applied.
      *
@@ -109,6 +117,7 @@ class Query
         $this->selectStatement = "*";
         $this->tableName = null;
         $this->dataValues = [];
+        $this->orderBy = null;
         $this->limit = null;
         $this->offset = null;
         $this->whereStatements = [];
@@ -268,6 +277,18 @@ class Query
     }
 
     /**
+     * Sets the ORDER BY statement on the query.
+     * 
+     * @param string $orderBy
+     * @return Query|$this
+     */
+    public function orderBy(string $orderBy): Query
+    {
+        $this->orderBy = $orderBy;
+        return $this;
+    }
+    
+    /**
      * Applies an LIMIT to the statement.
      *
      * @param int|null $limit Set limit to a number, or set to NULL or ZERO to make this query limitless.
@@ -400,6 +421,11 @@ class Query
                     $this->bindParam($parameter);
                 }
             }
+        }
+        
+        // Apply ORDER BY
+        if (!empty($this->orderBy)) {
+            $statementText .= " ORDER BY {$this->orderBy}";
         }
 
         // Apply LIMIT
