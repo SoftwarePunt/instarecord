@@ -156,6 +156,38 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @runInSeparateProcess 
+     */
+    public function testWhereWithBoundArray()
+    {
+        $config = new TestDatabaseConfig();
+
+        Instarecord::config($config);
+        
+        $query = new Query(Instarecord::connection());
+        
+        $testUserA = new User();
+        $testUserA->userName = 'ArrayGuyOne';
+        $testUserA->save();
+
+        $testUserB = new User();
+        $testUserB->userName = 'ArrayGuyTwo';
+        $testUserB->save();
+        
+        $queryString = $query->select()
+            ->from('users')
+            ->where('id IN (?)', [$testUserA->id, $testUserB->id, 'banana'])
+            ->createStatementText();
+
+        // Test query formatting
+        $this->assertEquals('SELECT * FROM users WHERE id IN (?, ?, ?);', $queryString);
+        
+        // Test actual execution, expecting two rows
+        $rows = $query->queryAllRows();
+        $this->assertCount(2, $rows);
+    }
+
+    /**
      * @expectedException Instasell\Instarecord\Database\DatabaseException
      * @expectedExceptionMessage Table 'testdb.fruits' doesn't exist
      */

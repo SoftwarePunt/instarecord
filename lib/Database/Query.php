@@ -268,8 +268,60 @@ class Query
         // Register the WHERE statement data as a new row 
         $whereStatement = [$statementText];
 
-        foreach ($params as $param) {
-            $whereStatement[] = $param;
+        for ($paramIdx = 0; $paramIdx < count($params); $paramIdx++) {
+            $param = $params[$paramIdx];
+        
+            if (is_array($param)) {
+                $paramSubCount = count($param);
+                
+                if ($paramSubCount == 0) {
+                    // Empty array, bind empty string, not sure what else to do!
+                    $whereStatement[] = '';
+                } else {
+                    // We have an array param, expand the "?" marker to multiple question marks and bind each as a 
+                    // new, separate parameter to the statement.
+
+                    // Example: WHERE bla = ? AND id IN(?)
+                    // The $paramIdx will be #1 - 2nd item - so find the corresponding 2nd ? marker and modify it.
+
+                    $markerOffset = 0;
+                    $markerSkip = $paramIdx;
+                    $markerIdx = 0;
+
+                    while (true) {
+                        $markerIdx = strpos($statementText, '?', $markerOffset);
+
+                        if ($markerSkip <= 0) {
+                            break;
+                        } else {
+                            $markerOffset += $markerIdx + 1;
+                        }
+
+                        $markerSkip--;
+                    }
+
+                    // We should now have the marker position, add additional markers
+                    $extraMarkers = $paramSubCount - 1;
+                    
+                    if ($extraMarkers > 0) {
+                        $extraMarkersStr = "";
+
+                        for ($i = 0; $i < $extraMarkers; $i++) {
+                            $extraMarkersStr .= ", ?";
+                        }
+
+                        $statementText = substr_replace($statementText, $extraMarkersStr, $markerIdx + 1, 0);
+                        $whereStatement[0] = $statementText; 
+                    }
+                    
+                    // Bind each parameter
+                    foreach ($param as $subParam) {
+                        $whereStatement[] = $subParam;
+                    }
+                }
+            } else {
+                $whereStatement[] = $param;    
+            }
         }
 
         $this->whereStatements[] = $whereStatement;
