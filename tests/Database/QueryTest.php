@@ -176,11 +176,11 @@ class QueryTest extends TestCase
         
         $queryString = $query->select()
             ->from('users')
-            ->where('id IN (?)', [$testUserA->id, $testUserB->id, 'banana'])
+            ->where('id > ? AND id IN (?) AND id >= ?', 0, [$testUserA->id, $testUserB->id, 'banana'], 0)
             ->createStatementText();
 
         // Test query formatting
-        $this->assertEquals('SELECT * FROM users WHERE id IN (?, ?, ?);', $queryString);
+        $this->assertEquals('SELECT * FROM users WHERE id > ? AND id IN (?, ?, ?) AND id >= ?;', $queryString);
         
         // Test actual execution, expecting two rows
         $rows = $query->queryAllRows();
