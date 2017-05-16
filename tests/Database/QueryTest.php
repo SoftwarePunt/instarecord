@@ -164,7 +164,21 @@ class QueryTest extends TestCase
             ->limit(5)
             ->createStatementText();
 
-        $this->assertEquals('DELETE FROM fruits WHERE type = ? AND `color` = ? LIMIT 5;', $queryString);
+        $this->assertEquals('DELETE FROM fruits WHERE (type = ? AND `color` = ?) LIMIT 5;', $queryString);
+    }
+
+    public function testWhereWithAnd()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->delete()
+            ->from('fruits')
+            ->where('type = ?', 'fruit')
+            ->andWhere('color IN (?)', ['red', 'blue'])
+            ->andWhere('tastes_nice = 1')
+            ->createStatementText();
+
+        $this->assertEquals('DELETE FROM fruits WHERE (type = ?) AND (color IN (?, ?)) AND (tastes_nice = 1);', $queryString);
     }
 
     /**
@@ -192,7 +206,7 @@ class QueryTest extends TestCase
             ->createStatementText();
 
         // Test query formatting
-        $this->assertEquals('SELECT * FROM users WHERE id > ? AND id IN (?, ?, ?) AND id >= ?;', $queryString);
+        $this->assertEquals('SELECT * FROM users WHERE (id > ? AND id IN (?, ?, ?) AND id >= ?);', $queryString);
         
         // Test actual execution, expecting two rows
         $rows = $query->queryAllRows();

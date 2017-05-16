@@ -328,14 +328,38 @@ class Query
     }
     
     /**
-     * Adds an additional WHERE clause to the query.
+     * Sets the WHERE clause to the query.
+     * Clears any previous WHERE clauses when called. 
+     * 
+     * Use andWhere() to combine different WHERE blocks.
      *
      * @param string $statementText Raw SQL "WHERE" statement text.
      * @param array ...$params Bound parameter list.
+     * @see andWhere()
      * @throws QueryBuilderException
      * @return Query|$this
      */
     public function where(string $statementText, ...$params): Query
+    {
+        // Register the WHERE statement data as the ONLY row
+        $whereStatement = $this->processStatementParameters($statementText, $params);
+        $this->whereStatements = [$whereStatement];
+        return $this;
+    }
+
+    /**
+     * Adds an additional WHERE clause to the query.
+     * Groups multiple where blocks using "WHERE (x) AND (y) AND (z)" syntax.
+     * 
+     * Use where() to clear all where clauses and set a new one.
+     *
+     * @param string $statementText Raw SQL "WHERE" statement text.
+     * @param array ...$params Bound parameter list.
+     * @see where()
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function andWhere(string $statementText, ...$params): Query
     {
         // Register the WHERE statement data as a new row
         $whereStatement = $this->processStatementParameters($statementText, $params);
@@ -484,16 +508,25 @@ class Query
         }
 
         // Apply WHERE
+        $firstWhere = true;
+        
         if (!empty($this->whereStatements)) {
-            $statementText .= " WHERE ";
-
             foreach ($this->whereStatements as $statementData) {
+                if (!$firstWhere) {
+                    $statementText .= " AND (";
+                } else {
+                    $statementText .= " WHERE (";
+                }
+                
                 $whereStatementText = array_shift($statementData);
                 $statementText .= $whereStatementText;
 
                 foreach ($statementData as $parameter) {
                     $this->bindParam($parameter);
                 }
+
+                $statementText .= ")";
+                $firstWhere = false;
             }
         }
         
