@@ -127,6 +127,18 @@ class QueryTest extends TestCase
 
         $this->assertEquals('SELECT * FROM users ORDER BY some_order_value ASC;', $queryString);
     }
+
+    public function testOrderByWithParams()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select('*')
+            ->from('articles')
+            ->orderBy("MATCH (title) AGAINST (?) DESC", 'searchQuery')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM articles ORDER BY MATCH (title) AGAINST (?) DESC;', $queryString);
+    }
     
     public function testLimitAndOffset()
     {

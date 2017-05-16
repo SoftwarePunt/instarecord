@@ -248,14 +248,14 @@ class Query
     }
 
     /**
-     * Adds an additional WHERE clause to the query.
-     *
-     * @param string $statementText Raw SQL "WHERE" statement text.
-     * @param array ...$params Bound parameter list.
+     * Processes a given $statementText and a set of $parameters and its sub parameters.
+     * 
+     * @param string $statementText The raw statement text / SQL to bind.
+     * @param array $params The list of parameters to be bound to the statement text.
      * @throws QueryBuilderException
-     * @return Query|$this
+     * @return array A statement row, where index 0 contains the statement text and other values represent the params.
      */
-    public function where(string $statementText, ...$params): Query
+    protected function processStatementParameters(string $statementText, array $params): array
     {
         // Verify parameter count to prevent (to aid the developer, really)
         $paramCountExpected = substr_count($statementText, '?');
@@ -264,16 +264,16 @@ class Query
         if ($paramCountExpected !== $paramCountActual) {
             throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\".");
         }
-
-        // Register the WHERE statement data as a new row 
-        $whereStatement = [$statementText];
+        
+        // Cool, now let's get to work...
+        $finalizedRow = [$statementText];
 
         for ($paramIdx = 0; $paramIdx < count($params); $paramIdx++) {
             $param = $params[$paramIdx];
-        
+
             if (is_array($param)) {
                 $paramSubCount = count($param);
-                
+
                 if ($paramSubCount == 0) {
                     // Empty array, bind empty string, not sure what else to do!
                     $whereStatement[] = '';
@@ -302,7 +302,7 @@ class Query
 
                     // We should now have the marker position, add additional markers
                     $extraMarkers = $paramSubCount - 1;
-                    
+
                     if ($extraMarkers > 0) {
                         $extraMarkersStr = "";
 
@@ -311,19 +311,34 @@ class Query
                         }
 
                         $statementText = substr_replace($statementText, $extraMarkersStr, $markerIdx + 1, 0);
-                        $whereStatement[0] = $statementText; 
+                        $finalizedRow[0] = $statementText;
                     }
-                    
+
                     // Bind each parameter
                     foreach ($param as $subParam) {
-                        $whereStatement[] = $subParam;
+                        $finalizedRow[] = $subParam;
                     }
                 }
             } else {
-                $whereStatement[] = $param;    
+                $finalizedRow[] = $param;
             }
         }
 
+        return $finalizedRow;
+    }
+    
+    /**
+     * Adds an additional WHERE clause to the query.
+     *
+     * @param string $statementText Raw SQL "WHERE" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function where(string $statementText, ...$params): Query
+    {
+        // Register the WHERE statement data as a new row
+        $whereStatement = $this->processStatementParameters($statementText, $params);
         $this->whereStatements[] = $whereStatement;
         return $this;
     }
@@ -331,12 +346,19 @@ class Query
     /**
      * Sets the ORDER BY statement on the query.
      * 
-     * @param string $orderBy
+     * @param string $statementText Raw SQL for the "ORDER BY" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
      * @return Query|$this
      */
-    public function orderBy(string $orderBy): Query
+    public function orderBy(string $statementText, ...$params): Query
     {
-        $this->orderBy = $orderBy;
+        // Process parameters and set ORDER BY data
+        $statementRow = $this->processStatementParameters($statementText, $params);
+        
+        $this->orderBy = $statementRow[0];
+        $this->orderByParams = array_splice($statementRow, 1);
+        
         return $this;
     }
     
