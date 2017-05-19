@@ -260,6 +260,17 @@ class Model
     }
 
     /**
+     * Gets the value of the primary key property on this model.
+     * 
+     * @return string
+     */
+    public function getPrimaryKeyValue(): ?string
+    {
+        $pkPropName = $this->getPrimaryKeyPropertyName();
+        return $this->$pkPropName;
+    }
+
+    /**
      * Creates and returns a new query based on this model.
      * 
      * @return ModelQuery

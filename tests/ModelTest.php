@@ -350,4 +350,16 @@ class ModelTest extends TestCase
         
         $this->assertNull(User::fetch(123123123));
     }
+    
+    public function testFetchPkVal()
+    {
+        $newUser = new User();
+        $newUser->joinDate = null;
+        
+        $this->assertEquals(null, $newUser->getPrimaryKeyValue());
+        
+        $newUser->id = 123;
+
+        $this->assertEquals(123, $newUser->getPrimaryKeyValue());
+    }
 }
