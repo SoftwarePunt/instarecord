@@ -48,7 +48,7 @@ class Model
     protected function setInitialValues(?array $initialValues): void
     {
         foreach ($this->getPropertyNames() as $propertyName) {
-            $this->$propertyName = null;
+            $this->$propertyName = $this->getColumnForPropertyName($propertyName)->getDefaultValue();
         }
         
         if ($initialValues) {
