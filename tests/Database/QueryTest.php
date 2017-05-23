@@ -180,6 +180,42 @@ class QueryTest extends TestCase
 
         $this->assertEquals('DELETE FROM fruits WHERE (type = ?) AND (color IN (?, ?)) AND (tastes_nice = 1);', $queryString);
     }
+    
+    public function testInnerJoin()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select()
+            ->from('orders')
+            ->innerJoin('payments ON (payments.order_id = orders.id)')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM orders INNER JOIN payments ON (payments.order_id = orders.id);', $queryString);
+    }
+
+    public function testLeftJoin()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select()
+            ->from('orders')
+            ->leftJoin('payments ON (payments.order_id = orders.id)')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM orders LEFT JOIN payments ON (payments.order_id = orders.id);', $queryString);
+    }
+
+    public function testRightJoin()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select()
+            ->from('orders')
+            ->rightJoin('payments ON (payments.order_id = orders.id)')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM orders RIGHT JOIN payments ON (payments.order_id = orders.id);', $queryString);
+    }
 
     /**
      * @runInSeparateProcess 

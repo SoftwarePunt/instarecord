@@ -83,7 +83,7 @@ class Query
     protected $offset;
 
     /**
-     * Contains an array of WHERE statement.
+     * Contains an array of WHERE statements.
      *
      * Each entry in this array is another row (sub array):
      * - Parameter one (index zero) is the raw query text
@@ -92,6 +92,17 @@ class Query
      * @var array
      */
     protected $whereStatements;
+
+    /** 
+     * Contains an array of JOIN statements.
+     *
+     * Each entry in this array is another row (sub array):
+     * - Parameter one (index zero) is the raw query text including join type (ex "INNER JOIN x ON (y.a = x.b)")
+     * - Each parameter following it is a bound parameter
+     * 
+     * @var array
+     */
+    protected $joinStatements;
 
     /**
      * Constructs a new, blank query.
@@ -121,6 +132,7 @@ class Query
         $this->limit = null;
         $this->offset = null;
         $this->whereStatements = [];
+        $this->joinStatements = [];
 
         return $this;
     }
@@ -326,7 +338,64 @@ class Query
 
         return $finalizedRow;
     }
-    
+
+    /**
+     * Internal function for registering joins.
+     * 
+     * @param string $statementText
+     * @param array $params
+     * @return Query
+     */
+    protected function _join(string $statementText, array $params): Query
+    {
+        // Register the JOIN statement data as another row
+        $joinStatement = $this->processStatementParameters($statementText, $params);
+        $this->joinStatements[] = $joinStatement;
+        return $this;
+    }
+
+    /**
+     * Adds an INNER JOIN (simple join) clause to the query.
+     * The MySQL INNER JOIN would return the records where table1 and table2 intersect.
+     *
+     * @param string $statementText Raw SQL "INNER JOIN" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function innerJoin(string $statementText, ...$params): Query
+    {
+        return $this->_join("INNER JOIN {$statementText}", $params);
+    }
+
+    /**
+     * Adds an LEFT JOIN clause to the query.
+     * This type of join returns all rows from the LEFT-hand table specified in the ON condition and only those rows from the other table where the joined fields are equal (join condition is met).
+     *
+     * @param string $statementText Raw SQL "INNER JOIN" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function leftJoin(string $statementText, ...$params): Query
+    {
+        return $this->_join("LEFT JOIN {$statementText}", $params);
+    }
+
+    /**
+     * Adds an RIGHT JOIN clause to the query.
+     * This type of join returns all rows from the RIGHT-hand table specified in the ON condition and only those rows from the other table where the joined fields are equal (join condition is met).
+     *
+     * @param string $statementText Raw SQL "INNER JOIN" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function rightJoin(string $statementText, ...$params): Query
+    {
+        return $this->_join("RIGHT JOIN {$statementText}", $params);
+    }
+        
     /**
      * Sets the WHERE clause to the query.
      * Clears any previous WHERE clauses when called. 
@@ -506,23 +575,35 @@ class Query
                 $statementText .= ")";
             }
         }
+        
+        // Apply JOINs
+        if (!empty($this->joinStatements)) {
+            foreach ($this->joinStatements as $joinStatementData) {
+                $joinStatementText = array_shift($joinStatementData);
+                $statementText .= " {$joinStatementText}";
+
+                foreach ($joinStatementData as $boundJoinParam) {
+                    $this->bindParam($boundJoinParam);
+                }
+            }    
+        }
 
         // Apply WHERE
         $firstWhere = true;
         
         if (!empty($this->whereStatements)) {
-            foreach ($this->whereStatements as $statementData) {
+            foreach ($this->whereStatements as $whereStatementData) {
                 if (!$firstWhere) {
                     $statementText .= " AND (";
                 } else {
                     $statementText .= " WHERE (";
                 }
                 
-                $whereStatementText = array_shift($statementData);
+                $whereStatementText = array_shift($whereStatementData);
                 $statementText .= $whereStatementText;
 
-                foreach ($statementData as $parameter) {
-                    $this->bindParam($parameter);
+                foreach ($whereStatementData as $boundWhereParam) {
+                    $this->bindParam($boundWhereParam);
                 }
 
                 $statementText .= ")";
