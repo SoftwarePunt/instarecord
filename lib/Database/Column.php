@@ -96,6 +96,7 @@ class Column
                 $varKeywordOption = trim($varKeywordOption);
                 
                 switch ($varKeywordOption) {
+                    case "\\datetime":
                     case "datetime":
                         $this->dataType = self::TYPE_DATE_TIME;
                         break;
