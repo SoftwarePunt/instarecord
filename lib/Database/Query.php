@@ -328,15 +328,31 @@ class Query
 
                     // Bind each parameter
                     foreach ($param as $subParam) {
-                        $finalizedRow[] = $subParam;
+                        $finalizedRow[] = $this->preProcessParam($subParam);
                     }
                 }
             } else {
-                $finalizedRow[] = $param;
+                $finalizedRow[] = $this->preProcessParam($param);
             }
         }
 
         return $finalizedRow;
+    }
+
+    /**
+     * Processes the value of a parameter, cleaning it up for the query as necessary.
+     * 
+     * @param $paramValue
+     * @return mixed
+     */
+    protected function preProcessParam($paramValue)
+    {
+        if ($paramValue instanceof \DateTime) {
+            // Format DateTime to database format
+            return $paramValue->format(Column::DATE_TIME_FORMAT);
+        }
+        
+        return $paramValue;
     }
 
     /**
@@ -489,6 +505,17 @@ class Query
     {
         $this->parameters[] = $param;
         return $this;
+    }
+
+    /**
+     * Test / debug function.
+     * Gets a list of all bound parameters for the most recently generated statement.
+     * 
+     * @return array
+     */
+    public function getBoundParametersForGeneratedStatement(): array
+    {
+        return $this->parameters;
     }
 
     /**

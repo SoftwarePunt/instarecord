@@ -250,6 +250,23 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @runInSeparateProcess
+     */
+    public function testWhereWithDateTimeValueTransform()
+    {
+        $dateTime = new \DateTime();
+        $dateTime->setTimestamp(123456789);
+        
+        $query = Instarecord::query()->select()
+            ->from('users')
+            ->where('created_at = ?', $dateTime);
+        $queryString = $query->createStatementText();
+        
+        $this->assertEquals('SELECT * FROM users WHERE (created_at = ?);', $queryString);
+        $this->assertEquals(['1973-11-29 21:33:09'], $query->getBoundParametersForGeneratedStatement());
+    }
+
+    /**
      * @expectedException Instasell\Instarecord\Database\DatabaseException
      * @expectedExceptionMessage Table 'testdb.fruits' doesn't exist
      */
