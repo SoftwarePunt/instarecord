@@ -83,7 +83,7 @@ class Query
     protected $offset;
 
     /**
-     * Contains an array of WHERE statement.
+     * Contains an array of WHERE statements.
      *
      * Each entry in this array is another row (sub array):
      * - Parameter one (index zero) is the raw query text
@@ -92,6 +92,17 @@ class Query
      * @var array
      */
     protected $whereStatements;
+
+    /** 
+     * Contains an array of JOIN statements.
+     *
+     * Each entry in this array is another row (sub array):
+     * - Parameter one (index zero) is the raw query text including join type (ex "INNER JOIN x ON (y.a = x.b)")
+     * - Each parameter following it is a bound parameter
+     * 
+     * @var array
+     */
+    protected $joinStatements;
 
     /**
      * Constructs a new, blank query.
@@ -121,6 +132,7 @@ class Query
         $this->limit = null;
         $this->offset = null;
         $this->whereStatements = [];
+        $this->joinStatements = [];
 
         return $this;
     }
@@ -248,14 +260,14 @@ class Query
     }
 
     /**
-     * Adds an additional WHERE clause to the query.
-     *
-     * @param string $statementText Raw SQL "WHERE" statement text.
-     * @param array ...$params Bound parameter list.
+     * Processes a given $statementText and a set of $parameters and its sub parameters.
+     * 
+     * @param string $statementText The raw statement text / SQL to bind.
+     * @param array $params The list of parameters to be bound to the statement text.
      * @throws QueryBuilderException
-     * @return Query|$this
+     * @return array A statement row, where index 0 contains the statement text and other values represent the params.
      */
-    public function where(string $statementText, ...$params): Query
+    protected function processStatementParameters(string $statementText, array $params): array
     {
         // Verify parameter count to prevent (to aid the developer, really)
         $paramCountExpected = substr_count($statementText, '?');
@@ -264,14 +276,178 @@ class Query
         if ($paramCountExpected !== $paramCountActual) {
             throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\".");
         }
+        
+        // Cool, now let's get to work...
+        $finalizedRow = [$statementText];
 
-        // Register the WHERE statement data as a new row 
-        $whereStatement = [$statementText];
+        for ($paramIdx = 0; $paramIdx < count($params); $paramIdx++) {
+            $param = $params[$paramIdx];
 
-        foreach ($params as $param) {
-            $whereStatement[] = $param;
+            if (is_array($param)) {
+                $paramSubCount = count($param);
+
+                if ($paramSubCount == 0) {
+                    // Empty array, bind empty string, not sure what else to do!
+                    $whereStatement[] = '';
+                } else {
+                    // We have an array param, expand the "?" marker to multiple question marks and bind each as a 
+                    // new, separate parameter to the statement.
+
+                    // Example: WHERE bla = ? AND id IN(?)
+                    // The $paramIdx will be #1 - 2nd item - so find the corresponding 2nd ? marker and modify it.
+
+                    $markerOffset = 0;
+                    $markerSkip = $paramIdx;
+                    $markerIdx = 0;
+
+                    while (true) {
+                        $markerIdx = strpos($statementText, '?', $markerOffset);
+
+                        if ($markerSkip <= 0) {
+                            break;
+                        } else {
+                            $markerOffset += $markerIdx + 1;
+                        }
+
+                        $markerSkip--;
+                    }
+
+                    // We should now have the marker position, add additional markers
+                    $extraMarkers = $paramSubCount - 1;
+
+                    if ($extraMarkers > 0) {
+                        $extraMarkersStr = "";
+
+                        for ($i = 0; $i < $extraMarkers; $i++) {
+                            $extraMarkersStr .= ", ?";
+                        }
+
+                        $statementText = substr_replace($statementText, $extraMarkersStr, $markerIdx + 1, 0);
+                        $finalizedRow[0] = $statementText;
+                    }
+
+                    // Bind each parameter
+                    foreach ($param as $subParam) {
+                        $finalizedRow[] = $this->preProcessParam($subParam);
+                    }
+                }
+            } else {
+                $finalizedRow[] = $this->preProcessParam($param);
+            }
         }
 
+        return $finalizedRow;
+    }
+
+    /**
+     * Processes the value of a parameter, cleaning it up for the query as necessary.
+     * 
+     * @param $paramValue
+     * @return mixed
+     */
+    protected function preProcessParam($paramValue)
+    {
+        if ($paramValue instanceof \DateTime) {
+            // Format DateTime to database format
+            return $paramValue->format(Column::DATE_TIME_FORMAT);
+        }
+        
+        return $paramValue;
+    }
+
+    /**
+     * Internal function for registering joins.
+     * 
+     * @param string $statementText
+     * @param array $params
+     * @return Query
+     */
+    protected function _join(string $statementText, array $params): Query
+    {
+        // Register the JOIN statement data as another row
+        $joinStatement = $this->processStatementParameters($statementText, $params);
+        $this->joinStatements[] = $joinStatement;
+        return $this;
+    }
+
+    /**
+     * Adds an INNER JOIN (simple join) clause to the query.
+     * The MySQL INNER JOIN would return the records where table1 and table2 intersect.
+     *
+     * @param string $statementText Raw SQL "INNER JOIN" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function innerJoin(string $statementText, ...$params): Query
+    {
+        return $this->_join("INNER JOIN {$statementText}", $params);
+    }
+
+    /**
+     * Adds an LEFT JOIN clause to the query.
+     * This type of join returns all rows from the LEFT-hand table specified in the ON condition and only those rows from the other table where the joined fields are equal (join condition is met).
+     *
+     * @param string $statementText Raw SQL "INNER JOIN" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function leftJoin(string $statementText, ...$params): Query
+    {
+        return $this->_join("LEFT JOIN {$statementText}", $params);
+    }
+
+    /**
+     * Adds an RIGHT JOIN clause to the query.
+     * This type of join returns all rows from the RIGHT-hand table specified in the ON condition and only those rows from the other table where the joined fields are equal (join condition is met).
+     *
+     * @param string $statementText Raw SQL "INNER JOIN" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function rightJoin(string $statementText, ...$params): Query
+    {
+        return $this->_join("RIGHT JOIN {$statementText}", $params);
+    }
+        
+    /**
+     * Sets the WHERE clause to the query.
+     * Clears any previous WHERE clauses when called. 
+     * 
+     * Use andWhere() to combine different WHERE blocks.
+     *
+     * @param string $statementText Raw SQL "WHERE" statement text.
+     * @param array ...$params Bound parameter list.
+     * @see andWhere()
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function where(string $statementText, ...$params): Query
+    {
+        // Register the WHERE statement data as the ONLY row
+        $whereStatement = $this->processStatementParameters($statementText, $params);
+        $this->whereStatements = [$whereStatement];
+        return $this;
+    }
+
+    /**
+     * Adds an additional WHERE clause to the query.
+     * Groups multiple where blocks using "WHERE (x) AND (y) AND (z)" syntax.
+     * 
+     * Use where() to clear all where clauses and set a new one.
+     *
+     * @param string $statementText Raw SQL "WHERE" statement text.
+     * @param array ...$params Bound parameter list.
+     * @see where()
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function andWhere(string $statementText, ...$params): Query
+    {
+        // Register the WHERE statement data as a new row
+        $whereStatement = $this->processStatementParameters($statementText, $params);
         $this->whereStatements[] = $whereStatement;
         return $this;
     }
@@ -279,12 +455,19 @@ class Query
     /**
      * Sets the ORDER BY statement on the query.
      * 
-     * @param string $orderBy
+     * @param string $statementText Raw SQL for the "ORDER BY" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
      * @return Query|$this
      */
-    public function orderBy(string $orderBy): Query
+    public function orderBy(string $statementText, ...$params): Query
     {
-        $this->orderBy = $orderBy;
+        // Process parameters and set ORDER BY data
+        $statementRow = $this->processStatementParameters($statementText, $params);
+        
+        $this->orderBy = $statementRow[0];
+        $this->orderByParams = array_splice($statementRow, 1);
+        
         return $this;
     }
     
@@ -322,6 +505,17 @@ class Query
     {
         $this->parameters[] = $param;
         return $this;
+    }
+
+    /**
+     * Test / debug function.
+     * Gets a list of all bound parameters for the most recently generated statement.
+     * 
+     * @return array
+     */
+    public function getBoundParametersForGeneratedStatement(): array
+    {
+        return $this->parameters;
     }
 
     /**
@@ -408,18 +602,39 @@ class Query
                 $statementText .= ")";
             }
         }
+        
+        // Apply JOINs
+        if (!empty($this->joinStatements)) {
+            foreach ($this->joinStatements as $joinStatementData) {
+                $joinStatementText = array_shift($joinStatementData);
+                $statementText .= " {$joinStatementText}";
+
+                foreach ($joinStatementData as $boundJoinParam) {
+                    $this->bindParam($boundJoinParam);
+                }
+            }    
+        }
 
         // Apply WHERE
+        $firstWhere = true;
+        
         if (!empty($this->whereStatements)) {
-            $statementText .= " WHERE ";
-
-            foreach ($this->whereStatements as $statementData) {
-                $whereStatementText = array_shift($statementData);
+            foreach ($this->whereStatements as $whereStatementData) {
+                if (!$firstWhere) {
+                    $statementText .= " AND (";
+                } else {
+                    $statementText .= " WHERE (";
+                }
+                
+                $whereStatementText = array_shift($whereStatementData);
                 $statementText .= $whereStatementText;
 
-                foreach ($statementData as $parameter) {
-                    $this->bindParam($parameter);
+                foreach ($whereStatementData as $boundWhereParam) {
+                    $this->bindParam($boundWhereParam);
                 }
+
+                $statementText .= ")";
+                $firstWhere = false;
             }
         }
         

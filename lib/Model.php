@@ -48,7 +48,7 @@ class Model
     protected function setInitialValues(?array $initialValues): void
     {
         foreach ($this->getPropertyNames() as $propertyName) {
-            $this->$propertyName = null;
+            $this->$propertyName = $this->getColumnForPropertyName($propertyName)->getDefaultValue();
         }
         
         if ($initialValues) {
@@ -257,6 +257,17 @@ class Model
     {
         // TODO Do this better (@annotations seem like a clever idea)
         return "id";
+    }
+
+    /**
+     * Gets the value of the primary key property on this model.
+     * 
+     * @return string
+     */
+    public function getPrimaryKeyValue(): ?string
+    {
+        $pkPropName = $this->getPrimaryKeyPropertyName();
+        return $this->$pkPropName;
     }
 
     /**

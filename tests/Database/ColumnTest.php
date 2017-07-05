@@ -36,4 +36,22 @@ class ColumnTest extends TestCase
 
         $this->assertEquals('my_prop_name', $column->getColumnName(), "If no custom @columnn annotation is set, default column conventions should be assumed");
     }
+    
+    public function testUnderstandsNullables()
+    {
+        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\NullableTest');
+        
+        $this->assertFalse($table->getColumnByPropertyName('stringNonNullable')->getIsNullable());
+        $this->assertTrue($table->getColumnByPropertyName('stringNullableThroughType')->getIsNullable());
+        $this->assertTrue($table->getColumnByPropertyName('stringNullableThroughAnnotation')->getIsNullable());
+    }
+
+    public function testReadsDefaultValues()
+    {
+        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\DefaultsTest');
+
+        $this->assertEquals("hello1", $table->getColumnByPropertyName('strNullableWithDefault')->getDefaultValue());
+        $this->assertEquals("hello2", $table->getColumnByPropertyName('strNonNullableWithDefault')->getDefaultValue());
+        $this->assertEquals(null, $table->getColumnByPropertyName('strDefaultNullValue')->getDefaultValue());
+    }
 }

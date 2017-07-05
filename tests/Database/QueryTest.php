@@ -127,6 +127,18 @@ class QueryTest extends TestCase
 
         $this->assertEquals('SELECT * FROM users ORDER BY some_order_value ASC;', $queryString);
     }
+
+    public function testOrderByWithParams()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select('*')
+            ->from('articles')
+            ->orderBy("MATCH (title) AGAINST (?) DESC", 'searchQuery')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM articles ORDER BY MATCH (title) AGAINST (?) DESC;', $queryString);
+    }
     
     public function testLimitAndOffset()
     {
@@ -152,7 +164,106 @@ class QueryTest extends TestCase
             ->limit(5)
             ->createStatementText();
 
-        $this->assertEquals('DELETE FROM fruits WHERE type = ? AND `color` = ? LIMIT 5;', $queryString);
+        $this->assertEquals('DELETE FROM fruits WHERE (type = ? AND `color` = ?) LIMIT 5;', $queryString);
+    }
+
+    public function testWhereWithAnd()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->delete()
+            ->from('fruits')
+            ->where('type = ?', 'fruit')
+            ->andWhere('color IN (?)', ['red', 'blue'])
+            ->andWhere('tastes_nice = 1')
+            ->createStatementText();
+
+        $this->assertEquals('DELETE FROM fruits WHERE (type = ?) AND (color IN (?, ?)) AND (tastes_nice = 1);', $queryString);
+    }
+    
+    public function testInnerJoin()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select()
+            ->from('orders')
+            ->innerJoin('payments ON (payments.order_id = orders.id)')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM orders INNER JOIN payments ON (payments.order_id = orders.id);', $queryString);
+    }
+
+    public function testLeftJoin()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select()
+            ->from('orders')
+            ->leftJoin('payments ON (payments.order_id = orders.id)')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM orders LEFT JOIN payments ON (payments.order_id = orders.id);', $queryString);
+    }
+
+    public function testRightJoin()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select()
+            ->from('orders')
+            ->rightJoin('payments ON (payments.order_id = orders.id)')
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM orders RIGHT JOIN payments ON (payments.order_id = orders.id);', $queryString);
+    }
+
+    /**
+     * @runInSeparateProcess 
+     */
+    public function testWhereWithBoundArray()
+    {
+        $config = new TestDatabaseConfig();
+
+        Instarecord::config($config);
+        
+        $query = new Query(Instarecord::connection());
+        
+        $testUserA = new User();
+        $testUserA->userName = 'ArrayGuyOne';
+        $testUserA->save();
+
+        $testUserB = new User();
+        $testUserB->userName = 'ArrayGuyTwo';
+        $testUserB->save();
+        
+        $queryString = $query->select()
+            ->from('users')
+            ->where('id > ? AND id IN (?) AND id >= ?', 0, [$testUserA->id, $testUserB->id, 'banana'], 0)
+            ->createStatementText();
+
+        // Test query formatting
+        $this->assertEquals('SELECT * FROM users WHERE (id > ? AND id IN (?, ?, ?) AND id >= ?);', $queryString);
+        
+        // Test actual execution, expecting two rows
+        $rows = $query->queryAllRows();
+        $this->assertCount(2, $rows);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testWhereWithDateTimeValueTransform()
+    {
+        $dateTime = new \DateTime();
+        $dateTime->setTimestamp(123456789);
+        
+        $query = Instarecord::query()->select()
+            ->from('users')
+            ->where('created_at = ?', $dateTime);
+        $queryString = $query->createStatementText();
+        
+        $this->assertEquals('SELECT * FROM users WHERE (created_at = ?);', $queryString);
+        $this->assertEquals(['1973-11-29 21:33:09'], $query->getBoundParametersForGeneratedStatement());
     }
 
     /**

@@ -13,6 +13,8 @@ class Column
     const TYPE_STRING = "string";
     const TYPE_DATE_TIME = "datetime";
     const TYPE_BOOLEAN = "bool";
+    const TYPE_INTEGER = "integer";
+    const TYPE_DECIMAL = "decimal";
     
     const DATE_TIME_FORMAT = "Y-m-d H:i:s";
     
@@ -52,6 +54,11 @@ class Column
     protected $dataType;
 
     /**
+     * @var bool
+     */
+    protected $isNullable;
+
+    /**
      * Column constructor.
      *
      * @param Table $table The table this column is a part of.
@@ -74,22 +81,62 @@ class Column
     protected function determineDataType(): void
     {
         $this->dataType = self::TYPE_STRING;
+        $this->isNullable = false;
         
         if ($this->annotations->has('var')) {
-            $varKeyword = $this->annotations->get('var');
-            $varKeyword = TextTransforms::removeNamespaceFromClassName($varKeyword);
-            $varKeyword = strtolower($varKeyword);
+            $varKeywordValue = $this->annotations->get('var');
+            $varKeywordValue = TextTransforms::removeNamespaceFromClassName($varKeywordValue);
+            $varKeywordValue = strtolower($varKeywordValue);
             
-            switch ($varKeyword) {
-                case "datetime":
-                    $this->dataType = self::TYPE_DATE_TIME;
-                    break;
-                case "bool":
-                case "boolean":
-                    $this->dataType = self::TYPE_BOOLEAN;
-                    break;
+            // Sometimes var declarations are split (e.g. "@var string|null").
+            // Because a column can only be one data type, we always assume that the last value is accurate.
+            $varKeywordOptions = explode('|', $varKeywordValue);
+            
+            foreach ($varKeywordOptions as $varKeywordOption) {
+                $varKeywordOption = trim($varKeywordOption);
+                
+                switch ($varKeywordOption) {
+                    case "\\datetime":
+                    case "datetime":
+                        $this->dataType = self::TYPE_DATE_TIME;
+                        break;
+                    case "bool":
+                    case "boolean":
+                        $this->dataType = self::TYPE_BOOLEAN;
+                        break;
+                    case "float":
+                    case "double":
+                    case "decimal":
+                        $this->dataType = self::TYPE_DECIMAL;
+                        break;
+                    case "int":
+                    case "integer":
+                        $this->dataType = self::TYPE_INTEGER;
+                        break;
+                    case "null":
+                        // Special case: this just indicates the column is nullable
+                        $this->isNullable = true;
+                        break;
+                }    
             }
+            
         }
+        
+        // If an explicit @nullable annotation exists, mark as nullable
+        if ($this->annotations->has('nullable')) {
+            $this->isNullable = true;
+        }
+    }
+
+    /**
+     * Gets whether this column is nullable or not.
+     * 
+     * @see determineDataType()
+     * @return bool
+     */
+    public function getIsNullable(): bool
+    {
+        return $this->isNullable;
     }
 
     /**
@@ -123,6 +170,48 @@ class Column
     public function getPropertyName(): string
     {
         return $this->propertyName;
+    }
+
+    /**
+     * Gets the default value for this column.
+     * 
+     * @return mixed|null
+     */
+    public function getDefaultValue()
+    {
+        if ($this->annotations->has('default')) {
+            // Explicit default value is set in "@default X" annotation, prefer this primarily
+            $defaultValueExplicit = strval($this->annotations->get('default'));
+            
+            if ($defaultValueExplicit === "null") {
+                return null;
+            }
+            
+            return $defaultValueExplicit;
+        }
+        
+        if ($this->getIsNullable()) {
+            // This is a nullable column, no explicit default was set, so we'll set it to NULL for now
+            return null;
+        }
+        
+        // It's not a nullable column, we ought to try and set a sensible default value based on its type, if there
+        // is a suitable "empty" or "zero" value for that data type.
+        if ($this->dataType === self::TYPE_STRING) {
+            return '';
+        }
+        
+        if ($this->dataType === self::TYPE_INTEGER ||
+            $this->dataType === self::TYPE_DECIMAL) {
+            return 0;
+        }
+        
+        if ($this->dataType === self::TYPE_BOOLEAN) {
+            return false;
+        }
+        
+        // Unable to find a suitable default, it is up to the developer to set an appropriate value before insertion
+        return null;
     }
 
     /**

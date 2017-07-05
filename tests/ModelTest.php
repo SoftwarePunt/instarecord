@@ -328,6 +328,7 @@ class ModelTest extends TestCase
 
         // Create initial user
         $newUser = new User();
+        $newUser->userName = "testModelUpdatesFormattedValues";
         $newUser->joinDate = null;
         $newUser->save();
         
@@ -349,5 +350,26 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
         
         $this->assertNull(User::fetch(123123123));
+    }
+    
+    public function testDefaultValuesForNonNullableDataTypes()
+    {
+        $newUser = new User();
+        
+        $this->assertEquals('', $newUser->userName, "Non-nullable strings should be set to EMPTY STRING by default");
+        $this->assertEquals(0, $newUser->id, "Non-nullable integers should be set to NULL by default");
+        $this->assertEquals(null, $newUser->joinDate, "DateTimes are still set to NULL because they do not have a suitable zero or empty value");
+    }
+    
+    public function testFetchPkVal()
+    {
+        $newUser = new User();
+        $newUser->joinDate = null;
+        
+        $this->assertEquals(0, $newUser->getPrimaryKeyValue());
+        
+        $newUser->id = 123;
+
+        $this->assertEquals(123, $newUser->getPrimaryKeyValue());
     }
 }
