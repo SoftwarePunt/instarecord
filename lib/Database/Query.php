@@ -533,11 +533,38 @@ class Query
     {
         $statement = $this->executeStatement();
         $firstCol = $statement->fetchColumn(0);
-
+        
+        // Close statement
+        $statement->closeCursor();
+        $statement = null;
+        
+        // Return
         if ($firstCol) {
             return $firstCol;
         }
 
         return null;
+    }
+
+    /**
+     * Executes the query, fetches only the first value from each row, and combines those into an array.
+     * 
+     * @return array
+     */
+    public function querySingleValueArray(): array
+    {
+        $statement = $this->executeStatement();
+        $sva = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+        
+        // Close statement
+        $statement->closeCursor();
+        $statement = null;
+        
+        // Return
+        if ($sva) {
+            return $sva;    
+        }
+         
+        return [];
     }
 }

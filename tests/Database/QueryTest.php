@@ -285,4 +285,33 @@ class QueryTest extends TestCase
         
         $this->assertEquals($testUser->userName, $firstValue);
     }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testQuerySingleValueArray()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+
+        Instarecord::config($config);
+
+        $testUserA = new User();
+        $testUserA->userName = 'ArrItemOneSVA';
+        $testUserA->save();
+
+        $testUserB = new User();
+        $testUserB->userName = 'ArrItemTwoSVA';
+        $testUserB->save();
+
+        $query = new Query($connection);
+        $query->select('user_name');
+        $query->from('users');
+        
+        $sva = $query->querySingleValueArray();
+
+        $this->assertNotEmpty($sva);
+        $this->assertContains('ArrItemOneSVA', $sva);
+        $this->assertContains('ArrItemTwoSVA', $sva);
+    }
 }
