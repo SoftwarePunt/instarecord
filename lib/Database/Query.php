@@ -782,4 +782,26 @@ class Query
          
         return [];
     }
+
+    /**
+     * Executes the query, and fetches the first two columns in each row as key and value respectively, combining them into an array.
+     * 
+     * @return array
+     */
+    public function queryKeyValueArray(): array
+    {
+        $statement = $this->executeStatement();
+        $kva = $statement->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        // Close statement
+        $statement->closeCursor();
+        $statement = null;
+
+        // Return
+        if ($kva) {
+            return $kva;
+        }
+
+        return [];
+    }
 }
