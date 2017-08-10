@@ -139,6 +139,30 @@ class QueryTest extends TestCase
 
         $this->assertEquals('SELECT * FROM articles ORDER BY MATCH (title) AGAINST (?) DESC;', $queryString);
     }
+
+    public function testGroupBy()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select('*')
+            ->from('users')
+            ->groupBy("id")
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM users GROUP BY id;', $queryString);
+    }
+
+    public function testGroupByWithParams()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select('*')
+            ->from('articles')
+            ->groupBy('id HAVING COUNT(id) > ?', 1)
+            ->createStatementText();
+
+        $this->assertEquals('SELECT * FROM articles GROUP BY id HAVING COUNT(id) > ?;', $queryString);
+    }
     
     public function testLimitAndOffset()
     {

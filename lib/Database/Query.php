@@ -65,6 +65,30 @@ class Query
     protected $orderBy;
 
     /**
+     * Holds the parameters for ORDER BY statement.
+     *
+     * @default null
+     * @var array
+     */
+    protected $orderByParams;
+
+    /**
+     * Controls the GROUP BY structure.
+     *
+     * @default null
+     * @var string|null
+     */
+    protected $groupBy;
+
+    /**
+     * Holds the parameters for GROUP BY statement.
+     *
+     * @default null
+     * @var array
+     */
+    protected $groupByParams;
+
+    /**
      * Limit to apply to query results (max records to return or change).
      * If set to NULL, no limit should be applied.
      *
@@ -470,6 +494,25 @@ class Query
         
         return $this;
     }
+
+    /**
+     * Sets the GROUP BY statement on the query.
+     *
+     * @param string $statementText Raw SQL for the "GROUP BY" statement text.
+     * @param array ...$params Bound parameter list.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function groupBy(string $statementText, ...$params): Query
+    {
+        // Process parameters and set GROUP BY data
+        $statementRow = $this->processStatementParameters($statementText, $params);
+
+        $this->groupBy = $statementRow[0];
+        $this->groupByParams = array_splice($statementRow, 1);
+
+        return $this;
+    }
     
     /**
      * Applies an LIMIT to the statement.
@@ -636,6 +679,11 @@ class Query
                 $statementText .= ")";
                 $firstWhere = false;
             }
+        }
+
+        // Apply GROUP BY
+        if (!empty($this->groupBy)) {
+            $statementText .= " GROUP BY {$this->groupBy}";
         }
         
         // Apply ORDER BY
