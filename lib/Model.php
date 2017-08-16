@@ -485,4 +485,52 @@ class Model
 
         return $columnName;
     }
+
+    /**
+     * Attempts to fetch a model from the database that matches the exact values set on this instance.
+     * The primary key value will be ignored when performing this transaction.
+     * Any column values that are either NULL or an EMPTY STRING are ignored.
+     *
+     * @return $this|Model|null
+     */
+    public function fetchExisting(): ?Model
+    {
+        // Get all column values, ready for a query
+        $columnValues = $this->getColumnValues();
+
+        // Remove primary key if we have it
+        $pkColName = $this->getPrimaryKeyColumnName();
+
+        if (isset($columnValues[$pkColName])) {
+            unset($columnValues[$pkColName]);
+        }
+
+        // If there is nothing to query, assume NULL (avoid presenting a default any match)
+        if (empty($columnValues)) {
+            return null;
+        }
+
+        // Construct the query string
+        $whereStatement = "";
+        $bindings = [];
+        $firstCondition = true;
+
+        foreach ($columnValues as $columnName => $columnValue) {
+            if ($columnValue === null || $columnValue === '') {
+                continue;
+            }
+
+            if (!$firstCondition) {
+                $whereStatement .= " AND ";
+            }
+
+            $whereStatement .= "`{$columnName}` = ?";
+            $bindings[] = $columnValue;
+            $firstCondition = false;
+        }
+
+        return self::query()
+            ->where($whereStatement, ...$bindings)
+            ->querySingleModel();
+    }
 }
