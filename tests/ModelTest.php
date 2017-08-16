@@ -387,13 +387,8 @@ class ModelTest extends TestCase
 
         $fetchResultTwo = $matchingJohn->fetchExisting();
 
-        $matchingJohn->id = 123;
-
-        $fetchResultThree = $existingJohn->fetchExisting();
-
         $this->assertNull($fetchResultOne, 'fetchExisting() 1 should return NULL initially, as no data exists');
         $this->assertEquals($existingJohn, $fetchResultTwo, 'fetchExisting() 2 should return a copy of the initial object since all properties match');
-        $this->assertEquals($existingJohn, $fetchResultThree, 'fetchExisting() 3 should still a copy of the initial object, as the PK should be ignored');
     }
 
     public function testTryBecomeExisting()

@@ -489,14 +489,14 @@ class Model
     /**
      * Attempts to fetch a model from the database that matches the exact values set on this instance.
      * The primary key value will be ignored when performing this transaction.
-     * Any column values that are either NULL or an EMPTY STRING are ignored.
+     * Only "dirty properties" will be used to prepare the query.
      *
      * @return $this|Model|null
      */
     public function fetchExisting(): ?Model
     {
         // Get all column values, ready for a query
-        $columnValues = $this->getColumnValues();
+        $columnValues = $this->getDirtyColumns();
 
         // Remove primary key if we have it
         $pkColName = $this->getPrimaryKeyColumnName();
@@ -516,10 +516,6 @@ class Model
         $firstCondition = true;
 
         foreach ($columnValues as $columnName => $columnValue) {
-            if ($columnValue === null || $columnValue === '') {
-                continue;
-            }
-
             if (!$firstCondition) {
                 $whereStatement .= " AND ";
             }
