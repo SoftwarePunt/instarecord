@@ -79,6 +79,27 @@ class ModelQuery extends Query
     }
 
     /**
+     * Same as queryAllModels(), but indexes all options by their PK value.
+     *
+     * @return array
+     */
+    public function queryAllModelsIndexed(): array
+    {
+        $rows = $this->queryAllRows();
+        $models = [];
+
+        foreach ($rows as $row) {
+            /**
+             * @var Model $instance
+             */
+            $instance = new $this->modelName($row);
+            $models[$instance->getPrimaryKeyValue()] = $instance;
+        }
+
+        return $models;
+    }
+
+    /**
      * Queries a single row and returns it as a model instance.
      *
      * @return Model|null Model instance, or NULL if there was no result.

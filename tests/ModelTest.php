@@ -304,6 +304,30 @@ class ModelTest extends TestCase
         $this->assertEquals($allUsersViaQuery, $allUsersViaAll);
     }
 
+    public function testModelQueryAllWithIndexed()
+    {
+        $allUsersViaQuery = User::query()->queryAllModelsIndexed();
+
+        $allUsersViaAll = User::all();
+        $userIds = [];
+
+        foreach ($allUsersViaAll as $item) {
+            $userIds[] = $item->id;
+        }
+
+        $valuesFromQuery = array_values($allUsersViaQuery);
+        $valuesFromQuery = sort($valuesFromQuery);
+
+        $keysFromQuery = array_keys($allUsersViaQuery);
+
+        $keysFromAll = array_keys($allUsersViaAll);
+        $valuesFromAll = array_values($allUsersViaAll);
+        $valuesFromAll = sort($valuesFromAll);
+
+        $this->assertEquals($valuesFromAll, $valuesFromQuery);
+        $this->assertEquals(sort($userIds), sort($keysFromQuery));
+    }
+
     public function testModelInsertsFormattedValuesAndParsesIncomingValues()
     {
         Instarecord::config(new TestDatabaseConfig());
