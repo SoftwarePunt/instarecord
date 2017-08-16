@@ -395,4 +395,32 @@ class ModelTest extends TestCase
         $this->assertEquals($existingJohn, $fetchResultTwo, 'fetchExisting() 2 should return a copy of the initial object since all properties match');
         $this->assertEquals($existingJohn, $fetchResultThree, 'fetchExisting() 3 should still a copy of the initial object, as the PK should be ignored');
     }
+
+    public function testTryBecomeExisting()
+    {
+        $someDt = new \DateTime('now');
+
+        // Create the initial record, which we'll be trying to "become"
+        $existingJohn = new User();
+        $existingJohn->userName = 'John Is The OG';
+        $existingJohn->joinDate = $someDt;
+        $existingJohn->save();
+
+        // Try a failing scenario
+        $matchingJohn = new User();
+        $matchingJohn->userName = 'Mike Is The OG No Match Here';
+        $matchingJohn->joinDate = $someDt;
+
+        $this->assertFalse($matchingJohn->tryBecomeExisting(), 'tryBecomeExisting() should fail if no match is found');
+        $this->assertEmpty($matchingJohn->id, 'tryBecomeExisting() should not set a PK ID if it returns false');
+
+        // Try a winning scenario
+        $matchingJohn = new User();
+        $matchingJohn->userName = 'John Is The OG';
+        $matchingJohn->joinDate = $someDt;
+
+        $this->assertTrue($matchingJohn->tryBecomeExisting(), 'tryBecomeExisting() should return true when a match is found');
+        $this->assertNotEmpty($existingJohn->id, 'tryBecomeExisting() should set properties from the fetched model (initial model should have a valid id to test)');
+        $this->assertEquals($matchingJohn->id, $existingJohn->id, 'tryBecomeExisting() should set properties from the fetched model');
+    }
 }

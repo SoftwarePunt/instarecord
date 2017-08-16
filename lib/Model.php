@@ -533,4 +533,22 @@ class Model
             ->where($whereStatement, ...$bindings)
             ->querySingleModel();
     }
+
+    /**
+     * Performs a "fetchExisting()", and if a result is found, assumes all properties of that instance.
+     *
+     * @see fetchExisting()
+     * @return bool Returns TRUE if assimilation worked, FALSE otherwise.
+     */
+    public function tryBecomeExisting(): bool
+    {
+        $existingModel = $this->fetchExisting();
+
+        if (!$existingModel) {
+            return false;
+        }
+
+        $this->setColumnValues($existingModel->getColumnValues());
+        return true;
+    }
 }
