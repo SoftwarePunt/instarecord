@@ -16,7 +16,22 @@ class DataFormattingTest extends TestCase
         $column = new Column($table, 'testColumn', $annotationBag);
         return $column;
     }
-    
+
+    public function testReadsDecimalsAnnotationAndFormatsDecimalsCorrectly()
+    {
+        $column = $this->_createTestColumn([
+            'var' => 'decimal',
+            'decimals' => 8
+        ]);
+
+        $inputValue = '12.32';
+
+        $actualOutput = $column->formatDatabaseValue($inputValue);
+        $expectedOutput = "12.32000000";
+
+        $this->assertSame($expectedOutput, $actualOutput);
+    }
+
     public function testDateTimeFormat()
     {
         $column = $this->_createTestColumn(['var' => 'anything']);

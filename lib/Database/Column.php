@@ -59,6 +59,11 @@ class Column
     protected $isNullable;
 
     /**
+     * @var int
+     */
+    protected $decimals;
+
+    /**
      * Column constructor.
      *
      * @param Table $table The table this column is a part of.
@@ -73,6 +78,21 @@ class Column
         
         $this->determineDataType();
         $this->getColumnName();
+        $this->readExtraProperties();
+    }
+
+    /**
+     * Internal function that parses additional column information from the annotation data.
+     */
+    protected function readExtraProperties(): void
+    {
+        if ($this->annotations->has('decimals')) {
+            $this->decimals = intval($this->annotations->get('decimals'));
+        }
+
+        if (!$this->decimals) {
+            $this->decimals = 4;
+        }
     }
 
     /**
@@ -238,7 +258,7 @@ class Column
             return '0';
         }
 
-        if ($this->dataType == self::TYPE_BOOLEAN) {
+        if ($this->dataType === self::TYPE_BOOLEAN) {
             if ($input == 'false') {
                 return '0';
             }
@@ -252,6 +272,10 @@ class Column
             }
 
             return '0';
+        }
+
+        if ($this->dataType === self::TYPE_DECIMAL) {
+            return strval(number_format(floatval($input), $this->decimals, '.', ''));
         }
         
         return strval($input);
