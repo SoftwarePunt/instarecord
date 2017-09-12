@@ -104,4 +104,27 @@ class DataFormattingTest extends TestCase
         $this->assertEquals(false, $column->parseDatabaseValue('false'));
         $this->assertEquals(false, $column->parseDatabaseValue(null));
     }
+
+    public function testParsesIntegerValues()
+    {
+        $column = $this->_createTestColumn(['var' => 'int']);
+
+        $this->assertEquals(-1, $column->parseDatabaseValue('-1'));
+        $this->assertEquals(0, $column->parseDatabaseValue('0'));
+        $this->assertEquals(1, $column->parseDatabaseValue('1'));
+        $this->assertEquals(0, $column->parseDatabaseValue('txt'));
+        $this->assertEquals(3, $column->parseDatabaseValue('3,5'));
+        $this->assertEquals(12, $column->parseDatabaseValue(12.33));
+        $this->assertEquals(1, $column->parseDatabaseValue(true));
+    }
+
+    public function testParsesDecimalValues()
+    {
+        $column = $this->_createTestColumn(['var' => 'float']);
+
+        $this->assertEquals(0, $column->parseDatabaseValue('0'));
+        $this->assertEquals(-1.33, $column->parseDatabaseValue('-1.33'));
+        $this->assertEquals(12.345, $column->parseDatabaseValue('12.345'));
+        $this->assertEquals(0, $column->parseDatabaseValue('txt'));
+    }
 }

@@ -275,7 +275,7 @@ class Column
         }
 
         if ($this->dataType === self::TYPE_DECIMAL) {
-            return strval(number_format(floatval($input), $this->decimals, '.', ''));
+            return number_format(floatval($input), $this->decimals, '.', '');
         }
         
         return strval($input);
@@ -293,13 +293,13 @@ class Column
             return null;
         }
 
-        if ($this->dataType == self::TYPE_DATE_TIME) {
+        if ($this->dataType === self::TYPE_DATE_TIME) {
             return \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input);
         }
 
-        if ($this->dataType == self::TYPE_BOOLEAN) {
+        if ($this->dataType === self::TYPE_BOOLEAN) {
             if ($input) {
-                if ($input == 'false' || $input == '0') {
+                if ($input === 'false' || $input === '0') {
                     return false;
                 }
 
@@ -307,6 +307,14 @@ class Column
             } else {
                 return false;
             }
+        }
+
+        if ($this->dataType === self::TYPE_INTEGER) {
+            return intval($input);
+        }
+
+        if ($this->dataType === self::TYPE_DECIMAL) {
+            return floatval($input);
         }
         
         return strval($input);

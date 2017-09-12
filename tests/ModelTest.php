@@ -288,7 +288,7 @@ class ModelTest extends TestCase
         foreach ($fetchUserList as $fetchUserListItem) {
             $this->assertInstanceOf("Instasell\\Instarecord\\Tests\\Samples\\User", $fetchUserListItem, 'Expected a list of user models');
             
-            if ($fetchUserListItem->id === $newUser->id) {
+            if ($fetchUserListItem->id == $newUser->id) {
                 $containsOurItem = true;
             }
         }
