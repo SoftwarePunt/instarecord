@@ -94,6 +94,27 @@ class DataFormattingTest extends TestCase
         $this->assertEquals('0', $column->formatDatabaseValue("000"), 'string("000") should be retained as int(0) for boolean data type');
     }
 
+    public function testFormatsNullableIntegerDataTypes()
+    {
+        $column = $this->_createTestColumn(['var' => 'int|null']);
+
+        $this->assertSame(null, $column->formatDatabaseValue(null));
+        $this->assertSame(null, $column->formatDatabaseValue(''));
+        $this->assertSame("0", $column->formatDatabaseValue(0));
+        $this->assertSame("1", $column->formatDatabaseValue('1'));
+        $this->assertSame("12", $column->formatDatabaseValue('12,35'));
+    }
+
+    public function testFormatsNonNullableIntegerDataTypes()
+    {
+        $column = $this->_createTestColumn(['var' => 'int']);
+
+        $this->assertSame("0", $column->formatDatabaseValue(null));
+        $this->assertSame("0", $column->formatDatabaseValue(''));
+        $this->assertSame("0", $column->formatDatabaseValue(0));
+        $this->assertSame("1", $column->formatDatabaseValue('1'));
+    }
+
     public function testParsesBooleanValues()
     {
         $column = $this->_createTestColumn(['var' => 'bool']);

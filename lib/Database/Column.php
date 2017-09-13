@@ -277,6 +277,24 @@ class Column
         if ($this->dataType === self::TYPE_DECIMAL) {
             return number_format(floatval($input), $this->decimals, '.', '');
         }
+
+        if ($this->dataType === self::TYPE_INTEGER) {
+            if ($input === 0 || $input === '0') {
+                // (Explicit zero to prevent the "empty" check below interfering)
+                return '0';
+            }
+
+            if (empty($input)) {
+                // (Empty input, but non zero: blank string or NULL value)
+                if ($this->isNullable) {
+                    return null;
+                }
+
+                return "0";
+            }
+
+            return strval(intval($input));
+        }
         
         return strval($input);
     }
