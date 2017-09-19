@@ -262,9 +262,9 @@ class Model
     /**
      * Gets the value of the primary key property on this model.
      * 
-     * @return string
+     * @return mixed|null
      */
-    public function getPrimaryKeyValue(): ?string
+    public function getPrimaryKeyValue()
     {
         $pkPropName = $this->getPrimaryKeyPropertyName();
         return $this->$pkPropName;
