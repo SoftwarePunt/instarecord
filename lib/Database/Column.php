@@ -242,10 +242,6 @@ class Column
      */
     public function formatDatabaseValue($input): ?string
     {
-        if ($input === null) {
-            return null;
-        }
-
         if ($input instanceof \DateTime) {
             return $input->format(self::DATE_TIME_FORMAT);
         }
@@ -295,7 +291,11 @@ class Column
 
             return strval(intval($input));
         }
-        
+
+        if ($input === null) {
+            return null;
+        }
+
         return strval($input);
     }
 
