@@ -21,7 +21,11 @@ class MySqlAdapter extends DatabaseAdapter
             $dsn .= "unix_socket={$config->unix_socket};";
         } else {
             if ($config->host) {
-                $dsn .= "host={$config->host};";
+                if ($config->host === "localhost") {
+                    $dsn .= "host=127.0.0.1;";
+                } else {
+                    $dsn .= "host={$config->host};";
+                }
             }
 
             if ($config->port) {
