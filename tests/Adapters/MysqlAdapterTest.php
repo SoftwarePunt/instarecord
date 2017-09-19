@@ -50,6 +50,19 @@ class MysqlAdapterTest extends TestCase
         $this->assertStringStartsWith("mysql:unix_socket=/tmp/example/unix.sock;", $generatedDsn);
         $this->assertNotContains("host=", $generatedDsn);
         $this->assertNotContains("port=", $generatedDsn);
-        
+    }
+
+    public function testTranslatesLocalhostToLocalIp()
+    {
+        $adapter = new MySqlAdapter();
+
+        $config = new DatabaseConfig();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->host = 'localhost';
+        $config->port = null;
+        $config->database = 'dbname123';
+        $config->charset = 'utf16';
+
+        $this->assertEquals("mysql:host=127.0.0.1;dbname=dbname123;charset=utf16", $adapter->createDsn($config));
     }
 }
