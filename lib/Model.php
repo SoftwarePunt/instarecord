@@ -95,6 +95,32 @@ class Model
     }
 
     /**
+     * Gets a key/value list of all properties and their current values, but indexed by column name.
+     * This is useful when you need column names but values in the correct PHP types.
+     *
+     * @see getColumnValues()
+     * @see getPropertyValues()
+     * @return array
+     */
+    public function getPropertyValuesWithColumnNames(): array
+    {
+        $properties = $this->getPropertyValues();
+        $columns = [];
+
+        foreach ($properties as $propertyName => $propertyValue) {
+            $columnInfo = $this->getColumnForPropertyName($propertyName);
+
+            if ($columnInfo) {
+                $columnName = $columnInfo->getColumnName();
+
+                $columns[$columnName] = $propertyValue;
+            }
+        }
+
+        return $columns;
+    }
+
+    /**
      * Gets a key/value list of all columns and their values.
      * This involves the translation of 
      *

@@ -177,6 +177,29 @@ class ModelTest extends TestCase
         $this->assertEquals($testSet['user_name'], $actualFromGet['user_name']);
     }
 
+    public function testGetPropertyValuesWithColumnNames()
+    {
+        $user = new User();
+
+        $testDate = new \DateTime();
+        $testDate->setDate(1978, 1, 2);
+        $testDate->setTime(3, 4, 5);
+
+        $testSet = [
+            'id' => 5,
+            'user_name' => "Bob",
+            'join_date' => $testDate->format('Y-m-d H:i:s')
+        ];
+
+        $user->setColumnValues($testSet);
+
+        $actualFromGet = $user->getPropertyValuesWithColumnNames();
+
+        $this->assertSame($testSet['id'], $actualFromGet['id']);
+        $this->assertSame($testSet['user_name'], $actualFromGet['user_name']);
+        $this->assertEquals($testDate, $actualFromGet['join_date']);
+    }
+
     /**
      * @runInSeparateProcess 
      */
