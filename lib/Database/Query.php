@@ -57,8 +57,16 @@ class Query
     protected $dataValues;
 
     /**
+     * The values to be updated in ON DUPLICATE KEY UPDATE.
+     *
+     * @see onDuplicateKeyUpdate
+     * @var array
+     */
+    protected $onDuplicateKeyUpdateValues;
+
+    /**
      * Controls the ORDER BY structure.
-     * 
+     *
      * @default null
      * @var string|null
      */
@@ -117,13 +125,13 @@ class Query
      */
     protected $whereStatements;
 
-    /** 
+    /**
      * Contains an array of JOIN statements.
      *
      * Each entry in this array is another row (sub array):
      * - Parameter one (index zero) is the raw query text including join type (ex "INNER JOIN x ON (y.a = x.b)")
      * - Each parameter following it is a bound parameter
-     * 
+     *
      * @var array
      */
     protected $joinStatements;
@@ -284,8 +292,29 @@ class Query
     }
 
     /**
+     * Adds an "ON DUPLICATE KEY UPDATE" component to the query statement.
+     *
+     * @param array $values Associative array of the values to be set, indexed by column names.
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function onDuplicateKeyUpdate(array $values): Query
+    {
+        $keys = array_keys($values);
+        $firstParameterKey = array_shift($keys);
+        $valuesAreIndexedByName = is_string($firstParameterKey);
+
+        if (!$valuesAreIndexedByName) {
+            throw new QueryBuilderException("Query format error: The values in the ON DUPLICATE KEY UPDATE block MUST be indexed by column name, not by column index number.");
+        }
+
+        $this->onDuplicateKeyUpdateValues = $values;
+        return $this;
+    }
+
+    /**
      * Processes a given $statementText and a set of $parameters and its sub parameters.
-     * 
+     *
      * @param string $statementText The raw statement text / SQL to bind.
      * @param array $params The list of parameters to be bound to the statement text.
      * @throws QueryBuilderException
@@ -300,7 +329,7 @@ class Query
         if ($paramCountExpected !== $paramCountActual) {
             throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\".");
         }
-        
+
         // Cool, now let's get to work...
         $finalizedRow = [$statementText];
 
@@ -314,7 +343,7 @@ class Query
                     // Empty array, bind empty string, not sure what else to do!
                     $whereStatement[] = '';
                 } else {
-                    // We have an array param, expand the "?" marker to multiple question marks and bind each as a 
+                    // We have an array param, expand the "?" marker to multiple question marks and bind each as a
                     // new, separate parameter to the statement.
 
                     // Example: WHERE bla = ? AND id IN(?)
@@ -365,7 +394,7 @@ class Query
 
     /**
      * Processes the value of a parameter, cleaning it up for the query as necessary.
-     * 
+     *
      * @param $paramValue
      * @return mixed
      */
@@ -375,13 +404,13 @@ class Query
             // Format DateTime to database format
             return $paramValue->format(Column::DATE_TIME_FORMAT);
         }
-        
+
         return $paramValue;
     }
 
     /**
      * Internal function for registering joins.
-     * 
+     *
      * @param string $statementText
      * @param array $params
      * @return Query
@@ -435,11 +464,11 @@ class Query
     {
         return $this->_join("RIGHT JOIN {$statementText}", $params);
     }
-        
+
     /**
      * Sets the WHERE clause to the query.
-     * Clears any previous WHERE clauses when called. 
-     * 
+     * Clears any previous WHERE clauses when called.
+     *
      * Use andWhere() to combine different WHERE blocks.
      *
      * @param string $statementText Raw SQL "WHERE" statement text.
@@ -459,7 +488,7 @@ class Query
     /**
      * Adds an additional WHERE clause to the query.
      * Groups multiple where blocks using "WHERE (x) AND (y) AND (z)" syntax.
-     * 
+     *
      * Use where() to clear all where clauses and set a new one.
      *
      * @param string $statementText Raw SQL "WHERE" statement text.
@@ -478,7 +507,7 @@ class Query
 
     /**
      * Sets the ORDER BY statement on the query.
-     * 
+     *
      * @param string $statementText Raw SQL for the "ORDER BY" statement text.
      * @param array ...$params Bound parameter list.
      * @throws QueryBuilderException
@@ -488,10 +517,10 @@ class Query
     {
         // Process parameters and set ORDER BY data
         $statementRow = $this->processStatementParameters($statementText, $params);
-        
+
         $this->orderBy = $statementRow[0];
         $this->orderByParams = array_splice($statementRow, 1);
-        
+
         return $this;
     }
 
@@ -513,7 +542,7 @@ class Query
 
         return $this;
     }
-    
+
     /**
      * Applies an LIMIT to the statement.
      *
@@ -553,7 +582,7 @@ class Query
     /**
      * Test / debug function.
      * Gets a list of all bound parameters for the most recently generated statement.
-     * 
+     *
      * @return array
      */
     public function getBoundParametersForGeneratedStatement(): array
@@ -645,7 +674,27 @@ class Query
                 $statementText .= ")";
             }
         }
-        
+
+        // ON DUPLICATE KEY UPDATE
+        if ($this->statementType == self::QUERY_TYPE_INSERT && !empty($this->onDuplicateKeyUpdateValues)) {
+            $columnIndexes = array_keys($this->onDuplicateKeyUpdateValues);
+            $columnValues = array_values($this->onDuplicateKeyUpdateValues);
+
+            $statementText .= " ON DUPLICATE KEY UPDATE ";
+
+            for ($i = 0; $i < count($columnValues); $i++) {
+                $columnName = $columnIndexes[$i];
+                $columnValue = $columnValues[$i];
+
+                if ($i > 0) {
+                    $statementText .= ", ";
+                }
+
+                $statementText .= "`{$columnName}` = ?";
+                $this->bindParam($columnValue);
+            }
+        }
+
         // Apply JOINs
         if (!empty($this->joinStatements)) {
             foreach ($this->joinStatements as $joinStatementData) {
@@ -655,12 +704,12 @@ class Query
                 foreach ($joinStatementData as $boundJoinParam) {
                     $this->bindParam($boundJoinParam);
                 }
-            }    
+            }
         }
 
         // Apply WHERE
         $firstWhere = true;
-        
+
         if (!empty($this->whereStatements)) {
             foreach ($this->whereStatements as $whereStatementData) {
                 if (!$firstWhere) {
@@ -668,7 +717,7 @@ class Query
                 } else {
                     $statementText .= " WHERE (";
                 }
-                
+
                 $whereStatementText = array_shift($whereStatementData);
                 $statementText .= $whereStatementText;
 
@@ -685,7 +734,7 @@ class Query
         if (!empty($this->groupBy)) {
             $statementText .= " GROUP BY {$this->groupBy}";
         }
-        
+
         // Apply ORDER BY
         if (!empty($this->orderBy)) {
             $statementText .= " ORDER BY {$this->orderBy}";
@@ -796,11 +845,11 @@ class Query
     {
         $statement = $this->executeStatement();
         $firstCol = $statement->fetchColumn(0);
-        
+
         // Close statement
         $statement->closeCursor();
         $statement = null;
-        
+
         // Return
         if ($firstCol) {
             return $firstCol;
@@ -811,29 +860,29 @@ class Query
 
     /**
      * Executes the query, fetches only the first value from each row, and combines those into an array.
-     * 
+     *
      * @return array
      */
     public function querySingleValueArray(): array
     {
         $statement = $this->executeStatement();
         $sva = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
-        
+
         // Close statement
         $statement->closeCursor();
         $statement = null;
-        
+
         // Return
         if ($sva) {
-            return $sva;    
+            return $sva;
         }
-         
+
         return [];
     }
 
     /**
      * Executes the query, and fetches the first two columns in each row as key and value respectively, combining them into an array.
-     * 
+     *
      * @return array
      */
     public function queryKeyValueArray(): array
