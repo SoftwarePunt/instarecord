@@ -780,9 +780,9 @@ class Query
     /**
      * Executes the query, retrieving the inserted auto incremented primary key (if any).
      *
-     * @return null|string
+     * @return null|int
      */
-    public function executeInsert(): ?string
+    public function executeInsert(): ?int
     {
         $this->execute();
         return $this->connection->lastInsertId();

@@ -169,12 +169,12 @@ class Connection
     /**
      * Gets the last primary key value that was inserted on this connection.
      * 
-     * @return string|null
+     * @return int|null
      */
-    public function lastInsertId(): ?string
+    public function lastInsertId(): ?int
     {
         if ($this->isOpen()) {
-            return $this->pdo->lastInsertId();
+            return intval($this->pdo->lastInsertId());
         }
         
         return null;

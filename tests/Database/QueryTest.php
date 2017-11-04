@@ -343,6 +343,7 @@ class QueryTest extends TestCase
         
         $this->assertNotEmpty($aiId, 'Auto incremented ID return value expected');
         $this->assertGreaterThan(0, $aiId, 'Auto incremented ID return value non-negative ID expected');
+        $this->assertInternalType("int", $aiId, 'Auto incremented ID should be an integer');
     }
 
     /**
