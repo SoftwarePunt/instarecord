@@ -115,6 +115,18 @@ class DataFormattingTest extends TestCase
         $this->assertSame("1", $column->formatDatabaseValue('1'));
     }
 
+    public function testSupportsNullableBooleanFormatting()
+    {
+        $column = $this->_createTestColumn(['var' => 'bool|null']);
+
+        $this->assertSame("0", $column->formatDatabaseValue(0));
+        $this->assertSame("1", $column->formatDatabaseValue(1));
+        $this->assertSame(null, $column->formatDatabaseValue(null));
+
+        // This is a bit of an edge case, but I came up with it on SO and it's kinda useful sometimes:
+        // https://stackoverflow.com/a/45087858/1410310
+    }
+
     public function testParsesBooleanValues()
     {
         $column = $this->_createTestColumn(['var' => 'bool']);

@@ -255,6 +255,14 @@ class Column
         }
 
         if ($this->dataType === self::TYPE_BOOLEAN) {
+            if ($input === null) {
+                if ($this->isNullable) {
+                    return null;
+                }
+
+                return '0';
+            }
+
             if ($input == 'false') {
                 return '0';
             }
