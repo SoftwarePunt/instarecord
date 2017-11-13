@@ -126,6 +126,15 @@ class Query
     protected $whereStatements;
 
     /**
+     * Contains an array of HAVING statements.
+     * (Identical in behavior to $whereStatements)
+     *
+     * @see $whereStatements
+     * @var array
+     */
+    protected $havingStatements;
+
+    /**
      * Contains an array of JOIN statements.
      *
      * Each entry in this array is another row (sub array):
@@ -165,6 +174,7 @@ class Query
         $this->offset = null;
         $this->whereStatements = [];
         $this->joinStatements = [];
+        $this->havingStatements = [];
 
         return $this;
     }
@@ -506,6 +516,46 @@ class Query
     }
 
     /**
+     * Sets the HAVING clause to the query.
+     * Clears any previous HAVING clauses when called.
+     *
+     * Use andHaving() to combine different HAVING blocks.
+     *
+     * @param string $statementText Raw SQL "HAVING" statement text.
+     * @param array ...$params Bound parameter list.
+     * @see andHaving()
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function having(string $statementText, ...$params): Query
+    {
+        // Register the HAVING statement data as the ONLY row
+        $havingStatement = $this->processStatementParameters($statementText, $params);
+        $this->havingStatements = [$havingStatement];
+        return $this;
+    }
+
+    /**
+     * Adds an additional HAVING clause to the query.
+     * Groups multiple having blocks using "HAVING (x) AND (y) AND (z)" syntax.
+     *
+     * Use having() to clear all having clauses and set a new one.
+     *
+     * @param string $statementText Raw SQL "HAVING" statement text.
+     * @param array ...$params Bound parameter list.
+     * @see having()
+     * @throws QueryBuilderException
+     * @return Query|$this
+     */
+    public function andHaving(string $statementText, ...$params): Query
+    {
+        // Register the HAVING statement data as a new row
+        $havingStatement = $this->processStatementParameters($statementText, $params);
+        $this->havingStatements[] = $havingStatement;
+        return $this;
+    }
+
+    /**
      * Sets the ORDER BY statement on the query.
      *
      * @param string $statementText Raw SQL for the "ORDER BY" statement text.
@@ -733,6 +783,29 @@ class Query
         // Apply GROUP BY
         if (!empty($this->groupBy)) {
             $statementText .= " GROUP BY {$this->groupBy}";
+        }
+        
+        // Apply HAVING
+        $firstHaving = true;
+
+        if (!empty($this->havingStatements)) {
+            foreach ($this->havingStatements as $havingStatementData) {
+                if (!$firstHaving) {
+                    $statementText .= " AND (";
+                } else {
+                    $statementText .= " HAVING (";
+                }
+
+                $havingStatementText = array_shift($havingStatementData);
+                $statementText .= $havingStatementText;
+
+                foreach ($havingStatementData as $boundHavingParam) {
+                    $this->bindParam($boundHavingParam);
+                }
+
+                $statementText .= ")";
+                $firstHaving = false;
+            }
         }
 
         // Apply ORDER BY

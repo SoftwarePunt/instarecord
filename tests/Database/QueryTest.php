@@ -220,6 +220,33 @@ class QueryTest extends TestCase
 
         $this->assertEquals('DELETE FROM fruits WHERE (type = ?) AND (color IN (?, ?)) AND (tastes_nice = 1);', $queryString);
     }
+
+    public function testHaving()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->delete()
+            ->from('fruits')
+            ->having('type = ? AND `color` = ?', 'apples', 'red')
+            ->limit(5)
+            ->createStatementText();
+
+        $this->assertEquals('DELETE FROM fruits HAVING (type = ? AND `color` = ?) LIMIT 5;', $queryString);
+    }
+
+    public function testHavingWithAnd()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->delete()
+            ->from('fruits')
+            ->having('type = ?', 'fruit')
+            ->andHaving('color IN (?)', ['red', 'blue'])
+            ->andHaving('tastes_nice = 1')
+            ->createStatementText();
+
+        $this->assertEquals('DELETE FROM fruits HAVING (type = ?) AND (color IN (?, ?)) AND (tastes_nice = 1);', $queryString);
+    }
     
     public function testInnerJoin()
     {
