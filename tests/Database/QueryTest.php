@@ -71,6 +71,20 @@ class QueryTest extends TestCase
         $this->assertEquals('UPDATE users SET `is_active` = ?, `is_friendly` = ?;', $queryString);
     }
 
+    public function testSimpleUpdateWithDateTimeParam()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $query = $query->update('users')
+            ->set(['last_active' => new \DateTime('2017-06-05 01:02:03')]);
+
+        $queryString = $query->createStatementText();
+        $queryParams = $query->getBoundParametersForGeneratedStatement();
+
+        $this->assertEquals('UPDATE users SET `last_active` = ?;', $queryString);
+        $this->assertEquals('2017-06-05 01:02:03', $queryParams[0]);
+    }
+
     /**
      * @expectedException Instasell\Instarecord\Database\QueryBuilderException
      * @expectedExceptionMessage Query format error

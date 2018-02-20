@@ -297,7 +297,13 @@ class Query
             throw new QueryBuilderException("Query format error: The values in the SET block MUST be indexed by column name, not by column index number.");
         }
 
-        $this->dataValues = $values;
+        $processedValues = [];
+
+        foreach ($values as $key => $value) {
+            $processedValues[$key] = $this->preProcessParam($value);
+        }
+
+        $this->dataValues = $processedValues;
         return $this;
     }
 
