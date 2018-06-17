@@ -4,6 +4,8 @@ stages:
 test:phpunit:
     stage: test
     image: epcallan/php7-testing-phpunit:7.2-phpunit7
+    tags:
+        - linux
     before_script:
         - composer install
     script:
