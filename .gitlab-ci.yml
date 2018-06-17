@@ -1,12 +1,29 @@
 services:
-- mysql
+    - name: mysql:5.7
+      alias: mysqlhost
 
 variables:
-  # Configure mysql service (https://hub.docker.com/_/mysql/)
-  MYSQL_DATABASE: hello_world_test
-  MYSQL_ROOT_PASSWORD: mysql
+    MYSQL_USER: homestead
+    MYSQL_ROOT_PASSWORD: secret
+    MYSQL_PASSWORD: secret
+    MYSQL_DATABASE: homestead
+    MYSQL_PORT: 3306
+    DB_HOST: mysqlhost
 
-connect:
-  image: mysql
-  script:
-  - echo "SELECT 'OK';" | mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mysql "$MYSQL_DATABASE"
+cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+        - vendor
+
+stages:
+    - test
+
+test:phpunit:
+    stage: test
+    image: epcallan/php7-testing-phpunit:7.2-phpunit7
+    tags:
+        - linux
+    before_script:
+        - composer install --prefer-dist --no-ansi --no-interaction
+    script:
+        - ./vendor/phpunit/phpunit/phpunit -v --coverage-text --stderr
