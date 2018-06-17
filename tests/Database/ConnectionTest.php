@@ -16,7 +16,7 @@ class ConnectionTest extends TestCase
         $this->assertFalse($connection->isOpen(), 'New connections should not open initially');
     }
 
-    public function testConnectionDsn()
+    public function testConnectionDsnGenerate()
     {
         $config = new DatabaseConfig();
         $config->adapter = DatabaseAdapter::MYSQL;
@@ -27,8 +27,10 @@ class ConnectionTest extends TestCase
         $config->database = "testdb";
         $config->charset = "utf8mb4";
 
-        $expectedDsn = "??";
+        $expectedDsn = "mysql:host=testhost;port=1234;dbname=testdb;charset=utf8mb4";
         $actualDsn = (new Connection($config))->generateDsn();
+
+        $this->assertEquals($expectedDsn, $actualDsn);
     }
     
     public function testOpenCloseAndReopen()
@@ -40,17 +42,17 @@ class ConnectionTest extends TestCase
         $config->username = TEST_USER_NAME;
         $config->password = TEST_PASSWORD;
         $config->database = TEST_DATABASE_NAME;
-        
+
         $connection = new Connection($config);
-        
+
         $connection->open();
-        
+
         $this->assertTrue($connection->isOpen(), 'Database connection should succeed');
-        
+
         $connection->close();
 
         $this->assertFalse($connection->isOpen(), 'Database connection close should succeed');
-        
+
         $connection->open();
 
         $this->assertTrue($connection->isOpen(), 'Database connection reopen should succeed');
