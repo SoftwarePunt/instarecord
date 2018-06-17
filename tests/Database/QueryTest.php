@@ -349,7 +349,7 @@ class QueryTest extends TestCase
 
     /**
      * @expectedException Instasell\Instarecord\Database\DatabaseException
-     * @expectedExceptionMessage Table 'testdb.fruits' doesn't exist
+     * @expectedExceptionMessage .fruits' doesn't exist
      */
     public function testExecute()
     {
