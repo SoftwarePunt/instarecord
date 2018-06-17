@@ -20,6 +20,8 @@ class ConnectionTest extends TestCase
     {
         $config = new DatabaseConfig();
         $config->adapter = DatabaseAdapter::MYSQL;
+        $config->host = TEST_DATABASE_HOST;
+        $config->port = TEST_DATABASE_PORT;
         $config->username = TEST_USER_NAME;
         $config->password = TEST_PASSWORD;
         $config->database = TEST_DATABASE_NAME;
