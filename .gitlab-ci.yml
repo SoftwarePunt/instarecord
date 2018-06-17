@@ -23,4 +23,4 @@ test:phpunit:
     before_script:
         - composer install --prefer-dist --no-ansi --no-interaction
     script:
-        - ./vendor/phpunit/phpunit/phpunit -v --coverage-text --colors=never --stderr
+        - ./vendor/phpunit/phpunit/phpunit -v --coverage-text --stderr
