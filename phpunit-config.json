@@ -1,5 +1,5 @@
 {
-    "db_connection": "mysql:host=myhost;dbname=homestead;charset=utf8mb4",
+    "db_connection": "mysql:host=mysqlhost;dbname=homestead;charset=utf8mb4",
     "db_user": "homestead",
     "db_pass": "secret",
     "db_name": "homestead"
