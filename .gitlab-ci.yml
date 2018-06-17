@@ -8,7 +8,7 @@ variables:
   MYSQL_USER: homestead
   MYSQL_PASSWORD: secret
   MYSQL_DATABASE: homestead
-  DB_HOST: mysql
+  DB_HOST: myhost
 
 stages:
     - test
@@ -17,7 +17,8 @@ test:phpunit:
     stage: test
     image: epcallan/php7-testing-phpunit:7.2-phpunit7
     services:
-        - mysql:5.7
+        - name: mysql:5.7
+          alias: myhost
     tags:
         - linux
     before_script:
