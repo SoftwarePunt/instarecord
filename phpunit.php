@@ -8,7 +8,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 // PHPUnit config
-$config = json_decode(file_get_contents(__DIR__ . '/phpunit-config.json'));
+$config = json_decode(file_get_contents(__DIR__ . '/phpunit-config.json'), true);
 
 // Reset database
 $pdo = new \PDO($config['db_connection'], $config['db_user'], $config['db_pass']);
