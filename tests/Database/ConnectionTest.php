@@ -15,6 +15,21 @@ class ConnectionTest extends TestCase
         $connection = new Connection(new DatabaseConfig());
         $this->assertFalse($connection->isOpen(), 'New connections should not open initially');
     }
+
+    public function testConnectionDsn()
+    {
+        $config = new DatabaseConfig();
+        $config->adapter = "testsql";
+        $config->host = "testhost";
+        $config->port = 1234;
+        $config->username = "testuser";
+        $config->password = "testpwd";
+        $config->database = "testdb";
+        $config->charset = "utf8mb4";
+
+        $expectedDsn = "??";
+        $actualDsn = (new Connection($config))->generateDsn();
+    }
     
     public function testOpenCloseAndReopen()
     {
