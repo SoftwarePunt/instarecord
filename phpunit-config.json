@@ -1,0 +1,5 @@
+{
+    "db_connection": "mysql:host=localhost;dbname=homestead;charset=utf8mb4",
+    "db_user": "homestead",
+    "db_pass": "secret"
+}
