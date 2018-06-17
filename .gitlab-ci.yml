@@ -7,6 +7,7 @@ variables:
     MYSQL_USER: homestead
     MYSQL_PASSWORD: secret
     MYSQL_DATABASE: homestead
+    MYSQL_PORT: 3377
     DB_HOST: mysqlhost
 
 cache:
