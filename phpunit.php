@@ -12,7 +12,10 @@ $config = json_decode(file_get_contents(__DIR__ . '/phpunit-config.json'), true)
 
 // Reset database
 $pdo = new \PDO($config['db_connection'], $config['db_user'], $config['db_pass']);
+
+// Constants for backwards compat
 define('TEST_USER_NAME', $config['db_user']);
+define('TEST_PASSWORD', $config['db_pass']);
 
 $pdo->exec('DROP TABLE IF EXISTS users;');
 
