@@ -24,6 +24,7 @@ test:phpunit:
     tags:
         - linux
     before_script:
+        - cp phpunit-config.ci.json phpunit-config.json
         - composer install --prefer-dist --no-ansi --no-interaction
     script:
         - ./vendor/phpunit/phpunit/phpunit -v --coverage-text --stderr
