@@ -7,12 +7,11 @@
 // Initialize the class autoloader
 require_once __DIR__ . '/vendor/autoload.php';
 
-define('TEST_DATABASE_NAME', 'testdb');
-define('TEST_USER_NAME', 'root');
-define('TEST_PASSWORD', 'dev123');
+// PHPUnit config
+$config = json_decode(file_get_contents(__DIR__ . '/phpunit-config.json'));
 
 // Reset database
-$pdo = new \PDO('mysql:host=localhost;dbname=' . TEST_DATABASE_NAME . ';charset=utf8', TEST_USER_NAME, TEST_PASSWORD);
+$pdo = new \PDO($config['db_connection'], $config['db_user'], $config['db_pass']);
 
 $pdo->exec('DROP TABLE IF EXISTS users;');
 
