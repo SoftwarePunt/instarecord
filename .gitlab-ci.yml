@@ -1,3 +1,8 @@
+cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+        - vendor
+
 variables:
   MYSQL_ROOT_PASSWORD: root
   MYSQL_USER: homestead
