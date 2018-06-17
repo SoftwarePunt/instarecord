@@ -1,5 +1,6 @@
 {
-    "db_connection": "mysql:host=mysqlhost;port=3377;dbname=homestead;charset=utf8mb4",
+    "db_host": "mysqlhost",
+    "db_port": 3306,
     "db_user": "homestead",
     "db_pass": "secret",
     "db_name": "homestead"
