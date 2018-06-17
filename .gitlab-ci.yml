@@ -22,6 +22,7 @@ test:phpunit:
     tags:
         - linux
     before_script:
+        - sleep 60s # wait for MySQL (TODO find a better solution...)
         - composer install --prefer-dist --no-ansi --no-interaction
     script:
         - ./vendor/phpunit/phpunit/phpunit -v --coverage-text --stderr
