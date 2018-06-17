@@ -2,5 +2,7 @@ stages:
     - test
 
 test:phpunit:
-    - image: epcallan/php7-testing-phpunit:7.2-phpunit7
-    - script: phpunit
+    stage: test
+    image: epcallan/php7-testing-phpunit:7.2-phpunit7
+    script:
+        - phpunit
