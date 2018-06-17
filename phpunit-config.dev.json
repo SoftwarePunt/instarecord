@@ -3,5 +3,5 @@
     "db_port": 3306,
     "db_user": "root",
     "db_pass": "dev123",
-    "db_name": "test"
+    "db_name": "testdb"
 }

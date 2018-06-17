@@ -39,8 +39,8 @@ unset($dsnConnection);
 // Local PDO instance to seed db
 $pdo = new \PDO($dsnText, $testConfigRaw['db_user'], $testConfigRaw['db_pass']);
 
-$pdo->exec('DROP TABLE IF EXISTS users;');
-$pdo->exec('CREATE TABLE `testdb`.`users` (
+$pdo->exec('DROP TABLE IF EXISTS `'  . $dsnConfig->database . '`.`users`;');
+$pdo->exec('CREATE TABLE `'  . $dsnConfig->database . '`.`users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_name` VARCHAR(45) NULL,
   `email_address` VARCHAR(45) NULL,
