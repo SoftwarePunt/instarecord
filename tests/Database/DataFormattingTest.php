@@ -160,4 +160,12 @@ class DataFormattingTest extends TestCase
         $this->assertEquals(12.345, $column->parseDatabaseValue('12.345'));
         $this->assertEquals(0, $column->parseDatabaseValue('txt'));
     }
+
+    public function testParsesNullableDecimalValues()
+    {
+        $column = $this->_createTestColumn(['var' => 'float|null']);
+
+        $this->assertEquals(null, $column->parseDatabaseValue(null));
+        $this->assertEquals(0, $column->parseDatabaseValue('0'));
+    }
 }
