@@ -52,6 +52,27 @@ class DataFormattingTest extends TestCase
         $this->assertEquals($testDateTimeStr, $parsedDateTime->format(Column::DATE_TIME_FORMAT), 'DateTime parsing should maintain correct value');
     }
 
+    public function testDateTimeParseFailuresDoesNotResultInFalse()
+    {
+        $column = $this->_createTestColumn(['var' => '\DateTime']);
+        $testDateTimeStr = 'pqadfgrashijklmaqxynostuvz';
+        $parsedDateTime = $column->parseDatabaseValue($testDateTimeStr);
+
+        $this->assertNotSame(false, $parsedDateTime, 'DateTime parse failures should never result in FALSE');
+    }
+
+    public function testDateTimeParseWithTimeOnly()
+    {
+        $column = $this->_createTestColumn(['var' => '\DateTime']);
+        $testDateTimeStr = '11:22:33';
+        $parsedDateTime = $column->parseDatabaseValue($testDateTimeStr);
+
+        $expected = date('Y-m-d') . ' ' . $testDateTimeStr;
+
+        $this->assertInstanceOf('\DateTime', $parsedDateTime, 'DateTime-timeonly value should be parsed into DateTime object');
+        $this->assertEquals($expected, $parsedDateTime->format(Column::DATE_TIME_FORMAT), 'DateTime-timeonly parsing should maintain correct value');
+    }
+
     public function testDateTimeParsesWhenAlsoNullable()
     {
         $column = $this->_createTestColumn(['var' => "\\DateTime|null"]);

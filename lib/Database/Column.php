@@ -2,6 +2,8 @@
 
 namespace Instasell\Instarecord\Database;
 
+use DateTime;
+use Exception;
 use Instasell\Instarecord\Utils\TextTransforms;
 use Minime\Annotations\Interfaces\AnnotationsBagInterface;
 
@@ -320,7 +322,28 @@ class Column
         }
 
         if ($this->dataType === self::TYPE_DATE_TIME) {
-            return \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input);
+            if (!empty($input)) {
+                // Parse attempt one: default db format
+                try {
+                    $dtParsed = \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input);
+
+                    if ($dtParsed) {
+                        return $dtParsed;
+                    }
+                } catch (Exception $ex) { }
+
+                // Parse attempt two: alt db format (also used for "time" db fields otherwise they break)
+                try {
+                    $dtParsed = new DateTime($input);
+
+                    if ($dtParsed) {
+                        return $dtParsed;
+                    }
+                } catch (Exception $ex) { }
+            }
+
+            // Exhausted options, treat as NULL
+            return null;
         }
 
         if ($this->dataType === self::TYPE_BOOLEAN) {
