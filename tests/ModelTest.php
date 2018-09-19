@@ -3,9 +3,7 @@
 namespace Instasell\Instarecord\Tests;
 
 use Instasell\Instarecord\Database\Column;
-use Instasell\Instarecord\DatabaseAdapter;
 use Instasell\Instarecord\Instarecord;
-use Instasell\Instarecord\Tests\Database\DataFormattingTest;
 use Instasell\Instarecord\Tests\Samples\User;
 use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
@@ -350,7 +348,6 @@ class ModelTest extends TestCase
         $valuesFromQuery = sort($valuesFromQuery);
 
         $keysFromQuery = array_keys($allUsersViaQuery);
-        $keysFromAll = array_keys($allUsersViaAll);
 
         $valuesFromAll = array_values($allUsersViaAll);
         $valuesFromAll = sort($valuesFromAll);
@@ -384,7 +381,6 @@ class ModelTest extends TestCase
         $valuesFromQuery = sort($valuesFromQuery);
 
         $keysFromQuery = array_keys($allUsersViaQuery);
-        $keysFromAll = array_keys($allUsersViaAll);
 
         $valuesFromAll = array_values($allUsersViaAll);
         $valuesFromAll = sort($valuesFromAll);
