@@ -81,9 +81,10 @@ class ModelQuery extends Query
     /**
      * Same as queryAllModels(), but indexes all options by their PK value.
      *
+     * @param string $indexKey The key to index the array with. If left at NULL, the primary key will be used as index.
      * @return array
      */
-    public function queryAllModelsIndexed(): array
+    public function queryAllModelsIndexed(?string $indexKey = null): array
     {
         $rows = $this->queryAllRows();
         $models = [];
@@ -93,7 +94,9 @@ class ModelQuery extends Query
              * @var Model $instance
              */
             $instance = new $this->modelName($row);
-            $models[$instance->getPrimaryKeyValue()] = $instance;
+
+            $models[$indexKey ? $instance->$indexKey :
+                $instance->getPrimaryKeyValue()] = $instance;
         }
 
         return $models;

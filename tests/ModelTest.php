@@ -327,28 +327,72 @@ class ModelTest extends TestCase
         $this->assertEquals($allUsersViaQuery, $allUsersViaAll);
     }
 
-    public function testModelQueryAllWithIndexed()
+    public function testModelQueryAllWithIndexedWithPrimaryKey()
     {
         $allUsersViaQuery = User::query()->queryAllModelsIndexed();
 
+        // -------------------------------------------------------------------------------------------------------------
+
+        /**
+         * @var $allUsersViaAll User[]
+         */
         $allUsersViaAll = User::all();
+
         $userIds = [];
 
         foreach ($allUsersViaAll as $item) {
             $userIds[] = $item->id;
         }
 
+        // -------------------------------------------------------------------------------------------------------------
+
         $valuesFromQuery = array_values($allUsersViaQuery);
         $valuesFromQuery = sort($valuesFromQuery);
 
         $keysFromQuery = array_keys($allUsersViaQuery);
-
         $keysFromAll = array_keys($allUsersViaAll);
+
         $valuesFromAll = array_values($allUsersViaAll);
         $valuesFromAll = sort($valuesFromAll);
 
+        // -------------------------------------------------------------------------------------------------------------
+
         $this->assertEquals($valuesFromAll, $valuesFromQuery);
         $this->assertEquals(sort($userIds), sort($keysFromQuery));
+    }
+
+    public function testModelQueryAllWithIndexedWithCustomKey()
+    {
+        $allUsersViaQuery = User::query()->queryAllModelsIndexed("userName");
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        /**
+         * @var $allUsersViaAll User[]
+         */
+        $allUsersViaAll = User::all();
+
+        $userNames = [];
+
+        foreach ($allUsersViaAll as $item) {
+            $userNames[] = $item->userName;
+        }
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        $valuesFromQuery = array_values($allUsersViaQuery);
+        $valuesFromQuery = sort($valuesFromQuery);
+
+        $keysFromQuery = array_keys($allUsersViaQuery);
+        $keysFromAll = array_keys($allUsersViaAll);
+
+        $valuesFromAll = array_values($allUsersViaAll);
+        $valuesFromAll = sort($valuesFromAll);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        $this->assertEquals($valuesFromAll, $valuesFromQuery);
+        $this->assertEquals(sort($userNames), sort($keysFromQuery));
     }
 
     public function testModelInsertsFormattedValuesAndParsesIncomingValues()
