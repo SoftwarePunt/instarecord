@@ -146,6 +146,20 @@ class Query
     protected $joinStatements;
 
     /**
+     * If enabled, we are doing a raw SQL style update (rather than a value-based update).
+     *
+     * @var bool
+     */
+    protected $rawUpdateMode;
+
+    /**
+     * Raw update statement array.
+     *
+     * @var array|null
+     */
+    protected $rawUpdate;
+
+    /**
      * Constructs a new, blank query.
      *
      * @param Connection $connection The connection to perform the query on.
@@ -175,6 +189,8 @@ class Query
         $this->whereStatements = [];
         $this->joinStatements = [];
         $this->havingStatements = [];
+        $this->rawUpdateMode = false;
+        $this->rawUpdate = null;
 
         return $this;
     }
@@ -283,27 +299,35 @@ class Query
     /**
      * Sets the values to be SET on an UPDATE statement.
      *
-     * @param array $values Associative array of the values to be set, indexed by column names.
+     * @param array|string $valuesOrSql Associative array of the values to be set indexed by column names *OR* raw SQL.
+     * @param array ...$params Bound parameter list. Only for raw mode (if first param is a string).
      * @throws QueryBuilderException
      * @return Query|$this
      */
-    public function set(array $values): Query
+    public function set($valuesOrSql, ...$params): Query
     {
-        $keys = array_keys($values);
-        $firstParameterKey = array_shift($keys);
-        $valuesAreIndexedByName = is_string($firstParameterKey);
+        if (is_array($valuesOrSql)) {
+            $keys = array_keys($valuesOrSql);
+            $firstParameterKey = array_shift($keys);
+            $valuesAreIndexedByName = is_string($firstParameterKey);
 
-        if (!$valuesAreIndexedByName) {
-            throw new QueryBuilderException("Query format error: The values in the SET block MUST be indexed by column name, not by column index number.");
+            if (!$valuesAreIndexedByName) {
+                throw new QueryBuilderException("Query format error: The values in the SET block MUST be indexed by column name, not by column index number.");
+            }
+
+            $processedValues = [];
+
+            foreach ($valuesOrSql as $key => $value) {
+                $processedValues[$key] = $this->preProcessParam($value);
+            }
+
+            $this->dataValues = $processedValues;
+            $this->rawUpdateMode = false;
+        } else {
+            $this->rawUpdate = $this->processStatementParameters($valuesOrSql, $params);
+            $this->rawUpdateMode = true;
         }
 
-        $processedValues = [];
-
-        foreach ($values as $key => $value) {
-            $processedValues[$key] = $this->preProcessParam($value);
-        }
-
-        $this->dataValues = $processedValues;
         return $this;
     }
 
@@ -673,61 +697,73 @@ class Query
             $statementText = "DELETE FROM {$this->tableName}";
         }
 
-        // SET or VALUES data for INSERT and UPDATE statements
-        if (!empty($this->dataValues)) {
-            $columnIndexes = array_keys($this->dataValues);
-            $columnValues = array_values($this->dataValues);
+        if ($this->rawUpdateMode) {
+            // SET data for UPDATE statement in direct/raw mode with a pre written SQL statement
+            $statementText .= " SET ";
+            $statementText .= $this->rawUpdate[0];
 
-            if ($this->statementType == self::QUERY_TYPE_UPDATE) {
-                $statementText .= " SET ";
+            $rawUpdateLen = count($this->rawUpdate);
 
-                for ($i = 0; $i < count($columnValues); $i++) {
-                    $columnName = $columnIndexes[$i];
-                    $columnValue = $columnValues[$i];
+            for ($i = 1; $i < $rawUpdateLen; $i++) {
+                $this->bindParam($this->rawUpdate[$i]);
+            }
+        } else {
+            // SET or VALUES data for INSERT and UPDATE statements
+            if (!empty($this->dataValues)) {
+                $columnIndexes = array_keys($this->dataValues);
+                $columnValues = array_values($this->dataValues);
 
-                    if ($i > 0) {
-                        $statementText .= ", ";
-                    }
+                if ($this->statementType == self::QUERY_TYPE_UPDATE) {
+                    $statementText .= " SET ";
 
-                    $statementText .= "`{$columnName}` = ?";
-                    $this->bindParam($columnValue);
-                }
-            } else if ($this->statementType == self::QUERY_TYPE_INSERT) {
-                $_columnIndexesForShift = $columnIndexes;
-                $columnFirstIndex = array_shift($_columnIndexesForShift);
-                $columnsAreIndexedByName = is_string($columnFirstIndex);
-
-                if ($columnsAreIndexedByName) {
-                    // VALUES for insert are indexed by column name, so prefix the insert list with column name hints
-                    $statementText .= " (";
-
-                    for ($i = 0; $i < count($columnIndexes); $i++) {
+                    for ($i = 0; $i < count($columnValues); $i++) {
                         $columnName = $columnIndexes[$i];
+                        $columnValue = $columnValues[$i];
 
                         if ($i > 0) {
                             $statementText .= ", ";
                         }
 
-                        $statementText .= "`{$columnName}`";
+                        $statementText .= "`{$columnName}` = ?";
+                        $this->bindParam($columnValue);
+                    }
+                } else if ($this->statementType == self::QUERY_TYPE_INSERT) {
+                    $_columnIndexesForShift = $columnIndexes;
+                    $columnFirstIndex = array_shift($_columnIndexesForShift);
+                    $columnsAreIndexedByName = is_string($columnFirstIndex);
+
+                    if ($columnsAreIndexedByName) {
+                        // VALUES for insert are indexed by column name, so prefix the insert list with column name hints
+                        $statementText .= " (";
+
+                        for ($i = 0; $i < count($columnIndexes); $i++) {
+                            $columnName = $columnIndexes[$i];
+
+                            if ($i > 0) {
+                                $statementText .= ", ";
+                            }
+
+                            $statementText .= "`{$columnName}`";
+                        }
+
+                        $statementText .= ")";
+                    }
+
+                    $statementText .= " VALUES (";
+
+                    for ($i = 0; $i < count($columnValues); $i++) {
+                        if ($i > 0) {
+                            $statementText .= ", ";
+                        }
+
+                        $statementText .= "?";
+
+                        $columnValue = $columnValues[$i];
+                        $this->bindParam($columnValue);
                     }
 
                     $statementText .= ")";
                 }
-
-                $statementText .= " VALUES (";
-
-                for ($i = 0; $i < count($columnValues); $i++) {
-                    if ($i > 0) {
-                        $statementText .= ", ";
-                    }
-
-                    $statementText .= "?";
-
-                    $columnValue = $columnValues[$i];
-                    $this->bindParam($columnValue);
-                }
-
-                $statementText .= ")";
             }
         }
 

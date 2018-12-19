@@ -85,6 +85,31 @@ class QueryTest extends TestCase
         $this->assertEquals('2017-06-05 01:02:03', $queryParams[0]);
     }
 
+    public function testRawUpdateWithoutParams()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->update('users')
+            ->set("is_active = 1")
+            ->createStatementText();
+
+        $this->assertEquals('UPDATE users SET is_active = 1;', $queryString);
+    }
+
+    public function testRawUpdateWithParams()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $query = $query->update('users')
+            ->set("is_active = 1, name = ?", "blah");
+
+        $queryString = $query->createStatementText();
+        $queryParams = $query->getBoundParametersForGeneratedStatement();
+
+        $this->assertEquals('UPDATE users SET is_active = 1, name = ?;', $queryString);
+        $this->assertEquals("blah", $queryParams[0]);
+    }
+
     /**
      * @expectedException Instasell\Instarecord\Database\QueryBuilderException
      * @expectedExceptionMessage Query format error
