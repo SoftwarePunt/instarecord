@@ -72,6 +72,10 @@ class Model
         $properties = [];
         
         foreach ($rfProperties as $rfProperty) {
+            if ($rfProperty->isStatic()) {
+                continue;
+            }
+
             $properties[] = $rfProperty->getName();
         }
         
