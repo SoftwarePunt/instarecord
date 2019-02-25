@@ -388,7 +388,7 @@ class Model
     public function save(): bool
     {
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
-        
+
         if (!empty($this->$primaryKeyName)) {
             return $this->update();
         } 

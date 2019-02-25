@@ -11,6 +11,30 @@ class InstarecordTest extends TestCase
     /**
      * @runInSeparateProcess
      */
+    public function testMultipleInstances()
+    {
+        // No instances
+        $this->assertEmpty(Instarecord::instance(false), "Requesting the instance() without \"\$autoCreate\" should return NULL.");
+
+        // Default instance
+        $instance = Instarecord::instance(true);
+        $this->assertInstanceOf(Instarecord::class, $instance);
+        $this->assertSame($instance, Instarecord::instance(false), "The \"\$autoCreate\"'d instance should be returned by instance().");
+
+        // Fetch by ID
+        $this->assertEquals("default", $instance->getId(), "The \"\$autoCreate\"'d instance should have an ID of value \"default\".");
+        $this->assertEmpty(Instarecord::getInstanceById("blah"), "getInstanceById() should return NULL for invalid keys");
+        $this->assertSame($instance, Instarecord::getInstanceById("default"), "getInstanceById(default) should return the auto created instance.");
+
+        // Secondary instance
+        $secondInstance = new Instarecord("second", false);
+        $this->assertSame($instance, Instarecord::instance(false), "The \"\$autoCreate\"'d instance should be returned by instance(), even if a newer one exists.");
+        $this->assertSame($secondInstance, Instarecord::getInstanceById("second"), "The second instance should be retrievable by ID");
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
     public function testGetConfig()
     {
         $configObject = Instarecord::config();
