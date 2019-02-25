@@ -43,4 +43,62 @@ class MySqlAdapter extends DatabaseAdapter
 
         return rtrim($dsn, ';');
     }
+
+    /**
+     * Parses a service DSN into a DatabaseConfig instance.
+     *
+     * @param string $dsn The DSN string to parse.
+     * @return DatabaseConfig
+     */
+    public function parseDsn(string $dsn): DatabaseConfig
+    {
+        $dbConfig = new DatabaseConfig();
+
+        // Extract protocol
+        $parts = explode(':', $dsn, 2);
+
+        $protocol = "mysql";
+        $remainder = "";
+
+        if (count($parts) == 2) {
+            $protocol = $parts[0];
+            $remainder = $parts[1];
+        } else {
+            $remainder = $parts[0];
+        }
+
+        // Extract components
+        $components = explode(';', $remainder);
+
+        foreach ($components as $component) {
+            $componentParts = explode('=', $component, 2);
+
+            if (count($componentParts) != 2) {
+                continue;
+            }
+
+            $componentName = trim(strtolower($componentParts[0]));
+            $componentValue = trim($componentParts[1]);
+
+            switch ($componentName) {
+                case "unix_socket":
+                    $dbConfig->unix_socket = $componentValue;
+                    break;
+                case "host":
+                    $dbConfig->host = $componentValue;
+                    break;
+                case "port":
+                    $dbConfig->port = intval($componentValue);
+                    break;
+                case "dbname":
+                    $dbConfig->database = $componentValue;
+                    break;
+                case "charset";
+                    $dbConfig->charset = $componentValue;
+                    break;
+            }
+        }
+
+        return $dbConfig;
+    }
 }

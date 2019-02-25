@@ -23,6 +23,29 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals("mysql:host=1.2.3.4;dbname=dbname123;charset=utf16", $adapter->createDsn($config));
     }
 
+    /**
+     * @depends testGenerateDsn
+     */
+    public function testParseDsn()
+    {
+        $adapter = new MySqlAdapter();
+
+        $config = new DatabaseConfig();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->host = '1.2.3.4';
+        $config->port = null;
+        $config->database = 'dbname123';
+        $config->charset = 'utf16';
+        $config->port = 1337;
+
+        $dsnGenerated = $adapter->createDsn($config);
+        $configParsed = $adapter->parseDsn($dsnGenerated);
+
+        $this->assertEquals("mysql:host=1.2.3.4;port=1337;dbname=dbname123;charset=utf16", $dsnGenerated);
+        $this->assertNotSame($config, $configParsed);
+        $this->assertEquals($config, $configParsed);
+    }
+
     public function testGenerateDsnWithCustomPort()
     {
         $adapter = new MySqlAdapter();
