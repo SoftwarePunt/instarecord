@@ -139,7 +139,7 @@ class Instarecord
         }
 
         if (!$this->connection) {
-            $this->connection = new Connection($this->config());
+            $this->connection = new Connection($this->getOrSetConfig());
         }
 
         return $this->connection;
@@ -164,7 +164,7 @@ class Instarecord
      */
     public function createQuery(): Query
     {
-        return new Query($this->connection());
+        return new Query($this->getConnection());
     }
 
     /**
