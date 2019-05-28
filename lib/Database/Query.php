@@ -213,10 +213,10 @@ class Query
     /**
      * Begins a SELECT COUNT(x) statement.
      *
-     * @param string $countColumn The COUNT() text: which column to use for count. Defaults to "id". Unsafe value.
+     * @param string $countColumn The COUNT() parameter (unsafe value). Defaults to "*" (all rows).
      * @return Query|$this
      */
-    public function count(string $countColumn = 'id'): Query
+    public function count(string $countColumn = "*"): Query
     {
         $this->statementType = self::QUERY_TYPE_SELECT;
         $this->selectStatement = "COUNT({$countColumn})";
@@ -1019,5 +1019,13 @@ class Query
         }
 
         return [];
+    }
+
+    /**
+     * @return QueryPaginator
+     */
+    public function paginate(): QueryPaginator
+    {
+        return new QueryPaginator($this);
     }
 }
