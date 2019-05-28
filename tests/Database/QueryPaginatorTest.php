@@ -99,4 +99,17 @@ class QueryPaginatorTest extends TestCase
 
         $this->assertEquals([$firstUser], $results);
     }
+
+    public function testPaginateCalculationWithZeroResults()
+    {
+        $paginator = User::query()
+            ->where('id < 0')
+            ->paginate();
+
+        $this->assertSame(0, $paginator->getTotalItemCount());
+        $this->assertSame(0, $paginator->getPageCount());
+        $this->assertTrue($paginator->getIsFirstPage());
+        $this->assertTrue($paginator->getIsLastPage());
+        $this->assertTrue($paginator->getIsValidPage());
+    }
 }

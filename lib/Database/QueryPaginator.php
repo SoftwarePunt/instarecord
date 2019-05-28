@@ -133,12 +133,20 @@ class QueryPaginator
      */
     public function getPageCount(): int
     {
-        return ceil($this->getTotalItemCount() / $this->pageSize);
+        $itemCount = $this->getTotalItemCount();
+
+        if ($itemCount === 0) {
+            return 0;
+        }
+
+        return ceil($itemCount / $this->pageSize);
     }
 
     /**
      * Gets whether the currently set page number is valid:
      * The current page index must be 0 or greater, and not exceed the upper page limit.
+     *
+     * NB: If there are no results, this function will still return TRUE for the first page (index zero).
      *
      * @return bool
      * @see getPageCount
@@ -146,7 +154,14 @@ class QueryPaginator
      */
     public function getIsValidPage(): bool
     {
-        return $this->pageIndex >= 0 && $this->pageIndex <= ($this->getPageCount() - 1);
+        $pageCount = $this->getPageCount();
+
+        if ($pageCount === 0 && $this->pageIndex === 0) {
+            // If there are no results, but this is the first page,.
+            return true;
+        }
+
+        return $this->pageIndex >= 0 && $this->pageIndex <= ($pageCount - 1);
     }
 
     /**
@@ -166,7 +181,13 @@ class QueryPaginator
      */
     public function getIsLastPage(): bool
     {
-        return $this->pageIndex === ($this->getPageCount() - 1);
+        $pageCount = $this->getPageCount();
+
+        if ($pageCount === 0 && $this->pageIndex === 0) {
+            return true;
+        }
+
+        return $this->pageIndex === ($pageCount - 1);
     }
 
     /**
