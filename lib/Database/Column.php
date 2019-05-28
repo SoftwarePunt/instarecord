@@ -3,6 +3,7 @@
 namespace Instasell\Instarecord\Database;
 
 use DateTime;
+use DateTimeZone;
 use Exception;
 use Instasell\Instarecord\Utils\TextTransforms;
 use Minime\Annotations\Interfaces\AnnotationsBagInterface;
@@ -245,6 +246,7 @@ class Column
     public function formatDatabaseValue($input): ?string
     {
         if ($input instanceof \DateTime) {
+            $input->setTimezone(new DateTimeZone('UTC'));
             return $input->format(self::DATE_TIME_FORMAT);
         }
 
@@ -325,7 +327,7 @@ class Column
             if (!empty($input)) {
                 // Parse attempt one: default db format
                 try {
-                    $dtParsed = \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input);
+                    $dtParsed = \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input, new DateTimeZone('UTC'));
 
                     if ($dtParsed) {
                         return $dtParsed;
@@ -334,7 +336,7 @@ class Column
 
                 // Parse attempt two: alt db format (also used for "time" db fields otherwise they break)
                 try {
-                    $dtParsed = new DateTime($input);
+                    $dtParsed = new DateTime($input, new DateTimeZone('UTC'));
 
                     if ($dtParsed) {
                         return $dtParsed;

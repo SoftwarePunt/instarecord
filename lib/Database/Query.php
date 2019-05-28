@@ -2,6 +2,8 @@
 
 namespace Instasell\Instarecord\Database;
 
+use DateTimeZone;
+
 /**
  * Represents a Instarecord database query for reading or writing data.
  */
@@ -441,8 +443,10 @@ class Query
     protected function preProcessParam($paramValue)
     {
         if ($paramValue instanceof \DateTime) {
-            // Format DateTime to database format
-            return $paramValue->format(Column::DATE_TIME_FORMAT);
+            // Format DateTime to database format / UTC
+            $dt = clone $paramValue;
+            $dt->setTimezone(new DateTimeZone('UTC'));
+            return $dt->format(Column::DATE_TIME_FORMAT);
         }
 
         return $paramValue;

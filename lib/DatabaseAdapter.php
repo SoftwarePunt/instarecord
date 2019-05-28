@@ -19,7 +19,15 @@ abstract class DatabaseAdapter
      * @return string
      */
     public abstract function createDsn(DatabaseConfig $config): string;
-    
+
+    /**
+     * Parses a service DSN into a DatabaseConfig instance.
+     *
+     * @param string $dsn The DSN string to parse.
+     * @return DatabaseConfig
+     */
+    public abstract function parseDsn(string $dsn): DatabaseConfig;
+
     /**
      * Creates and returns an DatabaseAdapter instance based on its class name.
      * 

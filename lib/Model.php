@@ -72,6 +72,10 @@ class Model
         $properties = [];
         
         foreach ($rfProperties as $rfProperty) {
+            if ($rfProperty->isStatic()) {
+                continue;
+            }
+
             $properties[] = $rfProperty->getName();
         }
         
@@ -384,7 +388,7 @@ class Model
     public function save(): bool
     {
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
-        
+
         if (!empty($this->$primaryKeyName)) {
             return $this->update();
         } 
