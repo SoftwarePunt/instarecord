@@ -1016,4 +1016,12 @@ class Query
 
         return [];
     }
+
+    /**
+     * @return QueryPaginator
+     */
+    public function paginate(): QueryPaginator
+    {
+        return new QueryPaginator($this);
+    }
 }
