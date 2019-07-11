@@ -1,5 +1,6 @@
 {
     "name": "instasell/instarecord",
+    "version": "0.2.0",
     "description": "ActiveRecord Database ORM layer for MySQL",
     "type": "framework",
     "require": {
