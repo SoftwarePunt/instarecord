@@ -2,10 +2,12 @@
 
 namespace Instasell\Instarecord\Database;
 
+use Instasell\Instarecord\InstarecordException;
+
 /**
- * Exception class for Instarecord database errors.
+ * Instarecord exception type for database and connection errors.
  */
-class DatabaseException extends \RuntimeException
+class DatabaseException extends InstarecordException
 {
-    
+    // ...
 }

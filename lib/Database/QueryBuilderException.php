@@ -2,10 +2,12 @@
 
 namespace Instasell\Instarecord\Database;
 
+use Instasell\Instarecord\InstarecordException;
+
 /**
- * Exception class for Instarecord query builder errors.
+ * Instarecord exception type for query builder errors.
  */
-class QueryBuilderException extends \Exception
+class QueryBuilderException extends InstarecordException
 {
-    
+    // ...
 }

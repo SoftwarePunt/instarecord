@@ -2,10 +2,12 @@
 
 namespace Instasell\Instarecord\Config;
 
+use Instasell\Instarecord\InstarecordException;
+
 /**
- * Exception class for Instarecord configuration errors.
+ * Instarecord exception type for configuration errors.
  */
-class ConfigException extends \RuntimeException
+class ConfigException extends InstarecordException
 {
-    
+    // ...
 }
