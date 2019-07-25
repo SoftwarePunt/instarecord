@@ -3,14 +3,18 @@
 namespace Instasell\Instarecord\Tests\Samples;
 
 use Instasell\Instarecord\Model;
+use Instasell\Instarecord\Models\IReadOnlyModel;
 
-class User extends Model
+/**
+ * @table users
+ */
+class ReadOnlyUser extends Model implements IReadOnlyModel
 {
     /**
      * @var int
      */
     private $secretNotWritable;
-    
+
     /**
      * @var int
      */

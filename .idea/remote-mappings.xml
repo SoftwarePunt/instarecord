@@ -17,6 +17,13 @@
             </list>
           </settings>
         </remote-mappings>
+        <remote-mappings server-id="php@1a18ccad-1fc7-4d09-8489-a5140bfaf408">
+          <settings>
+            <list>
+              <mapping local-root="J:" remote-root="/var/www" />
+            </list>
+          </settings>
+        </remote-mappings>
       </list>
     </list>
   </component>

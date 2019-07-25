@@ -3,6 +3,8 @@
 namespace Instasell\Instarecord\Database;
 
 use Instasell\Instarecord\Model;
+use Instasell\Instarecord\Models\IReadOnlyModel;
+use Instasell\Instarecord\Models\ModelAccessException;
 
 /**
  * A model-specific query.
@@ -116,5 +118,35 @@ class ModelQuery extends Query
         }
         
         return new $this->modelName($row);
+    }
+
+    /**
+     * @throws ModelAccessException
+     */
+    protected function verifyAccess(): void
+    {
+        if ($this->referenceModel instanceof IReadOnlyModel) {
+            $restrictedStatementTypes = [
+                self::QUERY_TYPE_DELETE,
+                self::QUERY_TYPE_INSERT,
+                self::QUERY_TYPE_UPDATE
+            ];
+
+            if (in_array($this->statementType, $restrictedStatementTypes)) {
+                throw new ModelAccessException(
+                    "Cannot perform INSERT, DELETE or UPDATE queries for read only model: {$this->modelName}"
+                );
+            }
+        }
+    }
+
+    /**
+     * @inheritDoc
+     * @throws ModelAccessException
+     */
+    public function createStatementText(): string
+    {
+        $this->verifyAccess();
+        return parent::createStatementText();
     }
 }
