@@ -3,8 +3,9 @@
 namespace Instasell\Instarecord;
 
 use Instasell\Instarecord\Config\ModelConfig;
-use Instasell\Instarecord\Database\ModelQuery;
+use Instasell\Instarecord\Database\AutoApplicator;
 use Instasell\Instarecord\Database\Column;
+use Instasell\Instarecord\Database\ModelQuery;
 use Instasell\Instarecord\Database\Table;
 
 /**
@@ -15,7 +16,7 @@ class Model
     /**
      * An array containing properties and their last known values.
      * This is used to track "dirty" (changed) properties.
-     * 
+     *
      * @var array
      */
     protected $_trackedModelValues;
@@ -29,7 +30,7 @@ class Model
 
     /**
      * Initializes a new instance of this model which can be inserted into the database.
-     * 
+     *
      * @param array|null $initialValues Optionally, an array of initial property values to set on the model.
      */
     public function __construct(?array $initialValues = [])
@@ -42,7 +43,7 @@ class Model
 
     /**
      * Applies a set of initial values as properties on this model.
-     * 
+     *
      * @param array $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
      */
     protected function setInitialValues(?array $initialValues): void
@@ -50,7 +51,7 @@ class Model
         foreach ($this->getPropertyNames() as $propertyName) {
             $this->$propertyName = $this->getColumnForPropertyName($propertyName)->getDefaultValue();
         }
-        
+
         if ($initialValues) {
             $this->setColumnValues($initialValues);
         }
@@ -58,10 +59,10 @@ class Model
 
     /**
      * Gets a list of the names of all this model's properties.
-     * 
+     *
      * Properties are public variables defined in the class that can be get or set.
      * Each property refers to a real database column and may reflect a relationship.
-     * 
+     *
      * @return array
      */
     public function getPropertyNames(): array
@@ -70,7 +71,7 @@ class Model
         $rfProperties = $rfClass->getProperties(\ReflectionProperty::IS_PUBLIC);
 
         $properties = [];
-        
+
         foreach ($rfProperties as $rfProperty) {
             if ($rfProperty->isStatic()) {
                 continue;
@@ -78,23 +79,23 @@ class Model
 
             $properties[] = $rfProperty->getName();
         }
-        
+
         return $properties;
     }
 
     /**
      * Gets a key/value list of all properties and their values.
-     * 
+     *
      * @return array An array containing property values, indexed by property name.
      */
     public function getPropertyValues(): array
     {
         $propertyList = [];
-        
+
         foreach ($this->getPropertyNames() as $propertyName) {
-            $propertyList[$propertyName] = $this->$propertyName;    
+            $propertyList[$propertyName] = $this->$propertyName;
         }
-        
+
         return $propertyList;
     }
 
@@ -126,7 +127,7 @@ class Model
 
     /**
      * Gets a key/value list of all columns and their values.
-     * This involves the translation of 
+     * This involves the translation of
      *
      * @return array An array containing property values, indexed by property name.
      */
@@ -137,12 +138,12 @@ class Model
 
         foreach ($properties as $propertyName => $propertyValue) {
             $columnInfo = $this->getColumnForPropertyName($propertyName);
-            
+
             if ($columnInfo) {
                 $columnName = $columnInfo->getColumnName();
                 $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
 
-                $columns[$columnName] = $columnValue;    
+                $columns[$columnName] = $columnValue;
             }
         }
 
@@ -180,7 +181,7 @@ class Model
 
     /**
      * Gets a key/value list of all properties that have been modified.
-     * 
+     *
      * @return array An array containing property values, indexed by property name.
      */
     public function getDirtyProperties(): array
@@ -188,15 +189,25 @@ class Model
         $propertiesThen = $this->_trackedModelValues;
         $propertiesNow = $this->getPropertyValues();
         $propertiesDiff = [];
-        
+
         foreach ($propertiesNow as $propertyName => $propertyValue) {
             if (!array_key_exists($propertyName, $propertiesThen) || $propertiesThen[$propertyName] !== $propertiesNow[$propertyName]) {
                 // This property either was not previously known, or its value has changed in some way.
                 $propertiesDiff[$propertyName] = $propertyValue;
             }
         }
-        
+
         return $propertiesDiff;
+    }
+
+    /**
+     * Gets whether this model has any "dirty" fields or not.
+     *
+     * @return bool If true, this model has outstanding changes that have not been committed to the database yet.
+     */
+    public function isDirty(): bool
+    {
+        return !empty($this->getDirtyProperties());
     }
 
     /**
@@ -242,24 +253,24 @@ class Model
     /**
      * Gets a list of the column names defined in this model.
      * This is translated based on the properties defined in this model.
-     * 
+     *
      * @return array
      */
     public function getColumnNames(): array
     {
         $propertyNames = $this->getPropertyNames();
         $columnNames = [];
-        
+
         foreach ($propertyNames as $propertyName) {
             $columnNames[] = Column::getDefaultColumnName($propertyName);
         }
-        
+
         return $columnNames;
     }
 
     /**
      * Gets the normalized and pluralized table name for this model.
-     * 
+     *
      * @return string
      */
     public function getTableName(): string
@@ -280,7 +291,7 @@ class Model
 
     /**
      * Gets the name of the primary key property.
-     * 
+     *
      * @return string
      */
     public function getPrimaryKeyPropertyName(): string
@@ -291,7 +302,7 @@ class Model
 
     /**
      * Gets the value of the primary key property on this model.
-     * 
+     *
      * @return mixed|null
      */
     public function getPrimaryKeyValue()
@@ -302,7 +313,7 @@ class Model
 
     /**
      * Creates and returns a new query based on this model.
-     * 
+     *
      * @return ModelQuery
      */
     public static function query(): ModelQuery
@@ -312,7 +323,7 @@ class Model
 
     /**
      * Inserts this instance a new record in the database.
-     * 
+     *
      * @see update()
      * @return bool
      */
@@ -321,13 +332,15 @@ class Model
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
         $this->$primaryKeyName = null;
 
+        $this->runAutoApplicator(AutoApplicator::REASON_CREATE);
+
         $insertPkValue = $this->query()
             ->insert()
             ->values($this->getColumnValues())
             ->executeInsert();
-        
+
         // TODO Only get inserted PK value if it is known to be an auto increment column
-        
+
         $this->$primaryKeyName = $insertPkValue;
         $this->markAllPropertiesClean();
         return true;
@@ -337,31 +350,31 @@ class Model
      * Updates this instance's database record, based on its primary key.
      * Only "dirty" properties will be updated. If nothing was updated, this function won't do anything.
      * This function will fail if primary key is not set.
-     * 
+     *
      * @see create()
      * @return bool Returns whether updating the record succeeded. Also returns true if there was nothing to update.
      */
     public function update(): bool
     {
-        $modifiedData = $this->getDirtyColumns();
-        
-        if (empty($modifiedData)) {
-            return true;
+        if (!$this->isDirty()) {
+            return true; // no changes
         }
-        
+
+        $this->runAutoApplicator(AutoApplicator::REASON_UPDATE);
+
         $this->query()
             ->wherePrimaryKeyMatches($this)
             ->update()
-            ->set($modifiedData)
+            ->set($this->getDirtyColumns())
             ->execute();
-        
+
         $this->markAllPropertiesClean();
         return true;
     }
 
     /**
      * Deletes the record.
-     * 
+     *
      * @return bool Returns whether delete succeeded.
      */
     public function delete(): bool
@@ -370,17 +383,17 @@ class Model
             ->wherePrimaryKeyMatches($this)
             ->delete()
             ->execute();
-        
+
         return true;
     }
 
     /**
      * Commits the updated information in this model and its' underlying relationships to the database.
-     * 
+     *
      * If this record does not yet have primary key information, it will cause a new record to be inserted (create).
      * Instead, if this record does already have primary key information, it will cause the record to be updated.
      * If this is an existing record, but nothing was updated, this function won't do anything but still return true.
-     * 
+     *
      * @see create()
      * @see update()
      * @return bool Returns whether saving the data succeeded.
@@ -391,24 +404,24 @@ class Model
 
         if (!empty($this->$primaryKeyName)) {
             return $this->update();
-        } 
-        
+        }
+
         return $this->create();
     }
 
     /**
      * Fetches a instance of this model by its primary key value.
-     * 
+     *
      * @param string|int $keyValue The primary key value to seek out.
      * @return Model|$this|null Fetched model instance, or NULL if there was no result.
      */
     public static function fetch($keyValue): ?Model
     {
         $keyValue = strval($keyValue);
-        
+
         $className = get_called_class();
         $referenceModel = new $className();
-        
+
         /**
          * @var $referenceModel Model
          */
@@ -422,14 +435,14 @@ class Model
 
     /**
      * Fetches all records in the database as a collection of model instances.
-     * 
+     *
      * @return array
      */
     public static function all(): array
     {
         $className = get_called_class();
         $referenceModel = new $className();
-        
+
         /**
          * @var $referenceModel Model
          */
@@ -576,5 +589,24 @@ class Model
 
         $this->setColumnValues($existingModel->getColumnValues());
         return true;
+    }
+
+    /**
+     * Performs any @auto hooks before committing new or changed models to the database.
+     *
+     * @param string $reason The change reason, e.g. "update" or "create".
+     * @return bool Returns true if any data has changed.
+     */
+    protected function runAutoApplicator(string $reason): bool
+    {
+        $anyChanges = false;
+
+        foreach ($this->getTableInfo()->getColumns() as $column) {
+            if (AutoApplicator::apply($this, $column, $reason)) {
+                $anyChanges = true;
+            }
+        }
+
+        return $anyChanges;
     }
 }

@@ -45,6 +45,8 @@ $pdo->exec('CREATE TABLE `'  . $dsnConfig->database . '`.`users` (
   `user_name` VARCHAR(45) NULL,
   `email_address` VARCHAR(45) NULL,
   `join_date` DATETIME NULL,
+  `created_at` DATETIME NULL,
+  `modified_at` DATETIME NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `user_name_UNIQUE` (`user_name` ASC));');
 
