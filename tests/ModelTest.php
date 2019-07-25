@@ -44,10 +44,12 @@ class ModelTest extends TestCase
         $user = new User($values);
         
         $this->assertEmpty($user->getDirtyProperties());
+        $this->assertFalse($user->isDirty());
         
         $user->userName = 'Jan';
 
         $this->assertEquals(['userName' => 'Jan'], $user->getDirtyProperties());
+        $this->assertTrue($user->isDirty());
     }
     
     public function testGetDirtyColumns()
