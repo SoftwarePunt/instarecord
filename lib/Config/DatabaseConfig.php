@@ -69,8 +69,8 @@ class DatabaseConfig
     /**
      * The character set to use when connecting to the database.
      * 
-     * @default utf8
+     * @default utf8mb4
      * @var string
      */
-    public $charset = 'utf8';
+    public $charset = 'utf8mb4';
 }
