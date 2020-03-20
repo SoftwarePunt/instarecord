@@ -4,6 +4,7 @@ namespace Instasell\Instarecord\Tests\Database;
 
 use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\Database\Table;
+use Instasell\Instarecord\Instarecord;
 use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
 
@@ -46,10 +47,35 @@ class DataFormattingTest extends TestCase
     {
         $column = $this->_createTestColumn(['var' => '\DateTime']);
         $testDateTimeStr = '2013-02-01 11:22:33';
+
         $parsedDateTime = $column->parseDatabaseValue($testDateTimeStr);
         
         $this->assertInstanceOf('\DateTime', $parsedDateTime, 'DateTime value should be parsed into DateTime object');
+
+        /**
+         * @var \DateTime $parsedDateTime
+         */
+
         $this->assertEquals($testDateTimeStr, $parsedDateTime->format(Column::DATE_TIME_FORMAT), 'DateTime parsing should maintain correct value');
+        $this->assertEquals(Instarecord::config()->timezone, $parsedDateTime->getTimezone()->getName(), 'DateTime parsing should return correct timezone');
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDateTimeParseWithAltTimezone()
+    {
+        $customTzName = 'Europe/Amsterdam';
+        Instarecord::config()->timezone = $customTzName;
+
+        $column = $this->_createTestColumn(['var' => '\DateTime']);
+        $parsedDateTime = $column->parseDatabaseValue('2013-02-01 11:22:33');
+
+        $this->assertEquals(
+            $customTzName,
+            $parsedDateTime->getTimezone()->getName(),
+            'DateTime parsing should return correct timezone'
+        );
     }
 
     public function testDateTimeParseFailuresDoesNotResultInFalse()

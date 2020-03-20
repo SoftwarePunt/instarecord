@@ -5,6 +5,7 @@ namespace Instasell\Instarecord\Database;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use Instasell\Instarecord\Instarecord;
 use Instasell\Instarecord\Utils\TextTransforms;
 use Minime\Annotations\Interfaces\AnnotationsBagInterface;
 
@@ -20,6 +21,7 @@ class Column
     const TYPE_DECIMAL = "decimal";
     
     const DATE_TIME_FORMAT = "Y-m-d H:i:s";
+    const DEFAULT_TIMEZONE = "UTC";
 
     const AUTO_MODE_CREATED = "created";
     const AUTO_MODE_MODIFIED = "modified";
@@ -85,6 +87,13 @@ class Column
     protected $autoMode;
 
     /**
+     * The timezone to use for parsing/formatting date/time/datetime values.
+     *
+     * @var DateTimeZone
+     */
+    protected $timezone;
+
+    /**
      * Column constructor.
      *
      * @param Table $table The table this column is a part of.
@@ -103,6 +112,10 @@ class Column
         $this->getColumnName(); // trigger once, so name is cached
         $this->readExtraProperties(); // apply misc properties (@decimals)
         $this->readAutoMode(); // apply and validate @auto property, may also implicitly set @type
+
+        $this->timezone = new DateTimeZone(
+            Instarecord::config()->timezone
+        );
     }
 
     /**
@@ -349,7 +362,7 @@ class Column
     public function formatDatabaseValue($input): ?string
     {
         if ($input instanceof \DateTime) {
-            $input->setTimezone(new DateTimeZone('UTC'));
+            $input->setTimezone($this->timezone);
             return $input->format(self::DATE_TIME_FORMAT);
         }
 
@@ -430,7 +443,7 @@ class Column
             if (!empty($input)) {
                 // Parse attempt one: default db format
                 try {
-                    $dtParsed = \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input, new DateTimeZone('UTC'));
+                    $dtParsed = \DateTime::createFromFormat(self::DATE_TIME_FORMAT, $input, $this->timezone);
 
                     if ($dtParsed) {
                         return $dtParsed;
@@ -439,7 +452,7 @@ class Column
 
                 // Parse attempt two: alt db format (also used for "time" db fields otherwise they break)
                 try {
-                    $dtParsed = new DateTime($input, new DateTimeZone('UTC'));
+                    $dtParsed = new DateTime($input, $this->timezone);
 
                     if ($dtParsed) {
                         return $dtParsed;
