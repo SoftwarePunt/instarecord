@@ -15,15 +15,11 @@ class ReflectionModel
 {
     /**
      * An instance of the model being reflected.
-     *
-     * @var Model
      */
     protected Model $model;
 
     /**
      * The reflection class for the model instance.
-     *
-     * @var ReflectionClass
      */
     protected ReflectionClass $rfClass;
 
@@ -44,11 +40,11 @@ class ReflectionModel
     public function __construct(Model $model)
     {
         $this->model = $model;
-        $this->rfClass = new \ReflectionClass($model);
+        $this->rfClass = new ReflectionClass($model);
         $this->rfPublicProps = [];
 
         // Filter reflection properties to public, non-static ones only (these are our target properties)
-        $allProps = $this->rfClass->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $allProps = $this->rfClass->getProperties(ReflectionProperty::IS_PUBLIC);
         foreach ($allProps as $rfProp) {
             if ($rfProp->isPublic() && !$rfProp->isStatic()) {
                 $this->rfPublicProps[] = $rfProp;
@@ -65,7 +61,7 @@ class ReflectionModel
      * @throws ConfigException
      * @throws ReflectionException
      */
-    public static function fromClassName(string $modelClassName)
+    public static function fromClassName(string $modelClassName): ReflectionModel
     {
         if (!class_exists($modelClassName)) {
             throw new ConfigException("Cannot create ReflectionModel for invalid class name: {$modelClassName}");
