@@ -100,9 +100,9 @@ class Table
 
         $annotationReader = Reader::createFromDefaults();
 
-        foreach ($this->reflectionModel->getPropertyNamesAndTypes() as $propertyName => $propertyType) {
-            $column = new Column($this, $propertyName, $propertyType, $annotationReader->getPropertyAnnotations(
-                $this->modelClassNameQualified, $propertyName, $propertyType));
+        foreach ($this->reflectionModel->getReflectionProperties() as $propertyName => $rfProp) {
+            $annotationBag = $annotationReader->getPropertyAnnotations($this->modelClassNameQualified, $propertyName);
+            $column = new Column($this, $propertyName, $rfProp, $annotationBag);
 
             $columns[$propertyName] = $column;
             $columnsByName[$column->getColumnName()] = $column;

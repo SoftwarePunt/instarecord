@@ -82,16 +82,16 @@ class ReflectionModel
     }
 
     /**
-     * Gets a list of all public, non-static property names, mapped to their declared types.
+     * Gets a list of reflection properties, indexed by name.
      *
-     * @return string[] {propName => type} Indexed by property name, each value represents its declared type.
+     * @return ReflectionProperty[]
      */
-    public function getPropertyNamesAndTypes(): array
+    public function getReflectionProperties(): array
     {
         $propList = [];
 
         foreach ($this->rfPublicProps as $rfProp) {
-            $propList[$rfProp->getName()] = $rfProp->getType();
+            $propList[$rfProp->getName()] = $rfProp;
         }
 
         return $propList;

@@ -4,6 +4,7 @@ namespace Instasell\Instarecord\Tests\Database;
 
 use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\Database\Table;
+use Instasell\Instarecord\Reflection\ReflectionModel;
 use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
 
@@ -22,8 +23,13 @@ class ColumnTest extends TestCase
     public function testRespectsCustomColumnNames()
     {
         $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
+
+        $rfProp = ReflectionModel::fromClassName('Instasell\\Instarecord\\Tests\\Samples\\User')
+            ->getReflectionProperties()['id'];
+
         $annotationBag = new AnnotationsBag(['column' => 'custom_column_name']);
-        $column = new Column($table, 'myPropName', null, $annotationBag);
+
+        $column = new Column($table, 'id', $rfProp, $annotationBag);
 
         $this->assertEquals('custom_column_name', $column->getColumnName(), "A custom @columnn annotation should override the default column name");
     }

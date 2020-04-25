@@ -48,8 +48,14 @@ class Model
      */
     protected function setInitialValues(?array $initialValues): void
     {
-        foreach ($this->getPropertyNames() as $propertyName) {
-            $this->$propertyName = $this->getColumnForPropertyName($propertyName)->getDefaultValue();
+        foreach ($this->getTableInfo()->getColumns() as $column) {
+            $propertyName = $column->getPropertyName();
+            $defaultValue = $this->getColumnForPropertyName($propertyName)->getDefaultValue();
+
+            // [php-7.4]: Only assign default value if it's not null, or if null is explicitly allowed
+            if (($defaultValue !== null) || ($column->getIsNullable() && $defaultValue === null)) {
+                $this->$propertyName = $defaultValue;
+            }
         }
 
         if ($initialValues) {
@@ -93,7 +99,14 @@ class Model
         $propertyList = [];
 
         foreach ($this->getPropertyNames() as $propertyName) {
-            $propertyList[$propertyName] = $this->$propertyName;
+            // [php-7.4]: Work around "must not be accessed before initialization" errors with isset()
+            $propVal = null;
+
+            if (isset($this->$propertyName)) {
+                $propVal = $this->$propertyName;
+            }
+
+            $propertyList[$propertyName] = $propVal;
         }
 
         return $propertyList;
@@ -175,7 +188,10 @@ class Model
             $propertyName = $columnInfo->getPropertyName();
             $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
 
-            $this->$propertyName = $propertyValue;
+            // [php-7.4]: Only assign default value if it's not null, or if null is explicitly allowed
+            if (($propertyValue !== null) || ($columnInfo->getIsNullable() && $propertyValue === null)) {
+                $this->$propertyName = $propertyValue;
+            }
         }
     }
 
@@ -330,7 +346,8 @@ class Model
     public function create(): bool
     {
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
-        $this->$primaryKeyName = null;
+
+        unset($this->$primaryKeyName);
 
         $this->runAutoApplicator(AutoApplicator::REASON_CREATE);
 

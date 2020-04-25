@@ -16,10 +16,7 @@ class NullableTest extends Model
      */
     public $stringNonNullable;
 
-    /**
-     * @var string|null
-     */
-    public $stringNullableThroughType;
+    public ?string $stringNullableThroughType;
 
     /**
      * @nullable

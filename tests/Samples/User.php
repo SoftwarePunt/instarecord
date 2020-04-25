@@ -6,24 +6,14 @@ use Instasell\Instarecord\Model;
 
 class User extends Model
 {
-    /**
-     * @var int
-     */
-    private $secretNotWritable;
-    
-    /**
-     * @var int
-     */
-    public $id;
+    private int $secretNotWritable;
+
+    public int $id;
 
     /**
      * @myCustomAnnotation
-     * @var string
      */
-    public $userName;
+    public string $userName;
 
-    /**
-     * @var \DateTime
-     */
-    public $joinDate;
+    public \DateTime $joinDate;
 }

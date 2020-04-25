@@ -157,7 +157,7 @@ class ModelTest extends TestCase
 
         $this->assertEquals('Bob', $user->userName);
         $this->assertEquals(5, $user->id);
-        $this->assertNull($user->joinDate);
+        $this->assertFalse(isset($user->joinDate));
     }
 
     public function testGetAndSetColumnValues()
@@ -418,7 +418,6 @@ class ModelTest extends TestCase
         // Create initial user
         $newUser = new User();
         $newUser->userName = "testModelUpdatesFormattedValues";
-        $newUser->joinDate = null;
         $newUser->save();
         
         // Update user with a new date time
@@ -447,13 +446,12 @@ class ModelTest extends TestCase
         
         $this->assertEquals('', $newUser->userName, "Non-nullable strings should be set to EMPTY STRING by default");
         $this->assertEquals(0, $newUser->id, "Non-nullable integers should be set to NULL by default");
-        $this->assertEquals(null, $newUser->joinDate, "DateTimes are still set to NULL because they do not have a suitable zero or empty value");
+        $this->assertFalse(isset($newUser->joinDate), "DateTimes should be unassigned (isset = false) until an explicit value is assigned");
     }
     
     public function testFetchPkVal()
     {
         $newUser = new User();
-        $newUser->joinDate = null;
         
         $this->assertEquals(0, $newUser->getPrimaryKeyValue());
         

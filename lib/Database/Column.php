@@ -98,18 +98,18 @@ class Column
      *
      * @param Table $table The table this column is a part of.
      * @param string $propertyName The name of the property associated with this column on the model.
-     * @param string|null $propertyType The declared type of the property associated with this column on the model.
+     * @param \ReflectionProperty|null $rfProp Property reflection data.
      * @param AnnotationsBagInterface $annotations Attributes extracted from annotations.
      *
      * @throws ColumnDefinitionException
      */
-    public function __construct(Table $table, string $propertyName, ?string $propertyType, AnnotationsBagInterface $annotations)
+    public function __construct(Table $table, string $propertyName, ?\ReflectionProperty $rfProp, AnnotationsBagInterface $annotations)
     {
         $this->table = $table;
         $this->propertyName = $propertyName;
         $this->annotations = $annotations;
         
-        $this->determineDataType(); // apply @type and @nullable data, or set defaults
+        $this->determineDataType($rfProp); // apply type + nullable data / set defaults
         $this->getColumnName(); // trigger once, so name is cached
         $this->readExtraProperties(); // apply misc properties (@decimals)
         $this->readAutoMode(); // apply and validate @auto property, may also implicitly set @type
@@ -121,13 +121,55 @@ class Column
 
     /**
      * Determines and sets the column data type based on the "@var" annotation.
+     *
+     * @param \ReflectionProperty|null $rfProp Property reflection data.
+     *
+     * @throws ColumnDefinitionException
      */
-    protected function determineDataType(): void
+    protected function determineDataType(?\ReflectionProperty $rfProp): void
     {
         $this->dataType = self::TYPE_STRING;
         $this->dataTypeExplicit = false;
         $this->isNullable = false;
 
+        // Process in-code declared php type
+        if ($rfProp) {
+            $phpType = $rfProp->getType();
+            $phpTypeStr = strval($phpType);
+
+            if ($phpType && $phpTypeStr) {
+                switch ($phpTypeStr) {
+                    case "bool":
+                        $this->dataType = self::TYPE_BOOLEAN;
+                        break;
+                    case "int":
+                        $this->dataType = self::TYPE_INTEGER;
+                        break;
+                    case "float":
+                        $this->dataType = self::TYPE_DECIMAL;
+                        break;
+                    case "string":
+                        $this->dataType = self::TYPE_STRING;
+                        break;
+                    default:
+                        if (class_exists($phpTypeStr)) {
+                            if ($phpTypeStr === "DateTime" || $phpTypeStr === "\DateTime") {
+                                $this->dataType = self::TYPE_DATE_TIME;
+                                break;
+                            } else {
+                                throw new ColumnDefinitionException("Object properties are not currently supported: {$phpTypeStr}");
+                            }
+                        }
+                        throw new ColumnDefinitionException("Unsupported property type encountered: {$phpTypeStr}");
+                }
+
+                if ($phpType instanceof \ReflectionNamedType && $phpType->allowsNull()) {
+                    $this->isNullable = true;
+                }
+            }
+        }
+
+        // Process phpdoc-declared @var keyword; this overrides the PHP declared type
         if ($this->annotations->has('var')) {
             $varKeywordValue = $this->annotations->get('var');
             $varKeywordValue = TextTransforms::removeNamespaceFromClassName($varKeywordValue);
@@ -224,7 +266,7 @@ class Column
 
             if (!$dataTypeOk) {
                 throw new ColumnDefinitionException(
-                    "Column definition `{$this->propertyName}` has a @type of `{$this->dataType}`, "
+                    "Column definition `{$this->propertyName}` has a declared type of `{$this->dataType}`, "
                     . "but @auto mode of `{$this->autoMode}` expects a @type of `{$impliedType}`."
                 );
             }
