@@ -2,6 +2,8 @@
 
 namespace Instasell\Instarecord\Config;
 
+use Instasell\Instarecord\Database\Column;
+
 /**
  * Database configuration object for Instarecord.
  * Represents the configuration used to initialize a single database connection.
@@ -69,8 +71,19 @@ class DatabaseConfig
     /**
      * The character set to use when connecting to the database.
      * 
-     * @default utf8
+     * @default utf8mb4
      * @var string
      */
-    public $charset = 'utf8';
+    public $charset = 'utf8mb4';
+
+    /**
+     * The default timezone identifier.
+     * All date, datetime and times columns will be stored and retrieved with this timezone as basis.
+     *
+     * Changing this value will effectively change how each database value is interpreted, so beware.
+     *
+     * @default UTC
+     * @var string
+     */
+    public $timezone = Column::DEFAULT_TIMEZONE;
 }
