@@ -52,30 +52,8 @@ class ReflectionModel
         }
     }
 
-    /**
-     * Attempts to create a ReflectionModel given a $modelClassName.
-     *
-     * @param string $modelClassName The fully-qualified class name of the Model class.
-     * @return ReflectionModel
-     *
-     * @throws ConfigException
-     * @throws ReflectionException
-     */
-    public static function fromClassName(string $modelClassName): ReflectionModel
-    {
-        if (!class_exists($modelClassName)) {
-            throw new ConfigException("Cannot create ReflectionModel for invalid class name: {$modelClassName}");
-        }
-
-        $referenceModel = (new ReflectionClass($modelClassName))->newInstanceWithoutConstructor();
-
-        if (!$referenceModel instanceof Model) {
-            throw new ConfigException(
-                "Cannot create ReflectionModel for class that does not extend from Model: {$modelClassName}");
-        }
-
-        return new ReflectionModel($referenceModel);
-    }
+    // -----------------------------------------------------------------------------------------------------------------
+    // Reflection getter helpers
 
     /**
      * Gets the model's fully qualified class name.
@@ -101,5 +79,49 @@ class ReflectionModel
         }
 
         return $propNames;
+    }
+
+    /**
+     * Gets a list of all public, non-static property names, mapped to their declared types.
+     *
+     * @return string[] {propName => type} Indexed by property name, each value represents its declared type.
+     */
+    public function getPropertyNamesAndTypes(): array
+    {
+        $propList = [];
+
+        foreach ($this->rfPublicProps as $rfProp) {
+            $propList[$rfProp->getName()] = $rfProp->getType();
+        }
+
+        return $propList;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Static helper
+
+    /**
+     * Attempts to create a ReflectionModel given a $modelClassName.
+     *
+     * @param string $modelClassName The fully-qualified class name of the Model class.
+     * @return ReflectionModel
+     *
+     * @throws ConfigException
+     * @throws ReflectionException
+     */
+    public static function fromClassName(string $modelClassName): ReflectionModel
+    {
+        if (!class_exists($modelClassName)) {
+            throw new ConfigException("Cannot create ReflectionModel for invalid class name: {$modelClassName}");
+        }
+
+        $referenceModel = (new ReflectionClass($modelClassName))->newInstanceWithoutConstructor();
+
+        if (!$referenceModel instanceof Model) {
+            throw new ConfigException(
+                "Cannot create ReflectionModel for class that does not extend from Model: {$modelClassName}");
+        }
+
+        return new ReflectionModel($referenceModel);
     }
 }

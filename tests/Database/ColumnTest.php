@@ -23,7 +23,7 @@ class ColumnTest extends TestCase
     {
         $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
         $annotationBag = new AnnotationsBag(['column' => 'custom_column_name']);
-        $column = new Column($table, 'myPropName', $annotationBag);
+        $column = new Column($table, 'myPropName', null, $annotationBag);
 
         $this->assertEquals('custom_column_name', $column->getColumnName(), "A custom @columnn annotation should override the default column name");
     }
@@ -32,7 +32,7 @@ class ColumnTest extends TestCase
     {
         $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
         $annotationBag = new AnnotationsBag([]);
-        $column = new Column($table, 'myPropName', $annotationBag);
+        $column = new Column($table, 'myPropName', null, $annotationBag);
 
         $this->assertEquals('my_prop_name', $column->getColumnName(), "If no custom @columnn annotation is set, default column conventions should be assumed");
     }

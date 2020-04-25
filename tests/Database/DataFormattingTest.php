@@ -14,7 +14,7 @@ class DataFormattingTest extends TestCase
     {
         $annotationBag = new AnnotationsBag($annotations);
         $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
-        $column = new Column($table, 'testColumn', $annotationBag);
+        $column = new Column($table, 'testColumn', null, $annotationBag);
         return $column;
     }
 

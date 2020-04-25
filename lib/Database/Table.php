@@ -98,12 +98,11 @@ class Table
         $columns = [];
         $columnsByName = [];
 
-        $allPropertyNames = $this->reflectionModel->getPropertyNames();
         $annotationReader = Reader::createFromDefaults();
 
-        foreach ($allPropertyNames as $propertyName) {
-            $annotations = $annotationReader->getPropertyAnnotations($this->modelClassNameQualified, $propertyName);
-            $column = new Column($this, $propertyName, $annotations);
+        foreach ($this->reflectionModel->getPropertyNamesAndTypes() as $propertyName => $propertyType) {
+            $column = new Column($this, $propertyName, $propertyType, $annotationReader->getPropertyAnnotations(
+                $this->modelClassNameQualified, $propertyName, $propertyType));
 
             $columns[$propertyName] = $column;
             $columnsByName[$column->getColumnName()] = $column;

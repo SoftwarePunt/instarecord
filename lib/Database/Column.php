@@ -98,11 +98,12 @@ class Column
      *
      * @param Table $table The table this column is a part of.
      * @param string $propertyName The name of the property associated with this column on the model.
+     * @param string|null $propertyType The declared type of the property associated with this column on the model.
      * @param AnnotationsBagInterface $annotations Attributes extracted from annotations.
      *
      * @throws ColumnDefinitionException
      */
-    public function __construct(Table $table, string $propertyName, AnnotationsBagInterface $annotations)
+    public function __construct(Table $table, string $propertyName, ?string $propertyType, AnnotationsBagInterface $annotations)
     {
         $this->table = $table;
         $this->propertyName = $propertyName;
