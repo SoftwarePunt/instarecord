@@ -3,8 +3,8 @@
 namespace Instasell\Instarecord\Database;
 
 use Instasell\Instarecord\Config\ConfigException;
-use Instasell\Instarecord\Config\ModelConfig;
 use Instasell\Instarecord\Model;
+use Instasell\Instarecord\Reflection\ReflectionModel;
 use Instasell\Instarecord\Utils\TextTransforms;
 use Minime\Annotations\Reader;
 
@@ -13,6 +13,11 @@ use Minime\Annotations\Reader;
  */
 class Table
 {
+    /**
+     * @var ReflectionModel
+     */
+    protected $reflectionModel;
+
     /**
      * The fully qualified table class name.
      *
@@ -61,20 +66,16 @@ class Table
      * Table constructor.
      *
      * @param string $modelClassName Fully qualified class name for associated model.
+     *
+     * @throws ConfigException
+     * @throws \ReflectionException
      */
     public function __construct(string $modelClassName)
     {
-        if (!class_exists($modelClassName)) {
-            throw new ConfigException("Cannot determine table information for invalid class name: {$modelClassName}");
-        }
+        $this->reflectionModel = ReflectionModel::fromClassName($modelClassName);
 
         $this->modelClassNameQualified = $modelClassName;
         $this->modelClassName = TextTransforms::removeNamespaceFromClassName($modelClassName);
-        $this->referenceModel = (new \ReflectionClass($modelClassName))->newInstanceWithoutConstructor();
-
-        if (!$this->referenceModel instanceof Model) {
-            throw new ConfigException("Cannot determine table information for class that does not extend from Model: {$modelClassName}");
-        }
 
         // Parse class annotations to determine custom table name, etc
         $annotationReader = Reader::createFromDefaults();
@@ -102,7 +103,7 @@ class Table
         $columns = [];
         $columnsByName = [];
 
-        $allPropertyNames = $this->referenceModel->getPropertyNames();
+        $allPropertyNames = $this->reflectionModel->getPropertyNames();
         $annotationReader = Reader::createFromDefaults();
 
         foreach ($allPropertyNames as $propertyName) {
