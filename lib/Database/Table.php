@@ -3,7 +3,6 @@
 namespace Instasell\Instarecord\Database;
 
 use Instasell\Instarecord\Config\ConfigException;
-use Instasell\Instarecord\Model;
 use Instasell\Instarecord\Reflection\ReflectionModel;
 use Instasell\Instarecord\Utils\TextTransforms;
 use Minime\Annotations\Reader;
@@ -14,37 +13,24 @@ use Minime\Annotations\Reader;
 class Table
 {
     /**
-     * @var ReflectionModel
+     * Reflection utility for the target Model class.
      */
-    protected $reflectionModel;
+    protected ReflectionModel $reflectionModel;
 
     /**
      * The fully qualified table class name.
-     *
-     * @var string
      */
-    private $modelClassNameQualified;
+    private string $modelClassNameQualified;
 
     /**
      * The unqualified model class name.
-     *
-     * @var string
      */
-    private $modelClassName;
+    private string $modelClassNameNoNamespace;
 
     /**
-     * A dummy instance of the model being referenced.
-     *
-     * @var Model
+     * The name of the database table.
      */
-    private $referenceModel;
-
-    /**
-     * The name of the table.
-     *
-     * @var string
-     */
-    private $tableName;
+    private string $tableName;
 
     /**
      * Column information list.
@@ -52,15 +38,15 @@ class Table
      *
      * @var Column[]
      */
-    private $columns;
+    private array $columns;
 
     /**
      * Column information list.
      * Indexed by column name.
      *
-     * @var
+     * @var Column[]
      */
-    private $columnsByName;
+    private array $columnsByName;
 
     /**
      * Table constructor.
@@ -75,7 +61,7 @@ class Table
         $this->reflectionModel = ReflectionModel::fromClassName($modelClassName);
 
         $this->modelClassNameQualified = $modelClassName;
-        $this->modelClassName = TextTransforms::removeNamespaceFromClassName($modelClassName);
+        $this->modelClassNameNoNamespace = TextTransforms::removeNamespaceFromClassName($modelClassName);
 
         // Parse class annotations to determine custom table name, etc
         $annotationReader = Reader::createFromDefaults();
@@ -170,7 +156,7 @@ class Table
         }
 
         // Assume default table name based on standard conventions
-        $this->tableName = self::getDefaultTableName($this->modelClassName);
+        $this->tableName = self::getDefaultTableName($this->modelClassNameNoNamespace);
         return $this->tableName;
     }
 
