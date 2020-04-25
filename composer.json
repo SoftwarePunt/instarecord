@@ -4,7 +4,7 @@
     "description": "ActiveRecord Database ORM layer for MySQL",
     "type": "framework",
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.4",
         "minime/annotations": "~3.0"
     },
     "require-dev": {
