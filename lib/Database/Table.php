@@ -33,6 +33,13 @@ class Table
     private string $tableName;
 
     /**
+     * Indicates whether or not $columns and $columnsByName have been initialized.
+     *
+     * @var bool
+     */
+    private bool $loadedColumns;
+
+    /**
      * Column information list.
      * Indexed by property name.
      *
@@ -63,6 +70,8 @@ class Table
         $this->modelClassNameQualified = $modelClassName;
         $this->modelClassNameNoNamespace = TextTransforms::removeNamespaceFromClassName($modelClassName);
 
+        $this->loadedColumns = false;
+
         // Parse class annotations to determine custom table name, etc
         $annotationReader = Reader::createFromDefaults();
         $classAnnotations = $annotationReader->getClassAnnotations($modelClassName);
@@ -82,7 +91,7 @@ class Table
      */
     public function getColumns(): array
     {
-        if ($this->columns) {
+        if ($this->loadedColumns) {
             return $this->columns;
         }
 
@@ -102,6 +111,8 @@ class Table
 
         $this->columns = $columns;
         $this->columnsByName = $columnsByName;
+        $this->loadedColumns = true;
+
         return $columns;
     }
 
@@ -150,7 +161,7 @@ class Table
      */
     public function getTableName(): string
     {
-        if ($this->tableName) {
+        if (isset($this->tableName)) {
             // Already calculated
             return $this->tableName;
         }
