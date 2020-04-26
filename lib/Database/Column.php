@@ -135,36 +135,39 @@ class Column
         // Process in-code declared php type
         if ($rfProp) {
             $phpType = $rfProp->getType();
-            $phpTypeStr = strval($phpType);
 
-            if ($phpType && $phpTypeStr) {
-                switch ($phpTypeStr) {
-                    case "bool":
-                        $this->dataType = self::TYPE_BOOLEAN;
-                        break;
-                    case "int":
-                        $this->dataType = self::TYPE_INTEGER;
-                        break;
-                    case "float":
-                        $this->dataType = self::TYPE_DECIMAL;
-                        break;
-                    case "string":
-                        $this->dataType = self::TYPE_STRING;
-                        break;
-                    default:
-                        if (class_exists($phpTypeStr)) {
-                            if ($phpTypeStr === "DateTime" || $phpTypeStr === "\DateTime") {
-                                $this->dataType = self::TYPE_DATE_TIME;
-                                break;
-                            } else {
-                                throw new ColumnDefinitionException("Object properties are not currently supported: {$phpTypeStr}");
+            if ($phpType) {
+                $phpTypeStr = $phpType->getName();
+
+                if ($phpType && $phpTypeStr) {
+                    switch ($phpTypeStr) {
+                        case "bool":
+                            $this->dataType = self::TYPE_BOOLEAN;
+                            break;
+                        case "int":
+                            $this->dataType = self::TYPE_INTEGER;
+                            break;
+                        case "float":
+                            $this->dataType = self::TYPE_DECIMAL;
+                            break;
+                        case "string":
+                            $this->dataType = self::TYPE_STRING;
+                            break;
+                        default:
+                            if (class_exists($phpTypeStr)) {
+                                if ($phpTypeStr === "DateTime" || $phpTypeStr === "\DateTime") {
+                                    $this->dataType = self::TYPE_DATE_TIME;
+                                    break;
+                                } else {
+                                    throw new ColumnDefinitionException("Object properties are not currently supported: {$phpTypeStr}");
+                                }
                             }
-                        }
-                        throw new ColumnDefinitionException("Unsupported property type encountered: {$phpTypeStr}");
-                }
+                            throw new ColumnDefinitionException("Unsupported property type encountered: {$phpTypeStr}");
+                    }
 
-                if ($phpType instanceof \ReflectionNamedType && $phpType->allowsNull()) {
-                    $this->isNullable = true;
+                    if ($phpType instanceof \ReflectionNamedType && $phpType->allowsNull()) {
+                        $this->isNullable = true;
+                    }
                 }
             }
         }
