@@ -6,7 +6,7 @@
   "require": {
     "php": ">=7.4",
     "ext-pdo": "*",
-    "minime/annotations": "~3.0",
+    "minime/annotations": "~3.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^6.0"
