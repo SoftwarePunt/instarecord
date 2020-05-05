@@ -426,6 +426,32 @@ class QueryTest extends TestCase
     /**
      * @depends testExecuteInsertWithAutoIncrement
      */
+    public function testExecuteReturnsRowCount()
+    {
+        $config = new TestDatabaseConfig();
+        $connection = new Connection($config);
+
+        (new Query($connection))->insert()
+            ->from('users')
+            ->values(['user_name' => 'delete-this-row-1'])
+            ->executeInsert();
+
+        (new Query($connection))->insert()
+            ->from('users')
+            ->values(['user_name' => 'delete-this-row-2'])
+            ->executeInsert();
+
+        $rowCount = (new Query($connection))->delete()
+            ->from('users')
+            ->where('user_name LIKE ?', 'delete-this-row-%')
+            ->execute();
+
+        $this->assertGreaterThanOrEqual(2, $rowCount);
+    }
+
+    /**
+     * @depends testExecuteInsertWithAutoIncrement
+     */
     public function testQueryAllRows()
     {
         $config = new TestDatabaseConfig();

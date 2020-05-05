@@ -888,12 +888,18 @@ class Query
      * Executes the query statement without gathering results.
      *
      * @throws DatabaseException
+     * @return int The number of rows affected by the query execution
      */
-    public function execute(): void
+    public function execute(): int
     {
         $stmt = $this->executeStatement();
+
+        $rowCount = $stmt->rowCount();
+
         $stmt->closeCursor();
         $stmt = null;
+
+        return $rowCount;
     }
 
     /**

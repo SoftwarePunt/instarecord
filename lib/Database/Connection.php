@@ -13,38 +13,38 @@ use Instasell\Instarecord\Logging\QueryLogger;
 class Connection
 {
     /**
-     * The configuration object used for this connection. 
-     * 
+     * The configuration object used for this connection.
+     *
      * @var DatabaseConfig
      */
     protected $config;
-    
+
     /**
      * The adapter used to communicate with the database.
-     * 
+     *
      * @var DatabaseAdapter
      */
     protected $adapter;
 
     /**
      * The PDO connection.
-     * 
+     *
      * @var \PDO
      */
     protected $pdo;
 
     /**
      * The query logger, if applicable.
-     * 
+     *
      * @var QueryLogger
      */
     protected $queryLogger;
 
     /**
      * Constructs a new, uninitialized database connection for a given adapter.
-     * 
-     * @throws ConfigException
+     *
      * @param DatabaseConfig $config
+     * @throws ConfigException
      */
     public function __construct(DatabaseConfig $config)
     {
@@ -55,18 +55,18 @@ class Connection
 
     /**
      * Sets the query logger on this connection instance.
-     * 
+     *
      * @param QueryLogger $logger
      */
     public function setQueryLogger(QueryLogger $logger)
     {
-        $this->queryLogger = $logger; 
+        $this->queryLogger = $logger;
     }
 
     /**
      * Attempts to open a database connection.
      * If the connection is already open, this function will do nothing.
-     * 
+     *
      * @throws DatabaseException
      */
     public function open(): void
@@ -74,7 +74,7 @@ class Connection
         if ($this->isOpen()) {
             return;
         }
-        
+
         try {
             $this->pdo = new \PDO($this->generateDsn(), $this->config->username, $this->config->password);
             $this->pdo->exec("SET NAMES {$this->config->charset};");
@@ -96,16 +96,16 @@ class Connection
      */
     public function close(): void
     {
-       if (!$this->isOpen()) {
-           return;
-       } 
-       
-       $this->pdo = null;
+        if (!$this->isOpen()) {
+            return;
+        }
+
+        $this->pdo = null;
     }
 
     /**
      * Gets whether the database connection has been opened.
-     * 
+     *
      * @return bool
      */
     public function isOpen(): bool
@@ -116,25 +116,24 @@ class Connection
     /**
      * Creates and executes a new PDO database statement, returning it if successful.
      * Causes the connection to open if it is currently closed.
-     * 
-     * @throws DatabaseException
+     *
      * @param string $statementText The statement (query) text.
      * @param array $parameters The parameters to be bound.
      * @return \PDOStatement
+     * @throws DatabaseException
      */
     public function executeStatement(string $statementText, array $parameters = []): \PDOStatement
     {
         // Ensure the connection is open
         $this->open();
-        
+
         // Create the new PDO statement object based on provided text
         try {
             $statement = $this->pdo->prepare($statementText);
-        }
-        catch (\PDOException $ex) {
+        } catch (\PDOException $ex) {
             throw new DatabaseException("Database error: Could not prepare a new statement: {$ex->getMessage()}", $ex->getCode(), $ex);
         }
-            
+
         if (!$statement) {
             throw new DatabaseException("Database error: Could not prepare a new statement on this connection");
         }
@@ -145,36 +144,36 @@ class Connection
         foreach ($parameters as $paramNumber => $paramValue) {
             $statement->bindValue(++$i, $paramValue);
         }
-        
+
         // Attempt to execute the statement, throwing an error on failure
         $queryTimeStart = microtime(true);
         $queryFailed = false;
-        
+
         if (!$statement->execute()) {
             $queryFailed = true;
         }
-        
+
         // Query complete, log it
         if ($this->queryLogger) {
             $queryTimeEnd = microtime(true);
             $queryRunTime = ($queryTimeEnd - $queryTimeStart);
-            
+
             $this->queryLogger->onQueryComplete($statementText, $parameters, $queryRunTime);
         }
-        
+
         // If this was a failure, throw up now
         if ($queryFailed) {
             $errorInfo = $statement->errorInfo();
             throw new DatabaseException("Query execution failure: {$errorInfo[2]}", $errorInfo[1]);
         }
-        
+
         // If we got this far, connect & execute was a success and we have a result object
         return $statement;
     }
 
     /**
      * Gets the last primary key value that was inserted on this connection.
-     * 
+     *
      * @return int|null
      */
     public function lastInsertId(): ?int
@@ -182,14 +181,14 @@ class Connection
         if ($this->isOpen()) {
             return intval($this->pdo->lastInsertId());
         }
-        
+
         return null;
     }
 
     /**
      * Begins a database transaction.
      * This turns off auto commit mode for statements.
-     * 
+     *
      * @return bool
      */
     public function beginTransaction(): bool
@@ -200,7 +199,7 @@ class Connection
     /**
      * Commits a transaction to the database.
      * This re-enables auto commit mode for statements.
-     * 
+     *
      * @return bool
      */
     public function commitTransaction(): bool
@@ -211,7 +210,7 @@ class Connection
     /**
      * Rolls back a transaction, reverting to the previous state.
      * This re-enables auto commit mode for statements.
-     * 
+     *
      * @return bool
      */
     public function rollbackTransaction(): bool
