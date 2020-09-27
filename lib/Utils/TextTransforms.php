@@ -7,7 +7,77 @@ namespace Instasell\Instarecord\Utils;
  */
 class TextTransforms
 {
-    private static $plural = array(
+    // -----------------------------------------------------------------------------------------------------------------
+    // Pluralization
+
+    public static function pluralize($string): string
+    {
+        // save some time in the case that singular and plural are the same
+        if (in_array(strtolower($string), self::uncountable))
+            return $string;
+
+        // check for irregular singular forms
+        foreach (self::irregular as $pattern => $result) {
+            $pattern = '/' . $pattern . '$/i';
+
+            if (preg_match($pattern, $string))
+                return preg_replace($pattern, $result, $string);
+        }
+
+        // check for matches using regular expressions
+        foreach (self::plural as $pattern => $result) {
+            if (preg_match($pattern, $string))
+                return preg_replace($pattern, $result, $string);
+        }
+
+        return "{$string}s";
+    }
+
+    public static function singularize($string): string
+    {
+        // save some time in the case that singular and plural are the same
+        if (in_array(strtolower($string), self::uncountable))
+            return $string;
+
+        // check for irregular plural forms
+        foreach (self::irregular as $result => $pattern) {
+            $pattern = '/' . $pattern . '$/i';
+
+            if (preg_match($pattern, $string))
+                return preg_replace($pattern, $result, $string);
+        }
+
+        // check for matches using regular expressions
+        foreach (self::singular as $pattern => $result) {
+            if (preg_match($pattern, $string))
+                return preg_replace($pattern, $result, $string);
+        }
+
+        return rtrim($string, "s");
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // NS
+
+    /**
+     * Removes the namespace component from a fully qualified class name.
+     *
+     * @param string $className Fully qualified class name.
+     * @return string Unqualified class name.
+     */
+    public static function removeNamespaceFromClassName(string $className): string
+    {
+        if (preg_match('@\\\\([\w]+)$@', $className, $matches)) {
+            $className = $matches[1];
+        }
+
+        return $className;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Data
+
+    private const plural = [
         '/(quiz)$/i' => "$1zes",
         '/^(ox)$/i' => "$1en",
         '/([m|l])ouse$/i' => "$1ice",
@@ -27,9 +97,9 @@ class TextTransforms
         '/(us)$/i' => "$1es",
         '/s$/i' => "s",
         '/$/' => "s"
-    );
+    ];
 
-    private static $singular = array(
+    private const singular = [
         '/(quiz)zes$/i' => "$1",
         '/(matr)ices$/i' => "$1ix",
         '/(vert|ind)ices$/i' => "$1ex",
@@ -57,11 +127,10 @@ class TextTransforms
         '/(h|bl)ouses$/i' => "$1ouse",
         '/(corpse)s$/i' => "$1",
         '/(us)es$/i' => "$1",
-        '/(us|ss)$/i' => "$1",
-        '/s$/i' => ""
-    );
+        '/(us|ss)$/i' => "$1"
+    ];
 
-    private static $irregular = array(
+    private const irregular = [
         'move' => 'moves',
         'foot' => 'feet',
         'goose' => 'geese',
@@ -70,9 +139,9 @@ class TextTransforms
         'man' => 'men',
         'tooth' => 'teeth',
         'person' => 'people'
-    );
+    ];
 
-    private static $uncountable = array(
+    private const uncountable = [
         'sheep',
         'fish',
         'deer',
@@ -82,66 +151,5 @@ class TextTransforms
         'rice',
         'information',
         'equipment'
-    );
-
-    public static function pluralize($string)
-    {
-        // save some time in the case that singular and plural are the same
-        if (in_array(strtolower($string), self::$uncountable))
-            return $string;
-
-        // check for irregular singular forms
-        foreach (self::$irregular as $pattern => $result) {
-            $pattern = '/' . $pattern . '$/i';
-
-            if (preg_match($pattern, $string))
-                return preg_replace($pattern, $result, $string);
-        }
-
-        // check for matches using regular expressions
-        foreach (self::$plural as $pattern => $result) {
-            if (preg_match($pattern, $string))
-                return preg_replace($pattern, $result, $string);
-        }
-
-        return $string;
-    }
-
-    public static function singularize($string)
-    {
-        // save some time in the case that singular and plural are the same
-        if (in_array(strtolower($string), self::$uncountable))
-            return $string;
-
-        // check for irregular plural forms
-        foreach (self::$irregular as $result => $pattern) {
-            $pattern = '/' . $pattern . '$/i';
-
-            if (preg_match($pattern, $string))
-                return preg_replace($pattern, $result, $string);
-        }
-
-        // check for matches using regular expressions
-        foreach (self::$singular as $pattern => $result) {
-            if (preg_match($pattern, $string))
-                return preg_replace($pattern, $result, $string);
-        }
-
-        return $string;
-    }
-
-    /**
-     * Removes the namespace component from a fully qualified class name.
-     *
-     * @param string $className Fully qualified class name.
-     * @return string Unqualified class name.
-     */
-    public static function removeNamespaceFromClassName(string $className)
-    {
-        if (preg_match('@\\\\([\w]+)$@', $className, $matches)) {
-            $className = $matches[1];
-        }
-
-        return $className;
-    }
+    ];
 }

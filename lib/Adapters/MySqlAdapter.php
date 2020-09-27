@@ -57,15 +57,8 @@ class MySqlAdapter extends DatabaseAdapter
         // Extract protocol
         $parts = explode(':', $dsn, 2);
 
-        $protocol = "mysql";
-        $remainder = "";
-
-        if (count($parts) == 2) {
-            $protocol = $parts[0];
-            $remainder = $parts[1];
-        } else {
-            $remainder = $parts[0];
-        }
+        $protocol = $parts[0] ?? "mysql";
+        $remainder = $parts[1] ?? "";
 
         // Extract components
         $components = explode(';', $remainder);
@@ -73,12 +66,8 @@ class MySqlAdapter extends DatabaseAdapter
         foreach ($components as $component) {
             $componentParts = explode('=', $component, 2);
 
-            if (count($componentParts) != 2) {
-                continue;
-            }
-
             $componentName = trim(strtolower($componentParts[0]));
-            $componentValue = trim($componentParts[1]);
+            $componentValue = trim($componentParts[1]) ?? "";
 
             switch ($componentName) {
                 case "unix_socket":
