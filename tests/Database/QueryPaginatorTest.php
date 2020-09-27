@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 class QueryPaginatorTest extends TestCase
 {
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $config = new TestDatabaseConfig();
         $connection = new Connection($config);
@@ -23,7 +23,7 @@ class QueryPaginatorTest extends TestCase
             ->delete();
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         $userQuery = User::query()
             ->delete();

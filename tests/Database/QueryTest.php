@@ -121,12 +121,11 @@ class QueryTest extends TestCase
         $this->assertEquals("blah", $queryParams[0]);
     }
 
-    /**
-     * @expectedException Instasell\Instarecord\Database\QueryBuilderException
-     * @expectedExceptionMessage Query format error
-     */
     public function testCannotUpdateWithColumnIndexNumbers()
     {
+        $this->expectException("Instasell\Instarecord\Database\QueryBuilderException");
+        $this->expectExceptionMessage("Query format error");
+
         $query = new Query(new Connection(new DatabaseConfig()));
 
         $data = [true, false];
@@ -383,12 +382,11 @@ class QueryTest extends TestCase
         $this->assertEquals(['1973-11-29 21:33:09'], $query->getBoundParametersForGeneratedStatement());
     }
 
-    /**
-     * @expectedException Instasell\Instarecord\Database\DatabaseException
-     * @expectedExceptionMessage .fruits' doesn't exist
-     */
     public function testExecute()
     {
+        $this->expectException("Instasell\Instarecord\Database\DatabaseException");
+        $this->expectExceptionMessage(".fruits' doesn't exist");
+
         $config = new TestDatabaseConfig();
         $connection = new Connection($config);
 
@@ -420,7 +418,7 @@ class QueryTest extends TestCase
         
         $this->assertNotEmpty($aiId, 'Auto incremented ID return value expected');
         $this->assertGreaterThan(0, $aiId, 'Auto incremented ID return value non-negative ID expected');
-        $this->assertInternalType("int", $aiId, 'Auto incremented ID should be an integer');
+        $this->assertIsInt($aiId, 'Auto incremented ID should be an integer');
     }
 
     /**

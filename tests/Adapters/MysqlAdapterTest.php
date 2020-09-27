@@ -71,8 +71,8 @@ class MysqlAdapterTest extends TestCase
         $generatedDsn = $adapter->createDsn($config);
         
         $this->assertStringStartsWith("mysql:unix_socket=/tmp/example/unix.sock;", $generatedDsn);
-        $this->assertNotContains("host=", $generatedDsn);
-        $this->assertNotContains("port=", $generatedDsn);
+        $this->assertStringNotContainsString("host=", $generatedDsn);
+        $this->assertStringNotContainsString("port=", $generatedDsn);
     }
 
     public function testTranslatesLocalhostToLocalIp()

@@ -1,16 +1,8 @@
 {
   "name": "instasell/instarecord",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "ActiveRecord Database ORM layer for MySQL",
-  "type": "framework",
-  "require": {
-    "php": ">=7.4",
-    "ext-pdo": "*",
-    "minime/annotations": "~3.0"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^6.0"
-  },
+  "type": "library",
   "license": "Proprietary",
   "authors": [
     {
@@ -18,7 +10,15 @@
       "email": "roy@softwarepunt.nl"
     }
   ],
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=7.4",
+    "ext-pdo": "*",
+    "minime/annotations": "~3.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9"
+  },
   "autoload": {
     "psr-4": {
       "Instasell\\Instarecord\\": "lib/",

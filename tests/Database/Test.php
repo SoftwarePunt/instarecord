@@ -19,7 +19,7 @@ class QueryLoggerTest extends TestCase
      */
     public static $queryLogger; 
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
         
@@ -37,7 +37,7 @@ class QueryLoggerTest extends TestCase
         };
     }
     
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp(); 
         

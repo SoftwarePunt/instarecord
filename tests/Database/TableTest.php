@@ -17,21 +17,19 @@ class TableTest extends TestCase
         $this->assertEquals("my_table_classes", Table::getDefaultTableName("My\\Qualified\\Namespaced\\MyTableClass"));
     }
 
-    /**
-     * @expectedException Instasell\Instarecord\Config\ConfigException
-     * @expectedExceptionMessage invalid class
-     */
     public function testConstructorErrorsOnBadClassName()
     {
+        $this->expectException("Instasell\Instarecord\Config\ConfigException");
+        $this->expectExceptionMessage("invalid class");
+
         $table = new Table('bogus\\class\\not\\real');
     }
 
-    /**
-     * @expectedException Instasell\Instarecord\Config\ConfigException
-     * @expectedExceptionMessage does not extend
-     */
     public function testConstructorErrorsOnNonModelClassName()
     {
+        $this->expectException("Instasell\Instarecord\Config\ConfigException");
+        $this->expectExceptionMessage("does not extend");
+
         $table = new Table('Instasell\\Instarecord\\Tests\\Database\\TableTest');
     }
 
@@ -55,22 +53,6 @@ class TableTest extends TestCase
         $columns2 = $table->getColumns();
 
         $this->assertSame($columns, $columns2, 'Column list should only be calculated once and cached in memory after');
-    }
-
-    /**
-     * @depends testExtractsIndexedColumnList
-     */
-    public function testExtractsAnnotationInfoIntoColumns()
-    {
-        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
-        $columns = $table->getColumns();
-        $userNameColumn = $columns['userName'];
-
-        // We're testing this on a private member because the API purposely doesn't expose the AnnotationBag
-        // Yet we want to test whether annotations are being parsed & passed correctly, somehow
-        // This isn't the prettiest solution but I'll sleep better at night knowing it's here
-        Assert::assertAttributeContains('myCustomAnnotation', 'annotations', $userNameColumn);
-        Assert::assertAttributeContains('string', 'annotations', $userNameColumn);
     }
     
     public function testUsesCustomTableNameFromAnnotation()

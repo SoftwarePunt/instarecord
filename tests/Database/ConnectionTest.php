@@ -58,12 +58,11 @@ class ConnectionTest extends TestCase
         $this->assertTrue($connection->isOpen(), 'Database connection reopen should succeed');
     }
 
-    /**
-     * @expectedException Instasell\Instarecord\Database\DatabaseException
-     * @expectedExceptionMessage Database connection failed
-     */
     public function testOpenThrowsExceptionForInvalidCredentials()
     {
+        $this->expectException("Instasell\Instarecord\Database\DatabaseException");
+        $this->expectExceptionMessage("Database connection failed");
+
         $config = new DatabaseConfig();
         $config->username = 'badname_notreal_noway';
         
@@ -85,6 +84,6 @@ class ConnectionTest extends TestCase
         $this->assertInstanceOf('\PDOStatement', $statement, 'Expected a raw PDOStatement as a result');
         
         $resultSet = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $this->assertInternalType('array', $resultSet, 'Expected assoc array as result with no errors');
+        $this->assertIsArray($resultSet, 'Expected assoc array as result with no errors');
     }
 }
