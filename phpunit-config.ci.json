@@ -1,7 +1,0 @@
-{
-    "db_host": "mysqlhost",
-    "db_port": 3306,
-    "db_user": "homestead",
-    "db_pass": "secret",
-    "db_name": "homestead"
-}
