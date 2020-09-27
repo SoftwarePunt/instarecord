@@ -42,6 +42,17 @@ class Model
     }
 
     /**
+     * Gets the actual table name.
+     * Can be overriden by a model to provide a custom name.
+     *
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return Table::getDefaultTableName(get_class($this));
+    }
+
+    /**
      * Applies a set of initial values as properties on this model.
      *
      * @param array $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
@@ -282,16 +293,6 @@ class Model
         }
 
         return $columnNames;
-    }
-
-    /**
-     * Gets the normalized and pluralized table name for this model.
-     *
-     * @return string
-     */
-    public function getTableName(): string
-    {
-        return Table::getTableNameForClass(get_class($this));
     }
 
     /**

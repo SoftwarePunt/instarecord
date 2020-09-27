@@ -28,11 +28,6 @@ class Table
     private string $modelClassNameNoNamespace;
 
     /**
-     * The name of the database table.
-     */
-    private string $tableName;
-
-    /**
      * Indicates whether or not $columns and $columnsByName have been initialized.
      *
      * @var bool
@@ -71,16 +66,6 @@ class Table
         $this->modelClassNameNoNamespace = TextTransforms::removeNamespaceFromClassName($modelClassName);
 
         $this->loadedColumns = false;
-
-        // Parse class annotations to determine custom table name, etc
-        $annotationReader = Reader::createFromDefaults();
-        $classAnnotations = $annotationReader->getClassAnnotations($modelClassName);
-
-        foreach ($classAnnotations as $name => $value) {
-            if (strtolower($name) === "table") {
-                $this->tableName = $value;
-            }
-        }
     }
 
     /**
@@ -154,23 +139,6 @@ class Table
     }
 
     /**
-     * Gets the table name.
-     *
-     * @return string
-     */
-    public function getTableName(): string
-    {
-        if (isset($this->tableName)) {
-            // Already calculated
-            return $this->tableName;
-        }
-
-        // Assume default table name based on standard conventions
-        $this->tableName = self::getDefaultTableName($this->modelClassNameNoNamespace);
-        return $this->tableName;
-    }
-
-    /**
      * @var array
      */
     public static $tableInfoCache = [];
@@ -186,18 +154,6 @@ class Table
         }
 
         return self::$tableInfoCache[$modelClassName];
-    }
-
-    /**
-     * Based on a Model name, returns the table name.
-     *
-     * @param string $modelClassName
-     * @return string
-     */
-    public static function getTableNameForClass(string $modelClassName): string
-    {
-        $tableInfo = Table::getTableInfo($modelClassName);
-        return $tableInfo->getTableName();
     }
 
     /**

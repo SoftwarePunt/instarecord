@@ -54,13 +54,4 @@ class TableTest extends TestCase
 
         $this->assertSame($columns, $columns2, 'Column list should only be calculated once and cached in memory after');
     }
-    
-    public function testUsesCustomTableNameFromAnnotation()
-    {
-        $user = new CustomTableNameModel();
-        $table = $user->getTableInfo();
-        
-        $this->assertEquals('my_name', $table->getTableName());
-        $this->assertEquals($user->getTableName(), $table->getTableName());
-    }
 }

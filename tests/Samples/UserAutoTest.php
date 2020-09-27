@@ -39,4 +39,12 @@ class UserAutoTest extends Model
      * @auto created
      */
     public $createdAt;
+
+    /**
+     * @inheritDoc
+     */
+    public function getTableName(): string
+    {
+        return "users";
+    }
 }

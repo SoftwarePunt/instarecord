@@ -30,4 +30,12 @@ class ReadOnlyUser extends Model implements IReadOnlyModel
      * @var \DateTime
      */
     public $joinDate;
+
+    /**
+     * @inheritDoc
+     */
+    public function getTableName(): string
+    {
+        return "users";
+    }
 }
