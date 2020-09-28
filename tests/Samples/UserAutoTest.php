@@ -9,40 +9,18 @@ use Instasell\Instarecord\Model;
  */
 class UserAutoTest extends Model
 {
-    /**
-     * @var int
-     */
-    private $secretNotWritable;
-    
-    /**
-     * @var int
-     */
-    public $id;
+    private int $secretNotWritable;
 
-    /**
-     * @myCustomAnnotation
-     * @var string
-     */
-    public $userName;
+    public int $id;
 
-    /**
-     * @var \DateTime
-     */
-    public $joinDate;
+    public string $userName;
 
-    /**
-     * @auto modified
-     */
-    public $modifiedAt;
+    public \DateTime $joinDate;
 
-    /**
-     * @auto created
-     */
-    public $createdAt;
+    public \DateTime $modifiedAt;
 
-    /**
-     * @inheritDoc
-     */
+    public \DateTime $createdAt;
+
     public function getTableName(): string
     {
         return "users";

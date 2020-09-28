@@ -2,7 +2,6 @@
 
 namespace Instasell\Instarecord\Tests\Database;
 
-use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\Database\Table;
 use Instasell\Instarecord\Instarecord;
 use Instasell\Instarecord\Tests\Samples\UserAutoTest;
@@ -12,9 +11,9 @@ use PHPUnit\Framework\TestCase;
 class AutoColumnTest extends TestCase
 {
     /**
-     * Asserts that the "@auto" annotation is correctly read and applied to the Column instance.
+     * Asserts that the auto mode is correctly determined.
      */
-    public function testAutoModeAnnotation()
+    public function testAutoModeDetermination()
     {
         $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\AutoColumnTest');
 
@@ -24,39 +23,12 @@ class AutoColumnTest extends TestCase
     }
 
     /**
-     * Asserts that the "@auto" annotation automatically implies the appropriate data type (e.g. DateTime), despite
-     * the "@type" being omitted for these columns.
+     * Asserts that the auto mode is not enabled for columns with incompatible types.
      */
-    public function testAutoModeImpliesDataType()
+    public function testAutoModeRequiresCompatibleType()
     {
-        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\AutoColumnTest');
-
-        $this->assertEquals(Column::TYPE_DATE_TIME, $table->getColumnByPropertyName("createdAt")->getType());
-        $this->assertEquals(Column::TYPE_DATE_TIME, $table->getColumnByPropertyName("modifiedAt")->getType());
-    }
-
-    /**
-     * Asserts that the "@auto" annotation requires a supported value.
-     */
-    public function testAutoModeThrowsOnInvalidAutoAnnotation()
-    {
-        $this->expectException("Instasell\Instarecord\Database\ColumnDefinitionException");
-        $this->expectExceptionMessage("invalid @auto value");
-
         $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\AutoColumnTestBadAuto');
-        $table->getColumnByPropertyName("createdAt");
-    }
-
-    /**
-     * Asserts that the "@auto" annotation does not accept incompatible column types.
-     */
-    public function testAutoModeThrowsOnIncompatibleTypes()
-    {
-        $this->expectException("Instasell\Instarecord\Database\ColumnDefinitionException");
-        $this->expectExceptionMessage("@auto mode of `created` expects a @type of `datetime`");
-
-        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\AutoColumnTestBadType');
-        $table->getColumnByPropertyName("createdAt");
+        $this->assertNull($table->getColumnByPropertyName("createdAt")->getAutoMode());
     }
 
     /**
@@ -71,7 +43,6 @@ class AutoColumnTest extends TestCase
         try {
             $uat->userName = "Newly Created";
 
-            $this->assertEmpty($uat->createdAt);
             $this->assertTrue($uat->save());
             $this->assertNotEmpty($uat->createdAt);
         } finally {
@@ -113,7 +84,6 @@ class AutoColumnTest extends TestCase
         try {
             $uat->userName = "Newly Created";
 
-            $this->assertEmpty($uat->modifiedAt);
             $this->assertTrue($uat->save());
             $this->assertNotEmpty($uat->modifiedAt);
         } finally {

@@ -6,21 +6,9 @@ use Instasell\Instarecord\Model;
 
 class NullableTest extends Model
 {
-    /**
-     * @var int
-     */
-    public $id;
+    public int $id;
 
-    /**
-     * @var string
-     */
-    public $stringNonNullable;
+    public string $stringNonNullable;
 
     public ?string $stringNullableThroughType;
-
-    /**
-     * @nullable
-     * @var string
-     */
-    public $stringNullableThroughAnnotation;
 }

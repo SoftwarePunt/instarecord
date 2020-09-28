@@ -10,27 +10,34 @@ use PHPUnit\Framework\TestCase;
 
 class DataFormattingTest extends TestCase
 {
-    private function _createTestColumn(array $annotations)
+    private function _createTestColumn(array $opts)
     {
-        $annotationBag = new AnnotationsBag($annotations);
         $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
-        $column = new Column($table, 'testColumn', null, $annotationBag);
+        $column = new Column($table, 'testColumn', null);
+
+        if (!empty($opts['var'])) {
+            $rfType = new \ReflectionProperty($column, "dataType");
+            $rfType->setAccessible(true);
+            $rfType->setValue($column, $opts['var']);
+        }
+
+        if (!empty($opts['nullable'])) {
+            $rfType = new \ReflectionProperty($column, "isNullable");
+            $rfType->setAccessible(true);
+            $rfType->setValue($column, true);
+        }
+
         return $column;
     }
 
-    public function testReadsDecimalsAnnotationAndFormatsDecimalsCorrectly()
+    public function testDecimals()
     {
-        $column = $this->_createTestColumn([
-            'var' => 'decimal',
-            'decimals' => 8
-        ]);
+        $column = $this->_createTestColumn(['var' => 'decimal']);
 
         $inputValue = '12.32';
 
-        $actualOutput = $column->formatDatabaseValue($inputValue);
-        $expectedOutput = "12.32000000";
-
-        $this->assertSame($expectedOutput, $actualOutput);
+        $this->assertSame(4, $column->getDecimals());
+        $this->assertSame("12.3200", $column->formatDatabaseValue($inputValue));
     }
 
     public function testDateTimeFormat()
@@ -45,7 +52,7 @@ class DataFormattingTest extends TestCase
     
     public function testDateTimeParse()
     {
-        $column = $this->_createTestColumn(['var' => '\DateTime']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_DATE_TIME]);
         $testDateTimeStr = '2013-02-01 11:22:33';
 
         $parsedDateTime = $column->parseDatabaseValue($testDateTimeStr);
@@ -68,7 +75,7 @@ class DataFormattingTest extends TestCase
         $customTzName = 'Europe/Amsterdam';
         Instarecord::config()->timezone = $customTzName;
 
-        $column = $this->_createTestColumn(['var' => '\DateTime']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_DATE_TIME]);
         $parsedDateTime = $column->parseDatabaseValue('2013-02-01 11:22:33');
 
         $this->assertEquals(
@@ -80,7 +87,7 @@ class DataFormattingTest extends TestCase
 
     public function testDateTimeParseFailuresDoesNotResultInFalse()
     {
-        $column = $this->_createTestColumn(['var' => '\DateTime']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_DATE_TIME]);
         $testDateTimeStr = 'pqadfgrashijklmaqxynostuvz';
         $parsedDateTime = $column->parseDatabaseValue($testDateTimeStr);
 
@@ -89,7 +96,7 @@ class DataFormattingTest extends TestCase
 
     public function testDateTimeParseWithTimeOnly()
     {
-        $column = $this->_createTestColumn(['var' => '\DateTime']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_DATE_TIME]);
         $testDateTimeStr = '11:22:33';
         $parsedDateTime = $column->parseDatabaseValue($testDateTimeStr);
 
@@ -101,7 +108,7 @@ class DataFormattingTest extends TestCase
 
     public function testDateTimeParsesWhenAlsoNullable()
     {
-        $column = $this->_createTestColumn(['var' => "\\DateTime|null"]);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_DATE_TIME, 'nullable' => true]);
         $testDateTimeStr = '2013-02-01 11:22:33';
         $parsedDateTime = $column->parseDatabaseValue($testDateTimeStr);
 
@@ -143,7 +150,7 @@ class DataFormattingTest extends TestCase
 
     public function testFormatsNullableIntegerDataTypes()
     {
-        $column = $this->_createTestColumn(['var' => 'int|null']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_INTEGER, 'nullable' => true]);
 
         $this->assertSame(null, $column->formatDatabaseValue(null));
         $this->assertSame(null, $column->formatDatabaseValue(''));
@@ -154,7 +161,7 @@ class DataFormattingTest extends TestCase
 
     public function testFormatsNonNullableIntegerDataTypes()
     {
-        $column = $this->_createTestColumn(['var' => 'int']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_INTEGER]);
 
         $this->assertSame("0", $column->formatDatabaseValue(null));
         $this->assertSame("0", $column->formatDatabaseValue(''));
@@ -164,7 +171,7 @@ class DataFormattingTest extends TestCase
 
     public function testSupportsNullableBooleanFormatting()
     {
-        $column = $this->_createTestColumn(['var' => 'bool|null']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_BOOLEAN, 'nullable' => true]);
 
         $this->assertSame("0", $column->formatDatabaseValue(0));
         $this->assertSame("1", $column->formatDatabaseValue(1));
@@ -187,7 +194,7 @@ class DataFormattingTest extends TestCase
 
     public function testParsesIntegerValues()
     {
-        $column = $this->_createTestColumn(['var' => 'int']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_INTEGER]);
 
         $this->assertEquals(-1, $column->parseDatabaseValue('-1'));
         $this->assertEquals(0, $column->parseDatabaseValue('0'));
@@ -200,7 +207,7 @@ class DataFormattingTest extends TestCase
 
     public function testParsesDecimalValues()
     {
-        $column = $this->_createTestColumn(['var' => 'float']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_DECIMAL]);
 
         $this->assertEquals(0, $column->parseDatabaseValue('0'));
         $this->assertEquals(-1.33, $column->parseDatabaseValue('-1.33'));
@@ -210,7 +217,7 @@ class DataFormattingTest extends TestCase
 
     public function testParsesNullableDecimalValues()
     {
-        $column = $this->_createTestColumn(['var' => 'float|null']);
+        $column = $this->_createTestColumn(['var' => Column::TYPE_DECIMAL, 'nullable' => true]);
 
         $this->assertEquals(null, $column->parseDatabaseValue(null));
         $this->assertEquals(0, $column->parseDatabaseValue('0'));

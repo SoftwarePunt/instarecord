@@ -6,8 +6,5 @@ use Instasell\Instarecord\Model;
 
 class AutoColumnTestBadAuto extends Model
 {
-    /**
-     * @auto blah
-     */
-    public $createdAt;
+    public string $createdAt;
 }

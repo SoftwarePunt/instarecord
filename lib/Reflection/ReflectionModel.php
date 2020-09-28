@@ -31,6 +31,11 @@ class ReflectionModel
     protected array $rfPublicProps;
 
     /**
+     * @var mixed[]
+     */
+    protected array $defaultValues;
+
+    /**
      * ReflectionModel constructor.
      *
      * @param Model $model
@@ -42,6 +47,7 @@ class ReflectionModel
         $this->model = $model;
         $this->rfClass = new ReflectionClass($model);
         $this->rfPublicProps = [];
+        $this->defaultValues = [];
 
         // Filter reflection properties to public, non-static ones only (these are our target properties)
         $allProps = $this->rfClass->getProperties(ReflectionProperty::IS_PUBLIC);
@@ -49,6 +55,11 @@ class ReflectionModel
             if ($rfProp->isPublic() && !$rfProp->isStatic()) {
                 $this->rfPublicProps[] = $rfProp;
             }
+        }
+
+        // Index default values
+        foreach ($this->rfClass->getDefaultProperties() as $name => $value) {
+            $this->defaultValues[$name] = $value;
         }
     }
 
@@ -95,6 +106,15 @@ class ReflectionModel
         }
 
         return $propList;
+    }
+
+    /**
+     * @param string $propName
+     * @return mixed|string|null
+     */
+    public function getPropertyDefaultValue(string $propName)
+    {
+        return $this->defaultValues[$propName] ?? null;
     }
 
     // -----------------------------------------------------------------------------------------------------------------

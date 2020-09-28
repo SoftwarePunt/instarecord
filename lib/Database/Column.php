@@ -6,8 +6,6 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use Instasell\Instarecord\Instarecord;
-use Instasell\Instarecord\Utils\TextTransforms;
-use Minime\Annotations\Interfaces\AnnotationsBagInterface;
 
 /**
  * Represents a Column within a Table.
@@ -28,70 +26,40 @@ class Column
     
     /**
      * The table this column is a part of.
-     *
-     * @var Table
      */
-    protected $table;
+    protected Table $table;
 
     /**
      * The name of the property associated with this column on the model.
-     *
-     * @var string
      */
-    protected $propertyName;
+    protected string $propertyName;
 
     /**
      * The name of the column in the database.
-     *
-     * @var string
      */
-    protected $columnName;
+    protected string $columnName;
 
     /**
-     * A list of annotations set on this column in php code.
-     *
-     * @var AnnotationsBagInterface
+     * @var mixed|null
      */
-    protected $annotations;
+    protected $defaultValue;
 
     /**
      * The data type of the column.
-     * 
-     * @var string
      */
-    protected $dataType;
+    protected string $dataType;
 
-    /**
-     * Flag indicating whether the data type was explicitly defined with a "@type" annotation.
-     * If false, this means it was assigned by default (string), or implicitly through another property (e.g. "@auto").
-     *
-     * @var bool
-     */
-    protected $dataTypeExplicit;
-
-    /**
-     * @var bool
-     */
-    protected $isNullable;
-
-    /**
-     * @var int
-     */
-    protected $decimals;
+    protected bool $isNullable;
 
     /**
      * Auto-fill mode for this column.
-     *
-     * @var string|null
      */
-    protected $autoMode;
+    protected ?string $autoMode;
 
     /**
      * The timezone to use for parsing/formatting date/time/datetime values.
-     *
-     * @var DateTimeZone
      */
-    protected $timezone;
+    protected DateTimeZone $timezone;
 
     /**
      * Column constructor.
@@ -99,20 +67,18 @@ class Column
      * @param Table $table The table this column is a part of.
      * @param string $propertyName The name of the property associated with this column on the model.
      * @param \ReflectionProperty|null $rfProp Property reflection data.
-     * @param AnnotationsBagInterface $annotations Attributes extracted from annotations.
+     * @param mixed|null $defaultValue
      *
      * @throws ColumnDefinitionException
      */
-    public function __construct(Table $table, string $propertyName, ?\ReflectionProperty $rfProp, AnnotationsBagInterface $annotations)
+    public function __construct(Table $table, string $propertyName, ?\ReflectionProperty $rfProp, $defaultValue = null)
     {
         $this->table = $table;
         $this->propertyName = $propertyName;
-        $this->annotations = $annotations;
+        $this->columnName = self::getDefaultColumnName($this->propertyName);
+        $this->defaultValue = $defaultValue;
         
         $this->determineDataType($rfProp); // apply type + nullable data / set defaults
-        $this->getColumnName(); // trigger once, so name is cached
-        $this->readExtraProperties(); // apply misc properties (@decimals)
-        $this->readAutoMode(); // apply and validate @auto property, may also implicitly set @type
 
         $this->timezone = new DateTimeZone(
             Instarecord::config()->timezone
@@ -129,7 +95,6 @@ class Column
     protected function determineDataType(?\ReflectionProperty $rfProp): void
     {
         $this->dataType = self::TYPE_STRING;
-        $this->dataTypeExplicit = false;
         $this->isNullable = false;
 
         // Process in-code declared php type
@@ -171,114 +136,6 @@ class Column
                 }
             }
         }
-
-        // Process phpdoc-declared @var keyword; this overrides the PHP declared type
-        if ($this->annotations->has('var')) {
-            $varKeywordValue = $this->annotations->get('var');
-            $varKeywordValue = TextTransforms::removeNamespaceFromClassName($varKeywordValue);
-            $varKeywordValue = strtolower($varKeywordValue);
-
-            // Sometimes var declarations are split (e.g. "@var string|null").
-            // Because a column can only be one data type, we always assume that the last value is accurate.
-            $varKeywordOptions = explode('|', $varKeywordValue);
-
-            foreach ($varKeywordOptions as $varKeywordOption) {
-                $varKeywordOption = trim($varKeywordOption);
-
-                switch ($varKeywordOption) {
-                    case "\\datetime":
-                    case "datetime":
-                        $this->dataType = self::TYPE_DATE_TIME;
-                        break;
-                    case "bool":
-                    case "boolean":
-                        $this->dataType = self::TYPE_BOOLEAN;
-                        break;
-                    case "float":
-                    case "double":
-                    case "decimal":
-                        $this->dataType = self::TYPE_DECIMAL;
-                        break;
-                    case "int":
-                    case "integer":
-                        $this->dataType = self::TYPE_INTEGER;
-                        break;
-                    case "null":
-                        // Special case: this just indicates the column is nullable
-                        $this->isNullable = true;
-                        break;
-                }
-            }
-
-            $this->dataTypeExplicit = true;
-        }
-
-        // If an explicit @nullable annotation exists, mark as nullable
-        if ($this->annotations->has('nullable')) {
-            $this->isNullable = true;
-        }
-    }
-
-    /**
-     * Internal function that parses additional column information from the annotation data.
-     */
-    protected function readExtraProperties(): void
-    {
-        if ($this->annotations->has('decimals')) {
-            $this->decimals = intval($this->annotations->get('decimals'));
-        }
-
-        if (!$this->decimals) {
-            $this->decimals = 4;
-        }
-    }
-
-    /**
-     * Internal function that parses and configures the "@auto" annotation.
-     *
-     * @throws ColumnDefinitionException
-     */
-    protected function readAutoMode(): void
-    {
-        $this->autoMode = null;
-
-        if (!$this->annotations->has('auto')) {
-            return; // easy exit, no auto mode
-        }
-
-        $this->autoMode = strval($this->annotations->get('auto'));
-
-        $impliedType = null;
-        $impliedTypeStrict = false;
-
-        switch ($this->autoMode) {
-            case self::AUTO_MODE_CREATED:
-            case self::AUTO_MODE_MODIFIED:
-                $impliedType = self::TYPE_DATE_TIME;
-                $impliedTypeStrict = true;
-                break;
-
-            default:
-                throw new ColumnDefinitionException(
-                    "Column definition `{$this->propertyName}` has an invalid @auto value: `{$this->dataType}`"
-                );
-        }
-
-        if ($this->dataTypeExplicit) {
-            $dataTypeOk = !$impliedTypeStrict || !$impliedType || $this->dataType === $impliedType;
-
-            if (!$dataTypeOk) {
-                throw new ColumnDefinitionException(
-                    "Column definition `{$this->propertyName}` has a declared type of `{$this->dataType}`, "
-                    . "but @auto mode of `{$this->autoMode}` expects a @type of `{$impliedType}`."
-                );
-            }
-        } else if ($impliedType) {
-            $this->dataType = $impliedType;
-            $this->dataTypeExplicit = false;
-        }
-
-        $this->isNullable = false;
     }
 
     /**
@@ -304,14 +161,7 @@ class Column
             return $this->columnName;
         }
 
-        if ($this->annotations->has('column')) {
-            // User defined column name
-            $this->columnName = $this->annotations->get('column');
-            return $this->columnName;
-        }
-
         // Assume default column name based on standard conventions
-        $this->columnName = self::getDefaultColumnName($this->propertyName);
         return $this->propertyName;
     }
 
@@ -332,17 +182,10 @@ class Column
      */
     public function getDefaultValue()
     {
-        if ($this->annotations->has('default')) {
-            // Explicit default value is set in "@default X" annotation, prefer this primarily
-            $defaultValueExplicit = strval($this->annotations->get('default'));
-            
-            if ($defaultValueExplicit === "null") {
-                return null;
-            }
-            
-            return $defaultValueExplicit;
+        if ($this->defaultValue) {
+            return $this->defaultValue;
         }
-        
+
         if ($this->getIsNullable()) {
             // This is a nullable column, no explicit default was set, so we'll set it to NULL for now
             return null;
@@ -378,25 +221,37 @@ class Column
         return $this->dataType;
     }
 
-    /**
-     * Gets the configured "auto mode" for this column, if any is defined.
-     *
-     * @see Column::AUTO_MODE_*
-     * @return string|null
-     */
-    public function getAutoMode(): ?string
+    public function getDecimals(): int
     {
-        return $this->autoMode;
+        switch ($this->dataType) {
+            case self::TYPE_DECIMAL:
+                return 4;
+        }
+        return 0;
     }
 
     /**
-     * Gets whether this is an automatically managed column (i.e. with an @auto value).
-     *
-     * @return bool
+     * Gets the "auto mode" for this column, based on its name and type.
+     */
+    public function getAutoMode(): ?string
+    {
+        if ($this->dataType === self::TYPE_DATE_TIME) {
+            // Auto DateTime columns
+            if ($this->columnName === "created_at") {
+                return self::AUTO_MODE_CREATED;
+            } else if ($this->columnName === "modified_at") {
+                return self::AUTO_MODE_MODIFIED;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets whether this is an automatically managed column.
      */
     public function hasAuto(): bool
     {
-        return !!$this->autoMode;
+        return !!$this->getAutoMode();
     }
 
     /**
@@ -445,7 +300,7 @@ class Column
         }
 
         if ($this->dataType === self::TYPE_DECIMAL) {
-            return number_format(floatval($input), $this->decimals, '.', '');
+            return number_format(floatval($input), $this->getDecimals(), '.', '');
         }
 
         if ($this->dataType === self::TYPE_INTEGER) {
