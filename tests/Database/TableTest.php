@@ -3,8 +3,6 @@
 namespace Instasell\Instarecord\Tests\Database;
 
 use Instasell\Instarecord\Database\Table;
-use Instasell\Instarecord\Tests\Samples\CustomTableNameModel;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 class TableTest extends TestCase

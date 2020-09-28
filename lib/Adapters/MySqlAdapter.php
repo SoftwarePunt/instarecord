@@ -72,6 +72,8 @@ class MySqlAdapter extends DatabaseAdapter
             switch ($componentName) {
                 case "unix_socket":
                     $dbConfig->unix_socket = $componentValue;
+                    $dbConfig->host = null;
+                    $dbConfig->port = null;
                     break;
                 case "host":
                     $dbConfig->host = $componentValue;

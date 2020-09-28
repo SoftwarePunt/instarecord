@@ -5,7 +5,7 @@ namespace Instasell\Instarecord\Database;
 use Instasell\Instarecord\Model;
 
 /**
- * Applies values to @auto columns.
+ * Applies values to auto-managed columns.
  */
 class AutoApplicator
 {

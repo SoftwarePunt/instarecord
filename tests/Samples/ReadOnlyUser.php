@@ -10,30 +10,11 @@ use Instasell\Instarecord\Models\IReadOnlyModel;
  */
 class ReadOnlyUser extends Model implements IReadOnlyModel
 {
-    /**
-     * @var int
-     */
-    private $secretNotWritable;
+    private int $secretNotWritable;
+    public int $id;
+    public string $userName;
+    public \DateTime $joinDate;
 
-    /**
-     * @var int
-     */
-    public $id;
-
-    /**
-     * @myCustomAnnotation
-     * @var string
-     */
-    public $userName;
-
-    /**
-     * @var \DateTime
-     */
-    public $joinDate;
-
-    /**
-     * @inheritDoc
-     */
     public function getTableName(): string
     {
         return "users";

@@ -46,6 +46,28 @@ class MysqlAdapterTest extends TestCase
         $this->assertEquals($config, $configParsed);
     }
 
+    /**
+     * @depends testGenerateDsn
+     */
+    public function testParseDsnWithUnixSocket()
+    {
+        $adapter = new MySqlAdapter();
+
+        $config = new DatabaseConfig();
+        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->unix_socket = '/tmp/example/unix.sock';
+        $config->host = null;
+        $config->port = null;
+        $config->database = 'dbname123';
+
+        $dsnGenerated = $adapter->createDsn($config);
+        $configParsed = $adapter->parseDsn($dsnGenerated);
+
+        $this->assertEquals("mysql:unix_socket=/tmp/example/unix.sock;dbname=dbname123;charset=utf8mb4", $dsnGenerated);
+        $this->assertNotSame($config, $configParsed);
+        $this->assertEquals($config, $configParsed);
+    }
+
     public function testGenerateDsnWithCustomPort()
     {
         $adapter = new MySqlAdapter();

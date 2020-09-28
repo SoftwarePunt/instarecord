@@ -10,9 +10,6 @@ class User extends Model
 
     public int $id;
 
-    /**
-     * @myCustomAnnotation
-     */
     public string $userName;
 
     public \DateTime $joinDate;
