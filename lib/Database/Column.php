@@ -239,7 +239,7 @@ class Column
             // Auto DateTime columns
             if ($this->columnName === "created_at") {
                 return self::AUTO_MODE_CREATED;
-            } else if ($this->columnName === "modified_at") {
+            } else if ($this->columnName === "modified_at" || $this->columnName === "updated_at") {
                 return self::AUTO_MODE_MODIFIED;
             }
         }
