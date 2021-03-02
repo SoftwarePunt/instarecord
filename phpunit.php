@@ -14,6 +14,13 @@ require_once __DIR__ . '/vendor/autoload.php';
 // DB Config: Load from JSON, generate DSN, move on :-)
 $testConfigRaw = json_decode(file_get_contents(__DIR__ . '/phpunit-config.json'), true);
 
+// Environment variables (GitHub actions)
+$ENV_DB_PORT = intval(getenv('DB_PORT'));
+
+if ($ENV_DB_PORT > 0) {
+    $testConfigRaw['db_port'] = $ENV_DB_PORT;
+}
+
 // Constants for backwards compat
 define('TEST_DATABASE_HOST', $testConfigRaw['db_host']);
 define('TEST_DATABASE_PORT', $testConfigRaw['db_port']);
