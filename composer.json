@@ -1,9 +1,8 @@
 {
   "name": "instasell/instarecord",
-  "version": "0.3.0",
   "description": "ActiveRecord Database ORM layer for MySQL",
   "type": "library",
-  "license": "Proprietary",
+  "license": "proprietary",
   "authors": [
     {
       "name": "Roy de Jong",
