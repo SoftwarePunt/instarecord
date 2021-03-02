@@ -77,6 +77,7 @@ class Connection
 
         try {
             $this->pdo = new \PDO($this->generateDsn(), $this->config->username, $this->config->password);
+            $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
             $this->pdo->exec("SET NAMES {$this->config->charset};");
         } catch (\Exception $ex) {
             throw new DatabaseException("Database connection failed: {$ex->getMessage()}", $ex->getCode(), $ex);
