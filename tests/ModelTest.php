@@ -218,6 +218,35 @@ class ModelTest extends TestCase
     /**
      * @runInSeparateProcess
      */
+    public function testCreateWithoutAutoIncrement()
+    {
+        Instarecord::config(new TestDatabaseConfig());
+
+        // Determine what the next auto increment number would be (max+1)
+        $nextUserId = intval(User::query()
+            ->select('id')
+            ->orderBy('id DESC')
+            ->limit(1)
+            ->querySingleValue()) + 1;
+
+        // Create user without auto increment
+        $newUser = new User();
+        $newUser->id = $nextUserId;
+        $newUser->setUseAutoIncrement(false);
+        $newUser->userName = "non-auto-incremented";
+
+        $this->assertTrue($newUser->create(), "Creating valid record without auto increment should return TRUE");
+        $this->assertSame($nextUserId, $newUser->id, "Creating record without auto increment should leave primary key unchanged");
+
+        // Test update
+        $newUser->userName = "updated-non-auto";
+
+        $this->assertTrue($newUser->save(), "Updating non-auto incremented record should succeed");
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
     public function testCreateViaSave()
     {
         Instarecord::config(new TestDatabaseConfig());

@@ -43,13 +43,28 @@ class Model
 
     /**
      * Gets the actual table name.
-     * Can be overriden by a model to provide a custom name.
+     *
+     * Default implementation determines the table name based on the model name.
+     * Can be overridden by a model to provide a custom name.
      *
      * @return string
      */
     public function getTableName(): string
     {
         return Table::getDefaultTableName(get_class($this));
+    }
+
+    /**
+     * Gets whether or not this is an "auto increment" table.
+     *
+     * Default implementation returns true.
+     * Can be overridden by a model to provide a custom name.
+     *
+     * @return bool
+     */
+    public function getIsAutoIncrement(): bool
+    {
+        return true;
     }
 
     /**
@@ -348,7 +363,10 @@ class Model
     {
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
 
-        unset($this->$primaryKeyName);
+        if ($this->getIsAutoIncrement()) {
+            // Auto increment mode: remove any existing primary key value
+            unset($this->$primaryKeyName);
+        }
 
         $this->runAutoApplicator(AutoApplicator::REASON_CREATE);
 
@@ -357,9 +375,10 @@ class Model
             ->values($this->getColumnValues())
             ->executeInsert();
 
-        // TODO Only get inserted PK value if it is known to be an auto increment column
+        if ($this->getIsAutoIncrement()) {
+            $this->$primaryKeyName = $insertPkValue;
+        }
 
-        $this->$primaryKeyName = $insertPkValue;
         $this->markAllPropertiesClean();
         return true;
     }
