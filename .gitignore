@@ -1,6 +1,12 @@
-/vendor/
-/build/
+# Secrets
+phpunit-config.json
 
+# Composer
+/vendor/
+
+# IDE
 .idea/workspace.xml
 
-phpunit-config.json
+# Build/temp
+/build/
+.phpunit.result.cache
