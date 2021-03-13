@@ -14,6 +14,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 // DB Config: Load from JSON, generate DSN, move on :-)
 $testConfigRaw = json_decode(file_get_contents(__DIR__ . '/phpunit-config.json'), true);
 
+if (!$testConfigRaw) {
+    echo "ERROR: Config file (phpunit-config.json) not found, can't run tests" . PHP_EOL;
+    exit(1);
+}
+
 // Environment variables (GitHub actions)
 $ENV_DB_PORT = intval(getenv('DB_PORT'));
 
@@ -22,24 +27,31 @@ if ($ENV_DB_PORT > 0) {
 }
 
 // Constants for backwards compat
-define('TEST_DATABASE_HOST', $testConfigRaw['db_host']);
-define('TEST_DATABASE_PORT', $testConfigRaw['db_port']);
-define('TEST_USER_NAME', $testConfigRaw['db_user']);
-define('TEST_PASSWORD', $testConfigRaw['db_pass']);
-define('TEST_DATABASE_NAME', $testConfigRaw['db_name']);
+define('TEST_UNIX_SOCKET', $testConfigRaw['db_unix_socket'] ?? null);
+define('TEST_DATABASE_HOST', $testConfigRaw['db_host'] ?? null);
+define('TEST_DATABASE_PORT', $testConfigRaw['db_port'] ?? 3306);
+define('TEST_USER_NAME', $testConfigRaw['db_user'] ?? 'root');
+define('TEST_PASSWORD', $testConfigRaw['db_pass'] ?? '');
+define('TEST_DATABASE_NAME', $testConfigRaw['db_name'] ?? 'test_db');
 
-// Generate DSN
+// Generate DSN (by using a temporary Connection instance)
 $dsnConfig = new DatabaseConfig();
 $dsnConfig->adapter = DatabaseAdapter::MYSQL;
-$dsnConfig->host = TEST_DATABASE_HOST;
-$dsnConfig->port = TEST_DATABASE_PORT;
+if (TEST_UNIX_SOCKET) {
+    $dsnConfig->unix_socket = TEST_UNIX_SOCKET;
+    $dsnConfig->host = null;
+    $dsnConfig->port = null;
+} else if (TEST_DATABASE_HOST) {
+    $dsnConfig->unix_socket = null;
+    $dsnConfig->host = TEST_DATABASE_HOST;
+    $dsnConfig->port = TEST_DATABASE_PORT;
+}
 $dsnConfig->username = TEST_USER_NAME;
 $dsnConfig->password = TEST_PASSWORD;
 $dsnConfig->database = TEST_DATABASE_NAME;
+
 $dsnConnection = new Connection($dsnConfig);
-
 $dsnText = $dsnConnection->generateDsn();
-
 $dsnConnection->close();
 unset($dsnConnection);
 
