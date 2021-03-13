@@ -4,6 +4,8 @@ namespace Instasell\Instarecord\Tests;
 
 use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\Instarecord;
+use Instasell\Instarecord\Tests\Samples\DummySerializableType;
+use Instasell\Instarecord\Tests\Samples\TestUserWithSerialized;
 use Instasell\Instarecord\Tests\Samples\User;
 use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
@@ -533,5 +535,20 @@ class ModelTest extends TestCase
         $this->assertTrue($matchingJohn->tryBecomeExisting(), 'tryBecomeExisting() should return true when a match is found');
         $this->assertNotEmpty($existingJohn->id, 'tryBecomeExisting() should set properties from the fetched model (initial model should have a valid id to test)');
         $this->assertEquals($matchingJohn->id, $existingJohn->id, 'tryBecomeExisting() should set properties from the fetched model');
+    }
+
+    public function testReadWriteSerializedType()
+    {
+        $user = new TestUserWithSerialized();
+        $this->assertNull($user->userName, "By default, a nullable serialized type should have a NULL value");
+
+        $user->userName = new DummySerializableType("Mr. Hands");
+        $this->assertTrue($user->save(), "Saving a serializable object value should succeed");
+
+        $user = User::fetch($user->id);
+        $this->assertSame("Mr. Hands", $user->userName, "Reading a serialized value as string should work");
+
+        $user = TestUserWithSerialized::fetch($user->id);
+        $this->assertEquals(new DummySerializableType("Mr. Hands"), $user->userName, "Reading a serialized object from database should work");
     }
 }

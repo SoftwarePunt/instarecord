@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use Instasell\Instarecord\Instarecord;
+use Instasell\Instarecord\Serialization\IDatabaseSerializable;
 
 /**
  * Represents a Column within a Table.
@@ -17,6 +18,7 @@ class Column
     const TYPE_BOOLEAN = "bool";
     const TYPE_INTEGER = "integer";
     const TYPE_DECIMAL = "decimal";
+    const TYPE_SERIALIZED_OBJECT = "serialized";
     
     const DATE_TIME_FORMAT = "Y-m-d H:i:s";
     const DEFAULT_TIMEZONE = "UTC";
@@ -48,6 +50,13 @@ class Column
      * The data type of the column.
      */
     protected string $dataType;
+
+    /**
+     * For TYPE_SERIALIZED_OBJECT:
+     * An empty / default instance of the IDatabaseSerializable class referenced by this column's type.
+     * This can be cloned and filled (dbUnserialize) as needed when reading from the database.
+     */
+    protected ?IDatabaseSerializable $referenceType;
 
     protected bool $isNullable;
 
@@ -95,6 +104,7 @@ class Column
     protected function determineDataType(?\ReflectionProperty $rfProp): void
     {
         $this->dataType = self::TYPE_STRING;
+        $this->referenceType = null;
         $this->isNullable = false;
 
         // Process in-code declared php type
@@ -124,7 +134,20 @@ class Column
                                     $this->dataType = self::TYPE_DATE_TIME;
                                     break;
                                 } else {
-                                    throw new ColumnDefinitionException("Object properties are not currently supported: {$phpTypeStr}");
+                                    if ($classImplements = class_implements($phpTypeStr)) {
+                                        if (in_array('Instasell\Instarecord\Serialization\IDatabaseSerializable', $classImplements)) {
+                                            $this->dataType = self::TYPE_SERIALIZED_OBJECT;
+
+                                            try {
+                                                $this->referenceType = new $phpTypeStr();
+                                                break;
+                                            } catch (Exception $ex) {
+                                                throw new ColumnDefinitionException("Objects that implement IDatabaseSerializable must have a default constructor that does not throw errors, in: {$phpTypeStr}, got: {$ex->getMessage()}");
+                                            }
+                                        }
+                                    }
+
+                                    throw new ColumnDefinitionException("Object property types must implement IDatabaseSerializable, found: {$phpTypeStr}");
                                 }
                             }
                             throw new ColumnDefinitionException("Unsupported property type encountered: {$phpTypeStr}");
@@ -262,9 +285,14 @@ class Column
      */
     public function formatDatabaseValue($input): ?string
     {
-        if ($input instanceof \DateTime) {
-            $input->setTimezone($this->timezone);
-            return $input->format(self::DATE_TIME_FORMAT);
+        if (is_object($input)) {
+            if ($input instanceof \DateTime) {
+                $input->setTimezone($this->timezone);
+                return $input->format(self::DATE_TIME_FORMAT);
+            }
+            if ($input instanceof IDatabaseSerializable) {
+                return $input->dbSerialize();
+            }
         }
 
         if ($input === true) {
@@ -363,6 +391,12 @@ class Column
 
             // Exhausted options, treat as NULL
             return null;
+        }
+
+        if ($this->dataType === self::TYPE_SERIALIZED_OBJECT) {
+            $nextInstance = clone $this->referenceType;
+            $nextInstance->dbUnserialize($input);
+            return $nextInstance;
         }
 
         if ($this->dataType === self::TYPE_BOOLEAN) {

@@ -5,6 +5,7 @@ namespace Instasell\Instarecord\Tests\Database;
 use Instasell\Instarecord\Database\Column;
 use Instasell\Instarecord\Database\Table;
 use Instasell\Instarecord\Instarecord;
+use Instasell\Instarecord\Tests\Samples\DummySerializableType;
 use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
 
@@ -19,6 +20,12 @@ class DataFormattingTest extends TestCase
             $rfType = new \ReflectionProperty($column, "dataType");
             $rfType->setAccessible(true);
             $rfType->setValue($column, $opts['var']);
+        }
+
+        if (!empty($opts['reftype'])) {
+            $rfType = new \ReflectionProperty($column, "referenceType");
+            $rfType->setAccessible(true);
+            $rfType->setValue($column, $opts['reftype']);
         }
 
         if (!empty($opts['nullable'])) {
@@ -221,5 +228,17 @@ class DataFormattingTest extends TestCase
 
         $this->assertEquals(null, $column->parseDatabaseValue(null));
         $this->assertEquals(0, $column->parseDatabaseValue('0'));
+    }
+
+    public function testIDatabaseSerializable()
+    {
+        $column = $this->_createTestColumn([
+            'var' => Column::TYPE_SERIALIZED_OBJECT,
+            'nullable' => true,
+            'reftype' => new DummySerializableType()
+        ]);
+
+        $this->assertSame(null, $column->parseDatabaseValue(null));
+        $this->assertEquals($obj = new DummySerializableType("test 123"), $column->parseDatabaseValue("test 123"));
     }
 }
