@@ -1,6 +1,6 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Utils;
+namespace SoftwarePunt\Instarecord\Utils;
 
 /**
  * Static utility class for performing text transformations.

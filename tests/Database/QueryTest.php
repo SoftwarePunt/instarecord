@@ -1,14 +1,14 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Database;
+namespace SoftwarePunt\Instarecord\Tests\Database;
 
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
-use Softwarepunt\Instarecord\Database\Connection;
-use Softwarepunt\Instarecord\Database\Query;
-use Softwarepunt\Instarecord\Instarecord;
-use Softwarepunt\Instarecord\Tests\Samples\User;
-use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\Database\Connection;
+use SoftwarePunt\Instarecord\Database\Query;
+use SoftwarePunt\Instarecord\Instarecord;
+use SoftwarePunt\Instarecord\Tests\Samples\User;
+use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class QueryTest extends TestCase
 {
@@ -123,7 +123,7 @@ class QueryTest extends TestCase
 
     public function testCannotUpdateWithColumnIndexNumbers()
     {
-        $this->expectException("Softwarepunt\Instarecord\Database\QueryBuilderException");
+        $this->expectException("SoftwarePunt\Instarecord\Database\QueryBuilderException");
         $this->expectExceptionMessage("Query format error");
 
         $query = new Query(new Connection(new DatabaseConfig()));
@@ -384,7 +384,7 @@ class QueryTest extends TestCase
 
     public function testExecute()
     {
-        $this->expectException("Softwarepunt\Instarecord\Database\DatabaseException");
+        $this->expectException("SoftwarePunt\Instarecord\Database\DatabaseException");
         $this->expectExceptionMessage(".fruits' doesn't exist");
 
         $config = new TestDatabaseConfig();

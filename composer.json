@@ -20,8 +20,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Softwarepunt\\Instarecord\\": "lib/",
-      "Softwarepunt\\Instarecord\\Tests\\": "tests/"
+      "SoftwarePunt\\Instarecord\\": "lib/",
+      "SoftwarePunt\\Instarecord\\Tests\\": "tests/"
     }
   }
 }

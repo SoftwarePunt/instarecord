@@ -1,16 +1,16 @@
 <?php
 
-namespace Softwarepunt\Instarecord;
+namespace SoftwarePunt\Instarecord;
 
-use Softwarepunt\Instarecord\Config\ConfigException;
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\Config\ConfigException;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 
 /**
  * Represents a database adapter, which provides database engine specific information and functionality.
  */
 abstract class DatabaseAdapter
 {
-    const MYSQL = 'Softwarepunt\Instarecord\Adapters\MySqlAdapter';
+    const MYSQL = 'SoftwarePunt\Instarecord\Adapters\MySqlAdapter';
 
     /**
      * Generates and returns the service DSN for this database server based on the provided config.

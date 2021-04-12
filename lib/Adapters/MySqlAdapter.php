@@ -1,9 +1,9 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Adapters;
+namespace SoftwarePunt\Instarecord\Adapters;
 
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
-use Softwarepunt\Instarecord\DatabaseAdapter;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\DatabaseAdapter;
 
 /**
  * Database adapter for MySQL servers.

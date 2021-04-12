@@ -1,8 +1,8 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Testing;
+namespace SoftwarePunt\Instarecord\Tests\Testing;
 
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 
 class TestDatabaseConfig extends DatabaseConfig
 {

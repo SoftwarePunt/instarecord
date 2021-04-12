@@ -1,11 +1,11 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Database;
+namespace SoftwarePunt\Instarecord\Database;
 
-use Softwarepunt\Instarecord\Config\ConfigException;
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
-use Softwarepunt\Instarecord\DatabaseAdapter;
-use Softwarepunt\Instarecord\Logging\QueryLogger;
+use SoftwarePunt\Instarecord\Config\ConfigException;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\DatabaseAdapter;
+use SoftwarePunt\Instarecord\Logging\QueryLogger;
 
 /**
  * Represents a connection to the database.

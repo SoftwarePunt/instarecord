@@ -1,8 +1,8 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Config;
+namespace SoftwarePunt\Instarecord\Config;
 
-use Softwarepunt\Instarecord\Database\Column;
+use SoftwarePunt\Instarecord\Database\Column;
 
 /**
  * Database configuration object for Instarecord.
@@ -13,10 +13,10 @@ class DatabaseConfig
     /**
      * The fully qualified class name of the database adapter to be used.
      * 
-     * @default Softwarepunt\Instarecord\Adapters\MySqlAdapter
+     * @default SoftwarePunt\Instarecord\Adapters\MySqlAdapter
      * @var string
      */
-    public $adapter = "Softwarepunt\\Instarecord\\Adapters\\MySqlAdapter";
+    public $adapter = "SoftwarePunt\\Instarecord\\Adapters\\MySqlAdapter";
 
     /**
      * The unix socket to be used to connect to the database host, replacing host and port.

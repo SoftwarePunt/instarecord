@@ -5,9 +5,9 @@
  */
 
 // Initialize the class autoloader
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
-use Softwarepunt\Instarecord\Database\Connection;
-use Softwarepunt\Instarecord\DatabaseAdapter;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\Database\Connection;
+use SoftwarePunt\Instarecord\DatabaseAdapter;
 
 require_once __DIR__ . '/vendor/autoload.php';
 

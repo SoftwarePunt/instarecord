@@ -1,6 +1,6 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Database;
+namespace SoftwarePunt\Instarecord\Database;
 
 use DateTimeZone;
 

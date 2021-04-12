@@ -1,10 +1,10 @@
 <?php
 
-namespace Softwarepunt\Instarecord;
+namespace SoftwarePunt\Instarecord;
 
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
-use Softwarepunt\Instarecord\Database\Connection;
-use Softwarepunt\Instarecord\Database\Query;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\Database\Connection;
+use SoftwarePunt\Instarecord\Database\Query;
 
 /**
  * Static core logic for Instarecord.

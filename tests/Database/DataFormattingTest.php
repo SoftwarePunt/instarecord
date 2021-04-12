@@ -1,19 +1,19 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Database;
+namespace SoftwarePunt\Instarecord\Tests\Database;
 
 use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Database\Column;
-use Softwarepunt\Instarecord\Database\Table;
-use Softwarepunt\Instarecord\Instarecord;
-use Softwarepunt\Instarecord\Tests\Samples\DummySerializableType;
+use SoftwarePunt\Instarecord\Database\Column;
+use SoftwarePunt\Instarecord\Database\Table;
+use SoftwarePunt\Instarecord\Instarecord;
+use SoftwarePunt\Instarecord\Tests\Samples\DummySerializableType;
 
 class DataFormattingTest extends TestCase
 {
     private function _createTestColumn(array $opts)
     {
-        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\User');
         $column = new Column($table, 'testColumn', null);
 
         if (!empty($opts['var'])) {

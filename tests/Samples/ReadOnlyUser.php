@@ -1,9 +1,9 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Samples;
+namespace SoftwarePunt\Instarecord\Tests\Samples;
 
-use Softwarepunt\Instarecord\Model;
-use Softwarepunt\Instarecord\Models\IReadOnlyModel;
+use SoftwarePunt\Instarecord\Model;
+use SoftwarePunt\Instarecord\Models\IReadOnlyModel;
 
 /**
  * @table users

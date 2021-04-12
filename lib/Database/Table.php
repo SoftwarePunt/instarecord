@@ -1,11 +1,11 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Database;
+namespace SoftwarePunt\Instarecord\Database;
 
 use Minime\Annotations\Reader;
-use Softwarepunt\Instarecord\Config\ConfigException;
-use Softwarepunt\Instarecord\Reflection\ReflectionModel;
-use Softwarepunt\Instarecord\Utils\TextTransforms;
+use SoftwarePunt\Instarecord\Config\ConfigException;
+use SoftwarePunt\Instarecord\Reflection\ReflectionModel;
+use SoftwarePunt\Instarecord\Utils\TextTransforms;
 
 /**
  * Represents a database table, which backs a model.

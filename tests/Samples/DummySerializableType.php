@@ -1,8 +1,8 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Samples;
+namespace SoftwarePunt\Instarecord\Tests\Samples;
 
-use Softwarepunt\Instarecord\Serialization\IDatabaseSerializable;
+use SoftwarePunt\Instarecord\Serialization\IDatabaseSerializable;
 
 class DummySerializableType implements IDatabaseSerializable
 {

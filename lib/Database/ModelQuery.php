@@ -1,10 +1,10 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Database;
+namespace SoftwarePunt\Instarecord\Database;
 
-use Softwarepunt\Instarecord\Model;
-use Softwarepunt\Instarecord\Models\IReadOnlyModel;
-use Softwarepunt\Instarecord\Models\ModelAccessException;
+use SoftwarePunt\Instarecord\Model;
+use SoftwarePunt\Instarecord\Models\IReadOnlyModel;
+use SoftwarePunt\Instarecord\Models\ModelAccessException;
 
 /**
  * A model-specific query.

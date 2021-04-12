@@ -1,11 +1,11 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Database;
+namespace SoftwarePunt\Instarecord\Tests\Database;
 
 use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Database\Column;
-use Softwarepunt\Instarecord\Database\Table;
+use SoftwarePunt\Instarecord\Database\Column;
+use SoftwarePunt\Instarecord\Database\Table;
 
 class ColumnTest extends TestCase
 {
@@ -21,7 +21,7 @@ class ColumnTest extends TestCase
 
     public function testGeneratesDefaultColumnNames()
     {
-        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\User');
         $column = new Column($table, 'myPropName', null);
 
         $this->assertEquals('my_prop_name', $column->getColumnName(), "If no custom @columnn annotation is set, default column conventions should be assumed");
@@ -29,7 +29,7 @@ class ColumnTest extends TestCase
     
     public function testUnderstandsNullables()
     {
-        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\NullableTest');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\NullableTest');
         
         $this->assertFalse($table->getColumnByPropertyName('stringNonNullable')->getIsNullable());
         $this->assertTrue($table->getColumnByPropertyName('stringNullableThroughType')->getIsNullable());
@@ -37,7 +37,7 @@ class ColumnTest extends TestCase
 
     public function testReadsDefaultValues()
     {
-        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\DefaultsTest');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\DefaultsTest');
 
         $this->assertEquals("hello1", $table->getColumnByPropertyName('strNullableWithDefault')->getDefaultValue());
         $this->assertEquals("hello2", $table->getColumnByPropertyName('strNonNullableWithDefault')->getDefaultValue());

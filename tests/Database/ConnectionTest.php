@@ -1,12 +1,12 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Database;
+namespace SoftwarePunt\Instarecord\Tests\Database;
 
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
-use Softwarepunt\Instarecord\Database\Connection;
-use Softwarepunt\Instarecord\DatabaseAdapter;
-use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\Database\Connection;
+use SoftwarePunt\Instarecord\DatabaseAdapter;
+use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 ;
 
@@ -62,7 +62,7 @@ class ConnectionTest extends TestCase
 
     public function testOpenThrowsExceptionForInvalidCredentials()
     {
-        $this->expectException("Softwarepunt\Instarecord\Database\DatabaseException");
+        $this->expectException("SoftwarePunt\Instarecord\Database\DatabaseException");
         $this->expectExceptionMessage("Database connection failed");
 
         $config = new DatabaseConfig();

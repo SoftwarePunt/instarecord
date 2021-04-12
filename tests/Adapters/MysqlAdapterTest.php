@@ -1,11 +1,11 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Adapters;
+namespace SoftwarePunt\Instarecord\Tests\Adapters;
 
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Adapters\MySqlAdapter;
-use Softwarepunt\Instarecord\Config\DatabaseConfig;
-use Softwarepunt\Instarecord\DatabaseAdapter;
+use SoftwarePunt\Instarecord\Adapters\MySqlAdapter;
+use SoftwarePunt\Instarecord\Config\DatabaseConfig;
+use SoftwarePunt\Instarecord\DatabaseAdapter;
 
 class MysqlAdapterTest extends TestCase
 {

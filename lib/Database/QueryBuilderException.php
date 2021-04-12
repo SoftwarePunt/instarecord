@@ -1,8 +1,8 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Database;
+namespace SoftwarePunt\Instarecord\Database;
 
-use Softwarepunt\Instarecord\InstarecordException;
+use SoftwarePunt\Instarecord\InstarecordException;
 
 /**
  * Instarecord exception type for query builder errors.

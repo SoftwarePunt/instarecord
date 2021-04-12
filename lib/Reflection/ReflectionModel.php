@@ -1,12 +1,12 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Reflection;
+namespace SoftwarePunt\Instarecord\Reflection;
 
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
-use Softwarepunt\Instarecord\Config\ConfigException;
-use Softwarepunt\Instarecord\Model;
+use SoftwarePunt\Instarecord\Config\ConfigException;
+use SoftwarePunt\Instarecord\Model;
 
 /**
  * Utility for performing reflection on a Model.

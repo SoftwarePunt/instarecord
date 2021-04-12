@@ -1,9 +1,9 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Utils;
+namespace SoftwarePunt\Instarecord\Tests\Utils;
 
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Utils\TextTransforms;
+use SoftwarePunt\Instarecord\Utils\TextTransforms;
 
 class TextTransformsTest extends TestCase
 {

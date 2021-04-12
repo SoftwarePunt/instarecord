@@ -1,12 +1,12 @@
 <?php
 
-namespace Softwarepunt\Instarecord;
+namespace SoftwarePunt\Instarecord;
 
-use Softwarepunt\Instarecord\Config\ModelConfig;
-use Softwarepunt\Instarecord\Database\AutoApplicator;
-use Softwarepunt\Instarecord\Database\Column;
-use Softwarepunt\Instarecord\Database\ModelQuery;
-use Softwarepunt\Instarecord\Database\Table;
+use SoftwarePunt\Instarecord\Config\ModelConfig;
+use SoftwarePunt\Instarecord\Database\AutoApplicator;
+use SoftwarePunt\Instarecord\Database\Column;
+use SoftwarePunt\Instarecord\Database\ModelQuery;
+use SoftwarePunt\Instarecord\Database\Table;
 
 /**
  * The base class for all Softwarepunt models.

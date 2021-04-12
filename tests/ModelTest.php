@@ -1,14 +1,14 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests;
+namespace SoftwarePunt\Instarecord\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Database\Column;
-use Softwarepunt\Instarecord\Instarecord;
-use Softwarepunt\Instarecord\Tests\Samples\DummySerializableType;
-use Softwarepunt\Instarecord\Tests\Samples\TestUserWithSerialized;
-use Softwarepunt\Instarecord\Tests\Samples\User;
-use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
+use SoftwarePunt\Instarecord\Database\Column;
+use SoftwarePunt\Instarecord\Instarecord;
+use SoftwarePunt\Instarecord\Tests\Samples\DummySerializableType;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUserWithSerialized;
+use SoftwarePunt\Instarecord\Tests\Samples\User;
+use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class ModelTest extends TestCase
 {
@@ -340,7 +340,7 @@ class ModelTest extends TestCase
         $containsOurItem = false;
         
         foreach ($fetchUserList as $fetchUserListItem) {
-            $this->assertInstanceOf("Softwarepunt\\Instarecord\\Tests\\Samples\\User", $fetchUserListItem, 'Expected a list of user models');
+            $this->assertInstanceOf("SoftwarePunt\\Instarecord\\Tests\\Samples\\User", $fetchUserListItem, 'Expected a list of user models');
             
             if ($fetchUserListItem->id == $newUser->id) {
                 $containsOurItem = true;

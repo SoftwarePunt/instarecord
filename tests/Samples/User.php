@@ -1,8 +1,8 @@
 <?php
 
-namespace Softwarepunt\Instarecord\Tests\Samples;
+namespace SoftwarePunt\Instarecord\Tests\Samples;
 
-use Softwarepunt\Instarecord\Model;
+use SoftwarePunt\Instarecord\Model;
 
 class User extends Model
 {
