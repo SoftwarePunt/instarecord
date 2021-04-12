@@ -1,6 +1,8 @@
 # Instarecord
 **✨ A nice PHP ORM for MySQL.**
 
+[![PHPUnit](https://github.com/SoftwarePunt/instarecord/actions/workflows/phpunit.yml/badge.svg)](https://github.com/SoftwarePunt/instarecord/actions/workflows/phpunit.yml)
+
 *This library is currently used for some internal projects. Extended docs coming soon. Not recommended for production usage yet.*
 
 ## The pitch
