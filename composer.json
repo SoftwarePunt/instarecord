@@ -2,7 +2,7 @@
   "name": "softwarepunt/instarecord",
   "description": "ActiveRecord Database ORM layer for MySQL",
   "type": "library",
-  "license": "proprietary",
+  "license": "MIT",
   "authors": [
     {
       "name": "Roy de Jong",
