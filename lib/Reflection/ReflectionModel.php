@@ -1,12 +1,12 @@
 <?php
 
-namespace Instasell\Instarecord\Reflection;
+namespace Softwarepunt\Instarecord\Reflection;
 
-use Instasell\Instarecord\Config\ConfigException;
-use Instasell\Instarecord\Model;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
+use Softwarepunt\Instarecord\Config\ConfigException;
+use Softwarepunt\Instarecord\Model;
 
 /**
  * Utility for performing reflection on a Model.

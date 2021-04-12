@@ -1,6 +1,6 @@
 <?php
 
-namespace Instasell\Instarecord\Serialization;
+namespace Softwarepunt\Instarecord\Serialization;
 
 /**
  * Interface for objects that can be serialized as a database string.

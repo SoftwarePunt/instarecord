@@ -5,9 +5,9 @@
  */
 
 // Initialize the class autoloader
-use Instasell\Instarecord\Config\DatabaseConfig;
-use Instasell\Instarecord\Database\Connection;
-use Instasell\Instarecord\DatabaseAdapter;
+use Softwarepunt\Instarecord\Config\DatabaseConfig;
+use Softwarepunt\Instarecord\Database\Connection;
+use Softwarepunt\Instarecord\DatabaseAdapter;
 
 require_once __DIR__ . '/vendor/autoload.php';
 

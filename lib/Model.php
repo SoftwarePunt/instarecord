@@ -1,15 +1,15 @@
 <?php
 
-namespace Instasell\Instarecord;
+namespace Softwarepunt\Instarecord;
 
-use Instasell\Instarecord\Config\ModelConfig;
-use Instasell\Instarecord\Database\AutoApplicator;
-use Instasell\Instarecord\Database\Column;
-use Instasell\Instarecord\Database\ModelQuery;
-use Instasell\Instarecord\Database\Table;
+use Softwarepunt\Instarecord\Config\ModelConfig;
+use Softwarepunt\Instarecord\Database\AutoApplicator;
+use Softwarepunt\Instarecord\Database\Column;
+use Softwarepunt\Instarecord\Database\ModelQuery;
+use Softwarepunt\Instarecord\Database\Table;
 
 /**
- * The base class for all Instasell models.
+ * The base class for all Softwarepunt models.
  */
 class Model
 {

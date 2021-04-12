@@ -1,10 +1,10 @@
 <?php
 
-namespace Instasell\Instarecord;
+namespace Softwarepunt\Instarecord;
 
-use Instasell\Instarecord\Config\DatabaseConfig;
-use Instasell\Instarecord\Database\Connection;
-use Instasell\Instarecord\Database\Query;
+use Softwarepunt\Instarecord\Config\DatabaseConfig;
+use Softwarepunt\Instarecord\Database\Connection;
+use Softwarepunt\Instarecord\Database\Query;
 
 /**
  * Static core logic for Instarecord.

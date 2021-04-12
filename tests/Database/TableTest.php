@@ -1,9 +1,9 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Database;
+namespace Softwarepunt\Instarecord\Tests\Database;
 
-use Instasell\Instarecord\Database\Table;
 use PHPUnit\Framework\TestCase;
+use Softwarepunt\Instarecord\Database\Table;
 
 class TableTest extends TestCase
 {
@@ -17,7 +17,7 @@ class TableTest extends TestCase
 
     public function testConstructorErrorsOnBadClassName()
     {
-        $this->expectException("Instasell\Instarecord\Config\ConfigException");
+        $this->expectException("Softwarepunt\Instarecord\Config\ConfigException");
         $this->expectExceptionMessage("invalid class");
 
         $table = new Table('bogus\\class\\not\\real');
@@ -25,20 +25,20 @@ class TableTest extends TestCase
 
     public function testConstructorErrorsOnNonModelClassName()
     {
-        $this->expectException("Instasell\Instarecord\Config\ConfigException");
+        $this->expectException("Softwarepunt\Instarecord\Config\ConfigException");
         $this->expectExceptionMessage("does not extend");
 
-        $table = new Table('Instasell\\Instarecord\\Tests\\Database\\TableTest');
+        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Database\\TableTest');
     }
 
     public function testExtractsIndexedColumnList()
     {
-        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\User');
         $columns = $table->getColumns();
 
         $this->assertNotEmpty($columns, 'Expected a non-empty columns list');
         $this->assertArrayHasKey('userName', $columns, 'Columns list should be indexed by property name');
-        $this->assertInstanceOf('Instasell\\Instarecord\\Database\\Column', $columns['userName'], 'Columns list should contain actual Column objects only');
+        $this->assertInstanceOf('Softwarepunt\\Instarecord\\Database\\Column', $columns['userName'], 'Columns list should contain actual Column objects only');
     }
 
     /**
@@ -46,7 +46,7 @@ class TableTest extends TestCase
      */
     public function testMemoryCachesColumnList()
     {
-        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\User');
         $columns = $table->getColumns();
         $columns2 = $table->getColumns();
 

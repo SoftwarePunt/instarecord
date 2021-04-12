@@ -1,5 +1,5 @@
 {
-  "name": "instasell/instarecord",
+  "name": "softwarepunt/instarecord",
   "description": "ActiveRecord Database ORM layer for MySQL",
   "type": "library",
   "license": "proprietary",
@@ -20,8 +20,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Instasell\\Instarecord\\": "lib/",
-      "Instasell\\Instarecord\\Tests\\": "tests/"
+      "Softwarepunt\\Instarecord\\": "lib/",
+      "Softwarepunt\\Instarecord\\Tests\\": "tests/"
     }
   }
 }

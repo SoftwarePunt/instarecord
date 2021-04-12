@@ -1,9 +1,8 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Testing;
+namespace Softwarepunt\Instarecord\Tests\Testing;
 
-use Instasell\Instarecord\Config\DatabaseConfig;
-use Instasell\Instarecord\DatabaseAdapter;
+use Softwarepunt\Instarecord\Config\DatabaseConfig;
 
 class TestDatabaseConfig extends DatabaseConfig
 {

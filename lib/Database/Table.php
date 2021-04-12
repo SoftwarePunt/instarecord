@@ -1,11 +1,11 @@
 <?php
 
-namespace Instasell\Instarecord\Database;
+namespace Softwarepunt\Instarecord\Database;
 
-use Instasell\Instarecord\Config\ConfigException;
-use Instasell\Instarecord\Reflection\ReflectionModel;
-use Instasell\Instarecord\Utils\TextTransforms;
 use Minime\Annotations\Reader;
+use Softwarepunt\Instarecord\Config\ConfigException;
+use Softwarepunt\Instarecord\Reflection\ReflectionModel;
+use Softwarepunt\Instarecord\Utils\TextTransforms;
 
 /**
  * Represents a database table, which backs a model.

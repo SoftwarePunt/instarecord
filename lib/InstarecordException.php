@@ -1,6 +1,6 @@
 <?php
 
-namespace Instasell\Instarecord;
+namespace Softwarepunt\Instarecord;
 
 /**
  * Base class for all exceptions thrown by the Instarecord library.

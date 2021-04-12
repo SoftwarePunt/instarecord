@@ -1,14 +1,13 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Database;
+namespace Softwarepunt\Instarecord\Tests\Database;
 
-use Instasell\Instarecord\Config\DatabaseConfig;
-use Instasell\Instarecord\Database\Connection;
-use Instasell\Instarecord\Database\Query;
-use Instasell\Instarecord\Instarecord;
-use Instasell\Instarecord\Tests\Samples\User;
-use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
+use Softwarepunt\Instarecord\Database\Connection;
+use Softwarepunt\Instarecord\Database\Query;
+use Softwarepunt\Instarecord\Instarecord;
+use Softwarepunt\Instarecord\Tests\Samples\User;
+use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class QueryPaginatorTest extends TestCase
 {
@@ -37,7 +36,7 @@ class QueryPaginatorTest extends TestCase
         $query = new Query($connection);
         $paginator = $query->paginate();
 
-        $this->assertInstanceOf("Instasell\Instarecord\Database\QueryPaginator", $paginator, "paginate() call should construct a new QueryPaginator");
+        $this->assertInstanceOf("Softwarepunt\Instarecord\Database\QueryPaginator", $paginator, "paginate() call should construct a new QueryPaginator");
         $this->assertSame($paginator::DEFAULT_PAGE_SIZE, $paginator->getQueryPageSize(), "Default page size should be set in constructor");
     }
 

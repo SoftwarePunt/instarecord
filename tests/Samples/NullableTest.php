@@ -1,8 +1,8 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Samples;
+namespace Softwarepunt\Instarecord\Tests\Samples;
 
-use Instasell\Instarecord\Model;
+use Softwarepunt\Instarecord\Model;
 
 class NullableTest extends Model
 {

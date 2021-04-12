@@ -1,11 +1,11 @@
 <?php
 
-namespace Instasell\Instarecord\Database;
+namespace Softwarepunt\Instarecord\Database;
 
-use Instasell\Instarecord\Config\ConfigException;
-use Instasell\Instarecord\Config\DatabaseConfig;
-use Instasell\Instarecord\DatabaseAdapter;
-use Instasell\Instarecord\Logging\QueryLogger;
+use Softwarepunt\Instarecord\Config\ConfigException;
+use Softwarepunt\Instarecord\Config\DatabaseConfig;
+use Softwarepunt\Instarecord\DatabaseAdapter;
+use Softwarepunt\Instarecord\Logging\QueryLogger;
 
 /**
  * Represents a connection to the database.

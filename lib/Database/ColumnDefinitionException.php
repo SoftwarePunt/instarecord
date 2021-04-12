@@ -1,8 +1,8 @@
 <?php
 
-namespace Instasell\Instarecord\Database;
+namespace Softwarepunt\Instarecord\Database;
 
-use Instasell\Instarecord\InstarecordException;
+use Softwarepunt\Instarecord\InstarecordException;
 
 /**
  * Instarecord exception type for column definition errors.

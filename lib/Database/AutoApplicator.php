@@ -1,8 +1,8 @@
 <?php
 
-namespace Instasell\Instarecord\Database;
+namespace Softwarepunt\Instarecord\Database;
 
-use Instasell\Instarecord\Model;
+use Softwarepunt\Instarecord\Model;
 
 /**
  * Applies values to auto-managed columns.

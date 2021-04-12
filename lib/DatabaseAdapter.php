@@ -1,16 +1,16 @@
 <?php
 
-namespace Instasell\Instarecord;
+namespace Softwarepunt\Instarecord;
 
-use Instasell\Instarecord\Config\ConfigException;
-use Instasell\Instarecord\Config\DatabaseConfig;
+use Softwarepunt\Instarecord\Config\ConfigException;
+use Softwarepunt\Instarecord\Config\DatabaseConfig;
 
 /**
  * Represents a database adapter, which provides database engine specific information and functionality.
  */
 abstract class DatabaseAdapter
 {
-    const MYSQL = 'Instasell\Instarecord\Adapters\MySqlAdapter';
+    const MYSQL = 'Softwarepunt\Instarecord\Adapters\MySqlAdapter';
 
     /**
      * Generates and returns the service DSN for this database server based on the provided config.

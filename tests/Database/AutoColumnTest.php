@@ -1,12 +1,12 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Database;
+namespace Softwarepunt\Instarecord\Tests\Database;
 
-use Instasell\Instarecord\Database\Table;
-use Instasell\Instarecord\Instarecord;
-use Instasell\Instarecord\Tests\Samples\UserAutoTest;
-use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
+use Softwarepunt\Instarecord\Database\Table;
+use Softwarepunt\Instarecord\Instarecord;
+use Softwarepunt\Instarecord\Tests\Samples\UserAutoTest;
+use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class AutoColumnTest extends TestCase
 {
@@ -15,7 +15,7 @@ class AutoColumnTest extends TestCase
      */
     public function testAutoModeDetermination()
     {
-        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\AutoColumnTest');
+        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\AutoColumnTest');
 
         $this->assertEquals("created", $table->getColumnByPropertyName("createdAt")->getAutoMode());
         $this->assertEquals("modified", $table->getColumnByPropertyName("modifiedAt")->getAutoMode());
@@ -27,7 +27,7 @@ class AutoColumnTest extends TestCase
      */
     public function testAutoModeRequiresCompatibleType()
     {
-        $table = new Table('Instasell\\Instarecord\\Tests\\Samples\\AutoColumnTestBadAuto');
+        $table = new Table('Softwarepunt\\Instarecord\\Tests\\Samples\\AutoColumnTestBadAuto');
         $this->assertNull($table->getColumnByPropertyName("createdAt")->getAutoMode());
     }
 

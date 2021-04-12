@@ -1,8 +1,6 @@
 <?php
 
-namespace Instasell\Instarecord\Database;
-
-use Instasell\Instarecord\Model;
+namespace Softwarepunt\Instarecord\Database;
 
 class QueryPaginator
 {

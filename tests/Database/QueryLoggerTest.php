@@ -1,11 +1,11 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Database;
+namespace Softwarepunt\Instarecord\Tests\Database;
 
-use Instasell\Instarecord\Database\Connection;
-use Instasell\Instarecord\Logging\QueryLogger;
-use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
+use Softwarepunt\Instarecord\Database\Connection;
+use Softwarepunt\Instarecord\Logging\QueryLogger;
+use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class QueryLoggerTest extends TestCase
 {

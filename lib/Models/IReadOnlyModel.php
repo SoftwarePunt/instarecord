@@ -1,6 +1,6 @@
 <?php
 
-namespace Instasell\Instarecord\Models;
+namespace Softwarepunt\Instarecord\Models;
 
 /**
  * Interface marker for read-only / immutable models:

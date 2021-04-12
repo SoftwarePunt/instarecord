@@ -1,9 +1,9 @@
 <?php
 
-namespace Instasell\Instarecord\Adapters;
+namespace Softwarepunt\Instarecord\Adapters;
 
-use Instasell\Instarecord\Config\DatabaseConfig;
-use Instasell\Instarecord\DatabaseAdapter;
+use Softwarepunt\Instarecord\Config\DatabaseConfig;
+use Softwarepunt\Instarecord\DatabaseAdapter;
 
 /**
  * Database adapter for MySQL servers.

@@ -1,8 +1,8 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Samples;
+namespace Softwarepunt\Instarecord\Tests\Samples;
 
-use Instasell\Instarecord\Serialization\IDatabaseSerializable;
+use Softwarepunt\Instarecord\Serialization\IDatabaseSerializable;
 
 class DummySerializableType implements IDatabaseSerializable
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Instasell\Instarecord\Database;
+namespace Softwarepunt\Instarecord\Database;
 
 use DateTimeZone;
 

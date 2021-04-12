@@ -1,9 +1,9 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Samples;
+namespace Softwarepunt\Instarecord\Tests\Samples;
 
-use Instasell\Instarecord\Model;
-use Instasell\Instarecord\Models\IReadOnlyModel;
+use Softwarepunt\Instarecord\Model;
+use Softwarepunt\Instarecord\Models\IReadOnlyModel;
 
 /**
  * @table users

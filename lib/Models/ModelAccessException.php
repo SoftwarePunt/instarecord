@@ -1,8 +1,8 @@
 <?php
 
-namespace Instasell\Instarecord\Models;
+namespace Softwarepunt\Instarecord\Models;
 
-use Instasell\Instarecord\InstarecordException;
+use Softwarepunt\Instarecord\InstarecordException;
 
 /**
  * Instarecord exception type for model access violations (e.g. trying to write to a read-only model).

@@ -1,6 +1,6 @@
 <?php
 
-namespace Instasell\Instarecord\Logging;
+namespace Softwarepunt\Instarecord\Logging;
 
 /**
  * Interface for a class that is capable of receiving query logs.

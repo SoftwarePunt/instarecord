@@ -1,18 +1,18 @@
 <?php
 
-namespace Instasell\Instarecord\Tests\Models;
+namespace Softwarepunt\Instarecord\Tests\Models;
 
-use Instasell\Instarecord\Instarecord;
-use Instasell\Instarecord\Tests\Samples\ReadOnlyUser;
-use Instasell\Instarecord\Tests\Samples\User;
-use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
+use Softwarepunt\Instarecord\Instarecord;
+use Softwarepunt\Instarecord\Tests\Samples\ReadOnlyUser;
+use Softwarepunt\Instarecord\Tests\Samples\User;
+use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class ReadOnlyModelTest extends TestCase
 {
     public function testCreateRejectedForReadOnlyModel()
     {
-        $this->expectException("Instasell\Instarecord\Models\ModelAccessException");
+        $this->expectException("Softwarepunt\Instarecord\Models\ModelAccessException");
         $this->expectExceptionMessage("read only model");
 
         Instarecord::config(new TestDatabaseConfig());
@@ -35,7 +35,7 @@ class ReadOnlyModelTest extends TestCase
 
             $this->assertTrue($rou->update()); // no changes should still pass safely
 
-            $this->expectException("Instasell\Instarecord\Models\ModelAccessException");
+            $this->expectException("Softwarepunt\Instarecord\Models\ModelAccessException");
             $this->expectExceptionMessage("read only model");
 
             $rou->userName = "edited";
@@ -56,7 +56,7 @@ class ReadOnlyModelTest extends TestCase
         try {
             $rou = ReadOnlyUser::fetch($normieUser->id);
 
-            $this->expectException("Instasell\Instarecord\Models\ModelAccessException");
+            $this->expectException("Softwarepunt\Instarecord\Models\ModelAccessException");
             $this->expectExceptionMessage("read only model");
 
             $rou->delete();

@@ -1,8 +1,8 @@
 <?php
 
-namespace Instasell\Instarecord\Config;
+namespace Softwarepunt\Instarecord\Config;
 
-use Instasell\Instarecord\InstarecordException;
+use Softwarepunt\Instarecord\InstarecordException;
 
 /**
  * Instarecord exception type for configuration errors.

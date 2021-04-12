@@ -1,10 +1,10 @@
 <?php
 
-namespace Instasell\Instarecord\Tests;
+namespace Softwarepunt\Instarecord\Tests;
 
-use Instasell\Instarecord\Instarecord;
-use Instasell\Instarecord\Tests\Testing\TestDatabaseConfig;
 use PHPUnit\Framework\TestCase;
+use Softwarepunt\Instarecord\Instarecord;
+use Softwarepunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class InstarecordTest extends TestCase
 {
@@ -38,7 +38,7 @@ class InstarecordTest extends TestCase
     public function testGetConfig()
     {
         $configObject = Instarecord::config();
-        $this->assertInstanceOf('Instasell\Instarecord\Config\DatabaseConfig', $configObject, 'A default config object should be created and returned');
+        $this->assertInstanceOf('Softwarepunt\Instarecord\Config\DatabaseConfig', $configObject, 'A default config object should be created and returned');
     }
 
     /**
@@ -60,7 +60,7 @@ class InstarecordTest extends TestCase
     public function testGetConnection()
     {
         $connectionObject = Instarecord::connection();
-        $this->assertInstanceOf('Instasell\Instarecord\Database\Connection', $connectionObject, 'A default connection object (based on a default config object) should be created and returned');
+        $this->assertInstanceOf('Softwarepunt\Instarecord\Database\Connection', $connectionObject, 'A default connection object (based on a default config object) should be created and returned');
         $this->assertFalse($connectionObject->isOpen(), 'New connection should be closed by default');
     }
 
@@ -86,6 +86,6 @@ class InstarecordTest extends TestCase
     public function testCreateQuery()
     {
         $query = Instarecord::query();
-        $this->assertInstanceOf('Instasell\Instarecord\Database\Query', $query, 'A new query object (based on a default connection and config object) should be created and returned');
+        $this->assertInstanceOf('Softwarepunt\Instarecord\Database\Query', $query, 'A new query object (based on a default connection and config object) should be created and returned');
     }
 }

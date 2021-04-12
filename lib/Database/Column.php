@@ -1,12 +1,12 @@
 <?php
 
-namespace Instasell\Instarecord\Database;
+namespace Softwarepunt\Instarecord\Database;
 
 use DateTime;
 use DateTimeZone;
 use Exception;
-use Instasell\Instarecord\Instarecord;
-use Instasell\Instarecord\Serialization\IDatabaseSerializable;
+use Softwarepunt\Instarecord\Instarecord;
+use Softwarepunt\Instarecord\Serialization\IDatabaseSerializable;
 
 /**
  * Represents a Column within a Table.
@@ -135,7 +135,7 @@ class Column
                                     break;
                                 } else {
                                     if ($classImplements = class_implements($phpTypeStr)) {
-                                        if (in_array('Instasell\Instarecord\Serialization\IDatabaseSerializable', $classImplements)) {
+                                        if (in_array('Softwarepunt\Instarecord\Serialization\IDatabaseSerializable', $classImplements)) {
                                             $this->dataType = self::TYPE_SERIALIZED_OBJECT;
 
                                             try {
