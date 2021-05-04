@@ -21,7 +21,9 @@
   "autoload": {
     "psr-4": {
       "SoftwarePunt\\Instarecord\\": "lib/",
-      "SoftwarePunt\\Instarecord\\Tests\\": "tests/"
+      "SoftwarePunt\\Instarecord\\Tests\\": "tests/",
+      "Instasell\\Instarecord\\": "lib/",
+      "Instasell\\Instarecord\\Tests\\": "tests/"
     }
   }
 }
