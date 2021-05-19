@@ -302,7 +302,7 @@ class Query
      * Sets the values to be SET on an UPDATE statement.
      *
      * @param array|string $valuesOrSql Associative array of the values to be set indexed by column names *OR* raw SQL.
-     * @param array ...$params Bound parameter list. Only for raw mode (if first param is a string).
+     * @param mixed ...$params Bound parameter list. Only for raw mode (if first param is a string).
      * @throws QueryBuilderException
      * @return Query|$this
      */
@@ -472,8 +472,7 @@ class Query
      * The MySQL INNER JOIN would return the records where table1 and table2 intersect.
      *
      * @param string $statementText Raw SQL "INNER JOIN" statement text.
-     * @param array ...$params Bound parameter list.
-     * @throws QueryBuilderException
+     * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
     public function innerJoin(string $statementText, ...$params): Query
@@ -486,8 +485,7 @@ class Query
      * This type of join returns all rows from the LEFT-hand table specified in the ON condition and only those rows from the other table where the joined fields are equal (join condition is met).
      *
      * @param string $statementText Raw SQL "INNER JOIN" statement text.
-     * @param array ...$params Bound parameter list.
-     * @throws QueryBuilderException
+     * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
     public function leftJoin(string $statementText, ...$params): Query
@@ -500,8 +498,7 @@ class Query
      * This type of join returns all rows from the RIGHT-hand table specified in the ON condition and only those rows from the other table where the joined fields are equal (join condition is met).
      *
      * @param string $statementText Raw SQL "INNER JOIN" statement text.
-     * @param array ...$params Bound parameter list.
-     * @throws QueryBuilderException
+     * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
     public function rightJoin(string $statementText, ...$params): Query
@@ -516,7 +513,7 @@ class Query
      * Use andWhere() to combine different WHERE blocks.
      *
      * @param string $statementText Raw SQL "WHERE" statement text.
-     * @param array ...$params Bound parameter list.
+     * @param mixed ...$params Bound parameter list.
      * @see andWhere()
      * @throws QueryBuilderException
      * @return Query|$this
@@ -536,7 +533,7 @@ class Query
      * Use where() to clear all where clauses and set a new one.
      *
      * @param string $statementText Raw SQL "WHERE" statement text.
-     * @param array ...$params Bound parameter list.
+     * @param mixed ...$params Bound parameter list.
      * @see where()
      * @throws QueryBuilderException
      * @return Query|$this
@@ -556,7 +553,7 @@ class Query
      * Use andHaving() to combine different HAVING blocks.
      *
      * @param string $statementText Raw SQL "HAVING" statement text.
-     * @param array ...$params Bound parameter list.
+     * @param mixed ...$params Bound parameter list.
      * @see andHaving()
      * @throws QueryBuilderException
      * @return Query|$this
@@ -576,7 +573,7 @@ class Query
      * Use having() to clear all having clauses and set a new one.
      *
      * @param string $statementText Raw SQL "HAVING" statement text.
-     * @param array ...$params Bound parameter list.
+     * @param mixed ...$params Bound parameter list.
      * @see having()
      * @throws QueryBuilderException
      * @return Query|$this
@@ -593,7 +590,7 @@ class Query
      * Sets the ORDER BY statement on the query.
      *
      * @param string $statementText Raw SQL for the "ORDER BY" statement text.
-     * @param array ...$params Bound parameter list.
+     * @param mixed ...$params Bound parameter list.
      * @throws QueryBuilderException
      * @return Query|$this
      */
@@ -612,7 +609,7 @@ class Query
      * Sets the GROUP BY statement on the query.
      *
      * @param string $statementText Raw SQL for the "GROUP BY" statement text.
-     * @param array ...$params Bound parameter list.
+     * @param mixed ...$params Bound parameter list.
      * @throws QueryBuilderException
      * @return Query|$this
      */
