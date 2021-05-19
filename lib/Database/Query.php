@@ -303,7 +303,6 @@ class Query
      *
      * @param array|string $valuesOrSql Associative array of the values to be set indexed by column names *OR* raw SQL.
      * @param mixed ...$params Bound parameter list. Only for raw mode (if first param is a string).
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function set($valuesOrSql, ...$params): Query
@@ -337,7 +336,6 @@ class Query
      * Adds an "ON DUPLICATE KEY UPDATE" component to the query statement.
      *
      * @param array $values Associative array of the values to be set, indexed by column names.
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function onDuplicateKeyUpdate(array $values): Query
@@ -359,7 +357,6 @@ class Query
      *
      * @param string $statementText The raw statement text / SQL to bind.
      * @param array $params The list of parameters to be bound to the statement text.
-     * @throws QueryBuilderException
      * @return array A statement row, where index 0 contains the statement text and other values represent the params.
      */
     protected function processStatementParameters(string $statementText, array $params): array
@@ -515,7 +512,6 @@ class Query
      * @param string $statementText Raw SQL "WHERE" statement text.
      * @param mixed ...$params Bound parameter list.
      * @see andWhere()
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function where(string $statementText, ...$params): Query
@@ -535,7 +531,6 @@ class Query
      * @param string $statementText Raw SQL "WHERE" statement text.
      * @param mixed ...$params Bound parameter list.
      * @see where()
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function andWhere(string $statementText, ...$params): Query
@@ -555,7 +550,6 @@ class Query
      * @param string $statementText Raw SQL "HAVING" statement text.
      * @param mixed ...$params Bound parameter list.
      * @see andHaving()
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function having(string $statementText, ...$params): Query
@@ -575,7 +569,6 @@ class Query
      * @param string $statementText Raw SQL "HAVING" statement text.
      * @param mixed ...$params Bound parameter list.
      * @see having()
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function andHaving(string $statementText, ...$params): Query
@@ -591,7 +584,6 @@ class Query
      *
      * @param string $statementText Raw SQL for the "ORDER BY" statement text.
      * @param mixed ...$params Bound parameter list.
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function orderBy(string $statementText, ...$params): Query
@@ -610,7 +602,6 @@ class Query
      *
      * @param string $statementText Raw SQL for the "GROUP BY" statement text.
      * @param mixed ...$params Bound parameter list.
-     * @throws QueryBuilderException
      * @return Query|$this
      */
     public function groupBy(string $statementText, ...$params): Query
