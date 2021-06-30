@@ -88,16 +88,16 @@ class QueryPaginator
     /**
      * Gets the total item count.
      *
+     * @param bool $distinct If true, apply a DISTINCT clause
      * @return int Total items without pagination.
      */
-    public function getTotalItemCount(): int
+    public function getTotalItemCount(string $column = '*', bool $distinct = false): int
     {
         if ($this->totalItemCount === null) {
             $this->totalItemCount = intval($this->createDerivedQuery()
-                ->count()
+                ->count($distinct ? "DISTINCT {$column}" : $column)
                 ->querySingleValue());
         }
-
         return $this->totalItemCount;
     }
 
