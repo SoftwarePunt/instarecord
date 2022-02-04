@@ -8,6 +8,7 @@ use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\Table;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Tests\Samples\DummySerializableType;
+use Softwarepunt\Instarecord\Tests\Samples\EnumSample;
 
 class DataFormattingTest extends TestCase
 {
@@ -26,6 +27,18 @@ class DataFormattingTest extends TestCase
             $rfType = new \ReflectionProperty($column, "referenceType");
             $rfType->setAccessible(true);
             $rfType->setValue($column, $opts['reftype']);
+        }
+
+        if (!empty($opts['reftype'])) {
+            $rfType = new \ReflectionProperty($column, "referenceType");
+            $rfType->setAccessible(true);
+            $rfType->setValue($column, $opts['reftype']);
+        }
+
+        if (!empty($opts['enumtype'])) {
+            $rfType = new \ReflectionProperty($column, "reflectionEnum");
+            $rfType->setAccessible(true);
+            $rfType->setValue($column, new \ReflectionEnum($opts['enumtype']));
         }
 
         if (!empty($opts['nullable'])) {
@@ -184,7 +197,7 @@ class DataFormattingTest extends TestCase
         $this->assertSame("1", $column->formatDatabaseValue(1));
         $this->assertSame(null, $column->formatDatabaseValue(null));
 
-        // This is a bit of an edge case, but I came up with it on SO and it's kinda useful sometimes:
+        // This is a bit of an edge case, but I came up with it on SO, and it's kinda useful sometimes:
         // https://stackoverflow.com/a/45087858/1410310
     }
 
@@ -240,5 +253,18 @@ class DataFormattingTest extends TestCase
 
         $this->assertSame(null, $column->parseDatabaseValue(null));
         $this->assertEquals($obj = new DummySerializableType("test 123"), $column->parseDatabaseValue("test 123"));
+    }
+
+    public function testEnum()
+    {
+        $column = $this->_createTestColumn([
+            'var' => Column::TYPE_ENUM,
+            'nullable' => true,
+            'enumtype' => EnumSample::class
+        ]);
+
+        $this->assertSame(null, $column->parseDatabaseValue(null));
+        $this->assertSame("three", $column->formatDatabaseValue(EnumSample::Three));
+        $this->assertEquals(EnumSample::Two, $column->parseDatabaseValue("two"));
     }
 }

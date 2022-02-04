@@ -12,6 +12,7 @@ class User extends Model
     public int $id;
     public string $userName;
     public \DateTime $joinDate;
+    public EnumSample $enumValue;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Not columns

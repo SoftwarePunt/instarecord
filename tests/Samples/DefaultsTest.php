@@ -10,4 +10,5 @@ class DefaultsTest extends Model
     public ?string $strNullableWithDefault = "hello1";
     public string $strNonNullableWithDefault = "hello2";
     public ?string $strDefaultNullValue = null;
+    public EnumSample $enumWithDefault = EnumSample::Three;
 }

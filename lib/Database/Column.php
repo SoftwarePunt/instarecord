@@ -18,6 +18,7 @@ class Column
     const TYPE_BOOLEAN = "bool";
     const TYPE_INTEGER = "integer";
     const TYPE_DECIMAL = "decimal";
+    const TYPE_ENUM = "enum";
     const TYPE_SERIALIZED_OBJECT = "serialized";
     
     const DATE_TIME_FORMAT = "Y-m-d H:i:s";
@@ -58,10 +59,22 @@ class Column
      */
     protected ?IDatabaseSerializable $referenceType;
 
+    /**
+     * For TYPE_ENUM:
+     * Reflected enum type used for this column.
+     * Only backed enums (int/string) are supported.
+     */
+    protected \ReflectionEnum $reflectionEnum;
+
+    /**
+     * Indicates whether this column supports NULL values or not.
+     */
     protected bool $isNullable;
 
     /**
-     * Auto-fill mode for this column.
+     * Automatic fill mode for this column.
+     *
+     * @see Column::AUTO_MODE_*
      */
     protected ?string $autoMode;
 
@@ -129,7 +142,14 @@ class Column
                             $this->dataType = self::TYPE_STRING;
                             break;
                         default:
-                            if (class_exists($phpTypeStr)) {
+                            if (enum_exists($phpTypeStr)) {
+                                $this->dataType = self::TYPE_ENUM;
+                                $this->reflectionEnum = new \ReflectionEnum($phpTypeStr);
+                                if (!$this->reflectionEnum->isBacked()) {
+                                    throw new ColumnDefinitionException("Only backed enums are supported for database serialization, tried to use: {$phpTypeStr}");
+                                }
+                                break;
+                            } else if (class_exists($phpTypeStr)) {
                                 if ($phpTypeStr === "DateTime" || $phpTypeStr === "\DateTime") {
                                     $this->dataType = self::TYPE_DATE_TIME;
                                     break;
@@ -349,6 +369,10 @@ class Column
             return strval(intval($input));
         }
 
+        if ($input instanceof \BackedEnum) {
+            return $input->value;
+        }
+
         if ($input === null) {
             return null;
         }
@@ -391,6 +415,11 @@ class Column
 
             // Exhausted options, treat as NULL
             return null;
+        }
+
+        if ($this->dataType === self::TYPE_ENUM) {
+            // Call Enum::tryFrom(), which will return the case object or null
+            return forward_static_call([$this->reflectionEnum->name, 'tryFrom'], $input);
         }
 
         if ($this->dataType === self::TYPE_SERIALIZED_OBJECT) {

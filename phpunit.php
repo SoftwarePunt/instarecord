@@ -63,6 +63,7 @@ $pdo->exec('CREATE TABLE `'  . $dsnConfig->database . '`.`users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_name` VARCHAR(45) NULL,
   `email_address` VARCHAR(45) NULL,
+  `enum_value` VARCHAR(45) NULL,
   `join_date` DATETIME NULL,
   `created_at` DATETIME NULL,
   `modified_at` DATETIME NULL,

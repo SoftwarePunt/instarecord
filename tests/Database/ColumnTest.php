@@ -6,6 +6,7 @@ use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\Table;
+use Softwarepunt\Instarecord\Tests\Samples\EnumSample;
 
 class ColumnTest extends TestCase
 {
@@ -42,5 +43,6 @@ class ColumnTest extends TestCase
         $this->assertEquals("hello1", $table->getColumnByPropertyName('strNullableWithDefault')->getDefaultValue());
         $this->assertEquals("hello2", $table->getColumnByPropertyName('strNonNullableWithDefault')->getDefaultValue());
         $this->assertEquals(null, $table->getColumnByPropertyName('strDefaultNullValue')->getDefaultValue());
+        $this->assertEquals(EnumSample::Three, $table->getColumnByPropertyName('enumWithDefault')->getDefaultValue());
     }
 }

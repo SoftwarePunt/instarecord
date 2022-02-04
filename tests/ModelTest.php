@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Tests\Samples\DummySerializableType;
+use Softwarepunt\Instarecord\Tests\Samples\EnumSample;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUserWithSerialized;
 use SoftwarePunt\Instarecord\Tests\Samples\User;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
@@ -432,6 +433,7 @@ class ModelTest extends TestCase
         $newUser = new User();
         $testFormatStr = '1970-11-12 01:03:04';
         $newUser->joinDate = new \DateTime($testFormatStr);
+        $newUser->enumValue = EnumSample::Two;
         $newUser->save();
         
         // The fact no errors have occurred is a good first step: it means we inserted valid data.
@@ -440,6 +442,7 @@ class ModelTest extends TestCase
         
         $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
         $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
+        $this->assertEquals(EnumSample::Two, $refetchedUser->enumValue, 'Database enum value should have been parsed correctly');
     }
 
     public function testModelUpdatesFormattedValues()
