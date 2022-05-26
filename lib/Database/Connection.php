@@ -85,6 +85,18 @@ class Connection
     }
 
     /**
+     * Gets the raw PDO connection, opening the connection if necessary.
+     *
+     * @throws DatabaseException Throws if the database connection cannot be opened.
+     * @return \PDO
+     */
+    public function getPdo(): \PDO
+    {
+        $this->open();
+        return $this->pdo;
+    }
+
+    /**
      * @return string
      */
     public function generateDsn(): string

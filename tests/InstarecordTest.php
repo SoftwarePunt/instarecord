@@ -88,4 +88,17 @@ class InstarecordTest extends TestCase
         $query = Instarecord::query();
         $this->assertInstanceOf('SoftwarePunt\Instarecord\Database\Query', $query, 'A new query object (based on a default connection and config object) should be created and returned');
     }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGetPdo()
+    {
+        Instarecord::config(new TestDatabaseConfig());
+        $connectionObject = Instarecord::connection();
+
+        $this->assertFalse($connectionObject->isOpen(), "Connection should be closed before getPdo() call");
+        $this->assertInstanceOf('\PDO', $connectionObject->getPdo(), "getPdo() should return \PDO instance");
+        $this->assertTrue($connectionObject->isOpen(), "getPdo() should open connection");
+    }
 }
