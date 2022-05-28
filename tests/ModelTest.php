@@ -288,6 +288,43 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @runInSeparateProcess
+     */
+    public function testUpsert()
+    {
+        Instarecord::config(new TestDatabaseConfig());
+
+        // NB: "userName" has a unique index
+
+        // 1. Upsert initial
+        $user1 = new User();
+        $user1->userName = "mr-upsert";
+        $user1->enumValue = EnumSample::One;
+
+        $this->assertTrue($user1->upsert(), "upsert() should succeed on create");
+        $this->assertNotNull($user1->id, "upsert() should cause auto incremented PK value to be set on create");
+
+        // 2. Upsert update
+        $user2 = new User();
+        $user2->userName = "mr-upsert";
+        $user2->enumValue = EnumSample::Two;
+        $user2->upsert();
+
+        $this->assertTrue($user2->upsert(), "upsert() should succeed on update");
+        $this->assertSame($user1->id, $user2->id, "upsert() should cause auto incremented PK value to be set on update");
+
+        // 3. Refetch to ensure data was updated
+        /**
+         * @var $userRefetched User|null
+         */
+        $userRefetched = User::query()
+            ->where('user_name = ?', "mr-upsert")
+            ->querySingleModel();
+
+        $this->assertSame($userRefetched->enumValue, $user2->enumValue, "User record should be updated in database after upsert()");
+    }
+
+    /**
      * @runInSeparateProcess 
      */
     public function testDelete()

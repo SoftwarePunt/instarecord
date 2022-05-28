@@ -67,6 +67,14 @@ class Query
     protected $onDuplicateKeyUpdateValues;
 
     /**
+     * The column name to be used with LAST_INSERT_ID()
+     *
+     * @default null
+     * @var string|null
+     */
+    protected $onDuplicateKeyUpdateLastInsertIdColumn;
+
+    /**
      * Controls the ORDER BY structure.
      *
      * @default null
@@ -185,6 +193,8 @@ class Query
         $this->selectStatement = "*";
         $this->tableName = null;
         $this->dataValues = [];
+        $this->onDuplicateKeyUpdateValues = [];
+        $this->onDuplicateKeyUpdateLastInsertIdColumn = null;
         $this->orderBy = null;
         $this->limit = null;
         $this->offset = null;
@@ -336,9 +346,10 @@ class Query
      * Adds an "ON DUPLICATE KEY UPDATE" component to the query statement.
      *
      * @param array $values Associative array of the values to be set, indexed by column names.
+     * @param string|null $lastInsertIdColumn Column name to use for LAST_INSERT_ID() in case of update result.
      * @return Query|$this
      */
-    public function onDuplicateKeyUpdate(array $values): Query
+    public function onDuplicateKeyUpdate(array $values, ?string $lastInsertIdColumn = null): Query
     {
         $keys = array_keys($values);
         $firstParameterKey = array_shift($keys);
@@ -348,7 +359,12 @@ class Query
             throw new QueryBuilderException("Query format error: The values in the ON DUPLICATE KEY UPDATE block MUST be indexed by column name, not by column index number.");
         }
 
+        if ($lastInsertIdColumn) {
+            unset($values[$lastInsertIdColumn]);
+        }
+
         $this->onDuplicateKeyUpdateValues = $values;
+        $this->onDuplicateKeyUpdateLastInsertIdColumn = $lastInsertIdColumn;
         return $this;
     }
 
@@ -766,11 +782,15 @@ class Query
 
             $statementText .= " ON DUPLICATE KEY UPDATE ";
 
+            if ($this->onDuplicateKeyUpdateLastInsertIdColumn) {
+                $statementText .= "`{$this->onDuplicateKeyUpdateLastInsertIdColumn}` = LAST_INSERT_ID(`{$this->onDuplicateKeyUpdateLastInsertIdColumn}`)";
+            }
+
             for ($i = 0; $i < count($columnValues); $i++) {
                 $columnName = $columnIndexes[$i];
                 $columnValue = $columnValues[$i];
 
-                if ($i > 0) {
+                if ($i > 0 || $this->onDuplicateKeyUpdateLastInsertIdColumn) {
                     $statementText .= ", ";
                 }
 

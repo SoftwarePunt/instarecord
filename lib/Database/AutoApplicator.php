@@ -11,6 +11,7 @@ class AutoApplicator
 {
     const REASON_UPDATE = "update";
     const REASON_CREATE = "create";
+    const REASON_UPSERT = "upsert";
 
     /**
      * @param Model $model The model for reading / writing the auto column to.

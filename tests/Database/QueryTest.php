@@ -181,6 +181,21 @@ class QueryTest extends TestCase
         $this->assertEquals('INSERT INTO users (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `name` = ?;', $queryString);
     }
 
+    public function testInsertWithOnDuplicateKeyUpdateWithLastInsertId()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $updateData = ['id' => 123, 'name' => 'Henk'];
+
+        $queryString = $query->insert()
+            ->into('users')
+            ->values($updateData)
+            ->onDuplicateKeyUpdate($updateData, 'id')
+            ->createStatementText();
+
+        $this->assertEquals('INSERT INTO users (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `id` = LAST_INSERT_ID(`id`), `name` = ?;', $queryString);
+    }
+
     public function testOrderBy()
     {
         $query = new Query(new Connection(new DatabaseConfig()));

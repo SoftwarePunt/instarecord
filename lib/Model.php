@@ -354,27 +354,29 @@ class Model
     }
 
     /**
-     * Inserts this instance a new record in the database.
+     * Inserts this as a new record in the database, ignoring the primary key if it is set.
      *
      * @see update()
      * @return bool
      */
     public function create(): bool
     {
+        // Auto increment mode: remove any existing primary key value
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
-
         if ($this->getIsAutoIncrement()) {
-            // Auto increment mode: remove any existing primary key value
             unset($this->$primaryKeyName);
         }
 
+        // Process auto columns
         $this->runAutoApplicator(AutoApplicator::REASON_CREATE);
 
+        // Build and execute "INSERT" query
         $insertPkValue = $this->query()
             ->insert()
             ->values($this->getColumnValues())
             ->executeInsert();
 
+        // Update state
         if ($this->getIsAutoIncrement()) {
             $this->$primaryKeyName = $insertPkValue;
         }
@@ -384,9 +386,45 @@ class Model
     }
 
     /**
-     * Updates this instance's database record, based on its primary key.
+     * Inserts this as a new record in the database via ON DUPLICATE KEY UPDATE query.
+     *
+     * @return bool
+     */
+    public function upsert(): bool
+    {
+        // Auto increment mode: remove any existing primary key value
+        $primaryKeyName = $this->getPrimaryKeyPropertyName();
+        if ($this->getIsAutoIncrement()) {
+            unset($this->$primaryKeyName);
+        }
+
+        // Process auto columns
+        $this->runAutoApplicator(AutoApplicator::REASON_UPSERT);
+
+        // Build and execute "INSERT ... ON DUPLICATE KEY UPDATE" query
+        $allValues = $this->getColumnValues();
+
+        $insertValues = $allValues;
+        unset($insertValues['id']);
+
+        $insertPkValue = $this->query()
+            ->insert()
+            ->values($insertValues)
+            ->onDuplicateKeyUpdate($allValues, $primaryKeyName)
+            ->executeInsert();
+
+        // Update state
+        if ($this->getIsAutoIncrement()) {
+            $this->$primaryKeyName = $insertPkValue;
+        }
+
+        $this->markAllPropertiesClean();
+        return true;
+    }
+
+    /**
+     * Updates this as an exiting record in the database, based on its primary key.
      * Only "dirty" properties will be updated. If nothing was updated, this function won't do anything.
-     * This function will fail if primary key is not set.
      *
      * @see create()
      * @return bool Returns whether updating the record succeeded. Also returns true if there was nothing to update.
@@ -425,7 +463,7 @@ class Model
     }
 
     /**
-     * Commits the updated information in this model and its' underlying relationships to the database.
+     * Commits the updated information in this model and its underlying relationships to the database.
      *
      * If this record does not yet have primary key information, it will cause a new record to be inserted (create).
      * Instead, if this record does already have primary key information, it will cause the record to be updated.
