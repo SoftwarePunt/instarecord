@@ -151,6 +151,26 @@ class QueryTest extends TestCase
         $this->assertEquals('INSERT INTO users (`id`, `user_name`) VALUES (?, ?);', $queryString);   
     }
 
+    /**
+     * @depends testSimpleInsertWithColumnNames
+     */
+    public function testInsertIgnore()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $data = [
+            'id' => '1',
+            'user_name' => 'Hank'
+        ];
+
+        $queryString = $query->insertIgnore()
+            ->values($data)
+            ->into('users')
+            ->createStatementText();
+
+        $this->assertEquals('INSERT IGNORE INTO users (`id`, `user_name`) VALUES (?, ?);', $queryString);
+    }
+
     public function testSimpleInsertWithColumnIndexNumbers()
     {
         $query = new Query(new Connection(new DatabaseConfig()));

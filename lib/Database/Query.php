@@ -37,6 +37,13 @@ class Query
     protected $statementType;
 
     /**
+     * Toggles "IGNORE" option with INSERT query.
+     *
+     * @var bool
+     */
+    protected $insertIgnore;
+
+    /**
      * The select statement for the query.
      *
      * @default *
@@ -190,6 +197,7 @@ class Query
     {
         $this->parameters = [];
         $this->statementType = self::QUERY_TYPE_SELECT;
+        $this->insertIgnore = false;
         $this->selectStatement = "*";
         $this->tableName = null;
         $this->dataValues = [];
@@ -241,6 +249,19 @@ class Query
     public function insert(): Query
     {
         $this->statementType = self::QUERY_TYPE_INSERT;
+        $this->insertIgnore = false;
+        return $this;
+    }
+
+    /**
+     * Begins a INSERT IGNORE statement.
+     *
+     * @return Query|$this
+     */
+    public function insertIgnore(): Query
+    {
+        $this->statementType = self::QUERY_TYPE_INSERT;
+        $this->insertIgnore = true;
         return $this;
     }
 
@@ -698,7 +719,11 @@ class Query
         if ($this->statementType === self::QUERY_TYPE_SELECT) {
             $statementText = "SELECT {$this->selectStatement} FROM {$this->tableName}";
         } else if ($this->statementType === self::QUERY_TYPE_INSERT) {
-            $statementText = "INSERT INTO {$this->tableName}";
+            if ($this->insertIgnore) {
+                $statementText = "INSERT IGNORE INTO {$this->tableName}";
+            } else {
+                $statementText = "INSERT INTO {$this->tableName}";
+            }
         } else if ($this->statementType === self::QUERY_TYPE_UPDATE) {
             $statementText = "UPDATE {$this->tableName}";
         } else if ($this->statementType === self::QUERY_TYPE_DELETE) {
