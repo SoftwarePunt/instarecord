@@ -262,6 +262,33 @@ class ModelTest extends TestCase
         $this->assertEmpty($newUser->getDirtyProperties(), 'After saving an item, all properties should be clean');
     }
 
+    public function testReload()
+    {
+        Instarecord::config(new TestDatabaseConfig());
+
+        // Create new user
+        $newUser = new User();
+        $newUser->userName = "reload-user";
+        $newUser->enumValue = EnumSample::One;
+        $this->assertTrue($newUser->save(), "New user save should succeed");
+        $this->assertNotEmpty($newUser->id, "New user save should set PK value");
+
+        // Update user by query
+        User::query()
+            ->update()
+            ->set('`enum_value` = ?', EnumSample::Two->value)
+            ->where('id = ?', $newUser->id)
+            ->execute();
+
+        // Reload user
+        $this->assertTrue($newUser->reload(), "Reload should succeed");
+        $this->assertEquals(EnumSample::Two, $newUser->enumValue, "Reloaded data should be applied");
+
+        // Delete & reload user
+        $newUser->delete();
+        $this->assertFalse($newUser->reload(), "Reload should fail for deleted record");
+    }
+
     /**
      * @depends testCreateViaSave
      * @runInSeparateProcess 

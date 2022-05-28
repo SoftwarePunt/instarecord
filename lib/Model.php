@@ -7,6 +7,7 @@ use SoftwarePunt\Instarecord\Database\AutoApplicator;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\ModelQuery;
 use SoftwarePunt\Instarecord\Database\Table;
+use SoftwarePunt\Instarecord\Models\ModelLogicException;
 
 /**
  * The base class for all Softwarepunt models.
@@ -482,6 +483,34 @@ class Model
         }
 
         return $this->create();
+    }
+
+    /**
+     * Reloads this model from the database.
+     * Requires that a PK value is set.
+     *
+     * @throws InstarecordException Throws if no PK value is set or if database error occurs
+     * @return boolean True if reload succeeded, false if no result from database (record deleted or bad PK value?)
+     */
+    public function reload(): bool
+    {
+        $pkColumn = $this->getPrimaryKeyColumnName();
+        $pkValue = $this->getPrimaryKeyValue();
+
+        if (!$pkValue)
+            throw new ModelLogicException("Cannot reload model with no PK value");
+
+        $row = $this->query()
+            ->where("`{$pkColumn}` = ?", $pkValue)
+            ->querySingleRow();
+
+        if (!$row)
+            // No result from database
+            return false;
+
+        $this->setColumnValues($row);
+        $this->markAllPropertiesClean();
+        return true;
     }
 
     /**
