@@ -389,9 +389,10 @@ class Model
     /**
      * Inserts this as a new record in the database via ON DUPLICATE KEY UPDATE query.
      *
+     * @param bool $reload If true, reload model data after performing UPSERT (if PK is set).
      * @return bool
      */
-    public function upsert(): bool
+    public function upsert(bool $reload = true): bool
     {
         // Auto increment mode: remove any existing primary key value
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
@@ -420,6 +421,12 @@ class Model
         }
 
         $this->markAllPropertiesClean();
+
+        // Perform internal reload if we have a PK
+        if (!empty($this->$primaryKeyName) && $reload) {
+            $this->reload();
+        }
+
         return true;
     }
 
