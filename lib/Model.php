@@ -493,6 +493,20 @@ class Model
     }
 
     /**
+     * Performs a save() while suppressing any database errors.
+     *
+     * @return bool True if saved successfully, false is save failed or caused a database error.
+     */
+    public function trySave(): bool
+    {
+        try {
+            return $this->save();
+        } catch (InstarecordException) {
+            return false;
+        }
+    }
+
+    /**
      * Reloads this model from the database.
      * Requires that a PK value is set.
      *

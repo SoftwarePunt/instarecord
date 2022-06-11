@@ -618,4 +618,19 @@ class ModelTest extends TestCase
         $user = TestUserWithSerialized::fetch($user->id);
         $this->assertEquals(new DummySerializableType("Mr. Hands"), $user->userName, "Reading a serialized object from database should work");
     }
+
+    public function testTrySave()
+    {
+        $user = new User();
+
+        $exceptionThrown = false;
+        try {
+            $user->save();
+        } catch (\Exception $ex) {
+            $exceptionThrown = true;
+        }
+        $this->assertTrue($exceptionThrown, "regular save() should trigger regular exception");
+
+        $this->assertFalse($user->trySave(), "trySave() should suppress exception and return false");
+    }
 }
