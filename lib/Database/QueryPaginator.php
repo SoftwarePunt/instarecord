@@ -96,6 +96,7 @@ class QueryPaginator
         if ($this->totalItemCount === null) {
             $this->totalItemCount = intval($this->createDerivedQuery()
                 ->count($distinct ? "DISTINCT {$column}" : $column)
+                ->orderBy(null)
                 ->querySingleValue());
         }
         return $this->totalItemCount;

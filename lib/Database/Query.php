@@ -623,8 +623,14 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function orderBy(string $statementText, ...$params): Query
+    public function orderBy(?string $statementText, ...$params): Query
     {
+        if (empty($statementText)) {
+            $this->orderBy = null;
+            $this->orderByParams = [];
+            return $this;
+        }
+
         // Process parameters and set ORDER BY data
         $statementRow = $this->processStatementParameters($statementText, $params);
 
