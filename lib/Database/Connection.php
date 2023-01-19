@@ -53,6 +53,11 @@ class Connection
         $this->queryLogger = null;
     }
 
+    public function getConfig(): DatabaseConfig
+    {
+        return $this->config;
+    }
+
     /**
      * Sets the query logger on this connection instance.
      *

@@ -479,7 +479,7 @@ class Query
         if ($paramValue instanceof \DateTime) {
             // Format DateTime to database format / UTC
             $dt = clone $paramValue;
-            $dt->setTimezone(new DateTimeZone('UTC'));
+            $dt->setTimezone(new DateTimeZone($this->connection->getConfig()->timezone));
             return $dt->format(Column::DATE_TIME_FORMAT);
         }
 
