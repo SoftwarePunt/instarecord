@@ -15,14 +15,14 @@ class QueryTest extends TestCase
     public function testSimpleSelect()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
-        
+
         $queryString = $query->select('*')
             ->from('users')
             ->createStatementText();
-        
+
         $this->assertEquals('SELECT * FROM users;', $queryString);
     }
-    
+
     public function testSimpleSelectCount()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
@@ -44,7 +44,7 @@ class QueryTest extends TestCase
 
         $this->assertEquals('SELECT COUNT(*) FROM users;', $queryString);
     }
-    
+
     public function testPerformsSelectByDefault()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
@@ -54,7 +54,20 @@ class QueryTest extends TestCase
 
         $this->assertEquals('SELECT * FROM users;', $queryString);
     }
-    
+
+    public function testBoundSelect()
+    {
+        $query = (new Query(new Connection(new DatabaseConfig())))
+            ->from('users')
+            ->select('user_name, MATCH (user_name) AGAINST (? IN BOOLEAN MODE) AS score', "*some bound text*");
+
+        $queryString = $query->createStatementText();
+        $queryParams = $query->getBoundParametersForGeneratedStatement();
+
+        $this->assertEquals('SELECT user_name, MATCH (user_name) AGAINST (? IN BOOLEAN MODE) AS score FROM users;', $queryString);
+        $this->assertEquals("*some bound text*", $queryParams[0]);
+    }
+
     public function testSimpleDelete()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
@@ -65,7 +78,7 @@ class QueryTest extends TestCase
 
         $this->assertEquals('DELETE FROM users;', $queryString);
     }
-    
+
     public function testSimpleUpdate()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
@@ -74,7 +87,7 @@ class QueryTest extends TestCase
             'is_active' => false,
             'is_friendly' => true
         ];
-        
+
         $queryString = $query->update('users')
             ->set($data)
             ->createStatementText();
@@ -133,11 +146,11 @@ class QueryTest extends TestCase
         $queryString = $query->update('users')
             ->set($data);
     }
-    
+
     public function testSimpleInsertWithColumnNames()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
-        
+
         $data = [
             'id' => '1',
             'user_name' => 'Hank'
@@ -148,7 +161,7 @@ class QueryTest extends TestCase
             ->into('users')
             ->createStatementText();
 
-        $this->assertEquals('INSERT INTO users (`id`, `user_name`) VALUES (?, ?);', $queryString);   
+        $this->assertEquals('INSERT INTO users (`id`, `user_name`) VALUES (?, ?);', $queryString);
     }
 
     /**
@@ -263,11 +276,11 @@ class QueryTest extends TestCase
 
         $this->assertEquals('SELECT * FROM articles GROUP BY id HAVING COUNT(id) > ?;', $queryString);
     }
-    
+
     public function testLimitAndOffset()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
-        
+
         $queryString = $query->update('users')
             ->set(['a' => 'b'])
             ->from('users')
@@ -331,7 +344,7 @@ class QueryTest extends TestCase
 
         $this->assertEquals('DELETE FROM fruits HAVING (type = ?) AND (color IN (?, ?)) AND (tastes_nice = 1);', $queryString);
     }
-    
+
     public function testInnerJoin()
     {
         $query = new Query(new Connection(new DatabaseConfig()));
@@ -369,16 +382,16 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @runInSeparateProcess 
+     * @runInSeparateProcess
      */
     public function testWhereWithBoundArray()
     {
         $config = new TestDatabaseConfig();
 
         Instarecord::config($config);
-        
+
         $query = new Query(Instarecord::connection());
-        
+
         $testUserA = new User();
         $testUserA->userName = 'ArrayGuyOne';
         $testUserA->save();
@@ -386,7 +399,7 @@ class QueryTest extends TestCase
         $testUserB = new User();
         $testUserB->userName = 'ArrayGuyTwo';
         $testUserB->save();
-        
+
         $queryString = $query->select()
             ->from('users')
             ->where('id > ? AND id IN (?) AND id >= ?', 0, [$testUserA->id, $testUserB->id, 'banana'], 0)
@@ -394,7 +407,7 @@ class QueryTest extends TestCase
 
         // Test query formatting
         $this->assertEquals('SELECT * FROM users WHERE (id > ? AND id IN (?, ?, ?) AND id >= ?);', $queryString);
-        
+
         // Test actual execution, expecting two rows
         $rows = $query->queryAllRows();
         $this->assertCount(2, $rows);
@@ -407,12 +420,12 @@ class QueryTest extends TestCase
     {
         $dateTime = new \DateTime();
         $dateTime->setTimestamp(123456789);
-        
+
         $query = Instarecord::query()->select()
             ->from('users')
             ->where('created_at = ?', $dateTime);
         $queryString = $query->createStatementText();
-        
+
         $this->assertEquals('SELECT * FROM users WHERE (created_at = ?);', $queryString);
         $this->assertEquals(['1973-11-29 21:33:09'], $query->getBoundParametersForGeneratedStatement());
     }
@@ -432,7 +445,7 @@ class QueryTest extends TestCase
             ->where('type = ? AND `color` = ?', 'apples', 'red')
             ->limit(5)
             ->execute();
-        
+
         // Testing exception because it will show several things:
         //  a) Communication / connection is up and running, execute is working
         //  b) Syntax of the command was valid and correct because of the table-specific error
@@ -450,7 +463,7 @@ class QueryTest extends TestCase
             ->from('users')
             ->values(['user_name' => 'ai-me-yay'])
             ->executeInsert();
-        
+
         $this->assertNotEmpty($aiId, 'Auto incremented ID return value expected');
         $this->assertGreaterThan(0, $aiId, 'Auto incremented ID return value non-negative ID expected');
         $this->assertIsInt($aiId, 'Auto incremented ID should be an integer');
@@ -494,7 +507,7 @@ class QueryTest extends TestCase
         $query->select('*');
         $query->from('users');
         $allRows = $query->queryAllRows();
-        
+
         $this->assertNotEmpty($allRows, 'Expected a nonempty row resultset');
         $this->assertNotEmpty($allRows[0], 'Expected a row subarray in the resultset');
         $this->assertArrayHasKey('user_name', $allRows[0], 'Expected a row subarray as assoc array with column names as indexes');
@@ -552,25 +565,25 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @runInSeparateProcess 
+     * @runInSeparateProcess
      */
     public function testQuerySingleValue()
     {
         $config = new TestDatabaseConfig();
         $connection = new Connection($config);
-        
+
         Instarecord::config($config);
 
         $testUser = new User();
         $testUser->userName = 'HenkTheSingleGuy';
         $testUser->save();
-        
+
         $query = new Query($connection);
         $query->select('user_name');
         $query->from('users');
         $query->where('id = ?', $testUser->id);
         $firstValue = $query->querySingleValue();
-        
+
         $this->assertEquals($testUser->userName, $firstValue);
     }
 
@@ -595,7 +608,7 @@ class QueryTest extends TestCase
         $query = new Query($connection);
         $query->select('user_name');
         $query->from('users');
-        
+
         $sva = $query->querySingleValueArray();
 
         $this->assertNotEmpty($sva);

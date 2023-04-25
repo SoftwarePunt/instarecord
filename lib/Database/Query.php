@@ -47,7 +47,9 @@ class Query
      * The select statement for the query.
      *
      * @default *
-     * @var string
+     * @var string|array Plain text, or an array where:
+     *  - Parameter one (index zero) is the raw query text
+     *  - Each parameter following it is a bound parameter
      */
     protected $selectStatement;
 
@@ -219,12 +221,13 @@ class Query
      * Begins a SELECT statement.
      *
      * @param string $selectText The select text: which columns to select. Defaults to "*". Unsafe value.
+     * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function select(string $selectText = '*'): Query
+    public function select(string $selectText = '*', ...$params): Query
     {
         $this->statementType = self::QUERY_TYPE_SELECT;
-        $this->selectStatement = $selectText;
+        $this->selectStatement = $this->processStatementParameters($selectText, $params);
         return $this;
     }
 
@@ -723,7 +726,16 @@ class Query
 
         // Statement header and table name
         if ($this->statementType === self::QUERY_TYPE_SELECT) {
-            $statementText = "SELECT {$this->selectStatement} FROM {$this->tableName}";
+            if (is_array($this->selectStatement)) {
+                // Bound select
+                $statementText = "SELECT {$this->selectStatement[0]} FROM {$this->tableName}";
+                for ($i = 1; $i < count($this->selectStatement); $i++) {
+                    $this->bindParam($this->selectStatement[$i]);
+                }
+            } else {
+                // Plain text select
+                $statementText = "SELECT {$this->selectStatement} FROM {$this->tableName}";
+            }
         } else if ($this->statementType === self::QUERY_TYPE_INSERT) {
             if ($this->insertIgnore) {
                 $statementText = "INSERT IGNORE INTO {$this->tableName}";
@@ -869,7 +881,7 @@ class Query
         if (!empty($this->groupBy)) {
             $statementText .= " GROUP BY {$this->groupBy}";
         }
-        
+
         // Apply HAVING
         $firstHaving = true;
 
