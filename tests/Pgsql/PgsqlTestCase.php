@@ -25,18 +25,23 @@ abstract class PgsqlTestCase extends TestCase
 
     public function getPgsqlConfigPath(): string
     {
-        return realpath(__DIR__ . '/../../') . '/phpunit-config.json';
+        return realpath(__DIR__ . '/../../') . '/phpunit-config-pgsql.json';
     }
 
     public function createConfig(): DatabaseConfig
     {
-        $testConfigRaw = json_decode($this->getPgsqlConfigPath(), true);
+        $testConfigRaw = json_decode(file_get_contents($this->getPgsqlConfigPath()), true);
+
+        if ($testConfigRaw === null)
+            throw new \RuntimeException("Config file could not be read: {$this->getPgsqlConfigPath()}");
 
         $dbConfig = new DatabaseConfig();
         $dbConfig->adapter = PostgreSqlAdapter::class;
         $dbConfig->unix_socket = $testConfigRaw['db_unix_socket'] ?? null;
-        $dbConfig->host = $testConfigRaw['db_host'] ?? null;
-        $dbConfig->port = $testConfigRaw['db_port'] ?? 3306;
+        if (!$dbConfig->unix_socket) {
+            $dbConfig->host = $testConfigRaw['db_host'] ?? null;
+            $dbConfig->port = $testConfigRaw['db_port'] ?? 3306;
+        }
         $dbConfig->username = $testConfigRaw['db_user'] ?? 'root';
         $dbConfig->password = $testConfigRaw['db_pass'] ?? '';
         $dbConfig->database = $testConfigRaw['db_name'] ?? 'test_db';

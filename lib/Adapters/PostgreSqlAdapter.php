@@ -17,6 +17,9 @@ class PostgreSqlAdapter extends DatabaseAdapter
     protected function writeDsnPart(string &$dsn, string $component, mixed $value): void
     {
         if ($component === "charset") {
+            if (str_starts_with($value, "utf8")) {
+                $value = "UTF8";
+            }
             parent::writeDsnPart($dsn, 'options', "'--client_encoding={$value}'");
             return;
         }
