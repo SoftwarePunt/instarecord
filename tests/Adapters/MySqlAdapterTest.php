@@ -7,14 +7,14 @@ use SoftwarePunt\Instarecord\Adapters\MySqlAdapter;
 use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 use SoftwarePunt\Instarecord\DatabaseAdapter;
 
-class MysqlAdapterTest extends TestCase
+class MySqlAdapterTest extends TestCase
 {
     public function testGenerateDsn()
     {
         $adapter = new MySqlAdapter();
         
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->host = '1.2.3.4';
         $config->port = null;
         $config->database = 'dbname123';
@@ -31,7 +31,7 @@ class MysqlAdapterTest extends TestCase
         $adapter = new MySqlAdapter();
 
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->host = '1.2.3.4';
         $config->port = null;
         $config->database = 'dbname123';
@@ -54,7 +54,7 @@ class MysqlAdapterTest extends TestCase
         $adapter = new MySqlAdapter();
 
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->unix_socket = '/tmp/example/unix.sock';
         $config->host = null;
         $config->port = null;
@@ -73,7 +73,7 @@ class MysqlAdapterTest extends TestCase
         $adapter = new MySqlAdapter();
 
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->host = '1.2.3.4';
         $config->port = 3307;
 
@@ -85,7 +85,7 @@ class MysqlAdapterTest extends TestCase
         $adapter = new MySqlAdapter();
 
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->host = '1.2.3.4';
         $config->port = 3307;
         $config->unix_socket = '/tmp/example/unix.sock';
@@ -102,7 +102,7 @@ class MysqlAdapterTest extends TestCase
         $adapter = new MySqlAdapter();
 
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->host = 'localhost';
         $config->port = null;
         $config->database = 'dbname123';

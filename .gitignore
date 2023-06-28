@@ -1,5 +1,6 @@
 # Secrets
 phpunit-config.json
+phpunit-config-*.json
 
 # Composer
 /vendor/

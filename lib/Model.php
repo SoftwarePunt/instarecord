@@ -56,7 +56,7 @@ class Model
     }
 
     /**
-     * Gets whether or not this is an "auto increment" table.
+     * Gets whether this is an "auto increment" table.
      *
      * Default implementation returns true.
      * Can be overridden by a model to provide a custom name.
@@ -368,13 +368,19 @@ class Model
             unset($this->$primaryKeyName);
         }
 
+        // Prepare insert values; never attempt to insert our PK
+        $insertValues = $this->getColumnValues();
+        if ($this->getIsAutoIncrement()) {
+            unset($insertValues[$primaryKeyName]);
+        }
+
         // Process auto columns
         $this->runAutoApplicator(AutoApplicator::REASON_CREATE);
 
         // Build and execute "INSERT" query
         $insertPkValue = $this->query()
             ->insert()
-            ->values($this->getColumnValues())
+            ->values($insertValues)
             ->executeInsert();
 
         // Update state

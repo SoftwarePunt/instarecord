@@ -14,17 +14,13 @@ class Connection
 {
     /**
      * The configuration object used for this connection.
-     *
-     * @var DatabaseConfig
      */
-    protected $config;
+    public readonly DatabaseConfig $config;
 
     /**
      * The adapter used to communicate with the database.
-     *
-     * @var DatabaseAdapter
      */
-    protected $adapter;
+    public readonly DatabaseAdapter $adapter;
 
     /**
      * The PDO connection.
@@ -50,6 +46,7 @@ class Connection
     {
         $this->config = $config;
         $this->adapter = DatabaseAdapter::createInstance($config->adapter);
+
         $this->queryLogger = null;
     }
 
