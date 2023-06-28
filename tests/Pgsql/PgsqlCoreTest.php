@@ -44,5 +44,19 @@ class PgsqlCoreTest extends PgsqlTestCase
         $user->userName = "Bobby Tables";
         $this->assertTrue($user->save(), "User save should succeed");
         $this->assertGreaterThan(0, $user->id, "User creation should succeed; auto incremented ID should be set");
+
+        $user->userName = "Updated Bobby Tables";
+        $this->assertTrue($user->update(), "User update should succeed");
+
+        $userId = $user->id;
+        $user = null;
+        $user = User::fetch($userId);
+        $this->assertNotNull($user, "User fetch by previous insert ID should succeed");
+        $this->assertSame("Updated Bobby Tables", $user->userName, "Updated name should be retrieved from database");
+
+        $this->assertTrue($user->delete(), "User delete should succeed");
+
+        $user = User::fetch($userId);
+        $this->assertNull($user, "User fetch by previous insert ID should succeed");
     }
 }
