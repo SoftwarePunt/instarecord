@@ -21,7 +21,7 @@ class ConnectionTest extends TestCase
     public function testConnectionDsnGenerate()
     {
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->host = "testhost";
         $config->port = 1234;
         $config->username = "testuser";
@@ -38,7 +38,7 @@ class ConnectionTest extends TestCase
     public function testOpenCloseAndReopen()
     {
         $config = new DatabaseConfig();
-        $config->adapter = DatabaseAdapter::MYSQL;
+        $config->adapter = DatabaseAdapter::MySql;
         $config->host = TEST_DATABASE_HOST;
         $config->port = TEST_DATABASE_PORT;
         $config->username = TEST_USER_NAME;

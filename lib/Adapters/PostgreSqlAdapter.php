@@ -6,12 +6,12 @@ use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 use SoftwarePunt\Instarecord\DatabaseAdapter;
 
 /**
- * Database adapter for MySQL servers.
+ * Database adapter for PostgreSQL servers.
  */
-class MySqlAdapter extends DatabaseAdapter
+class PostgreSqlAdapter extends DatabaseAdapter
 {
     public function getDsnPrefix(): string
     {
-        return "mysql";
+        return "pgsql";
     }
 }

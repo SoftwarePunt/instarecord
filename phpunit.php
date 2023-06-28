@@ -36,7 +36,7 @@ define('TEST_DATABASE_NAME', $testConfigRaw['db_name'] ?? 'test_db');
 
 // Generate DSN (by using a temporary Connection instance)
 $dsnConfig = new DatabaseConfig();
-$dsnConfig->adapter = DatabaseAdapter::MYSQL;
+$dsnConfig->adapter = DatabaseAdapter::MySql;
 if (TEST_UNIX_SOCKET) {
     $dsnConfig->unix_socket = TEST_UNIX_SOCKET;
     $dsnConfig->host = null;
