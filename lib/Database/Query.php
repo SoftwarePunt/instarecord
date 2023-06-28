@@ -718,6 +718,8 @@ class Query
      */
     public function createStatementText(): string
     {
+        $backtickChar = $this->connection->adapter->getQueryBacktick();
+
         // Reset bound parameters
         $this->parameters = [];
 
@@ -775,7 +777,7 @@ class Query
                             $statementText .= ", ";
                         }
 
-                        $statementText .= "`{$columnName}` = ?";
+                        $statementText .= "{$backtickChar}{$columnName}{$backtickChar} = ?";
                         $this->bindParam($columnValue);
                     }
                 } else if ($this->statementType == self::QUERY_TYPE_INSERT) {
@@ -794,7 +796,7 @@ class Query
                                 $statementText .= ", ";
                             }
 
-                            $statementText .= "`{$columnName}`";
+                            $statementText .= "{$backtickChar}{$columnName}{$backtickChar}";
                         }
 
                         $statementText .= ")";
@@ -826,7 +828,7 @@ class Query
             $statementText .= " ON DUPLICATE KEY UPDATE ";
 
             if ($this->onDuplicateKeyUpdateLastInsertIdColumn) {
-                $statementText .= "`{$this->onDuplicateKeyUpdateLastInsertIdColumn}` = LAST_INSERT_ID(`{$this->onDuplicateKeyUpdateLastInsertIdColumn}`)";
+                $statementText .= "{$backtickChar}{$this->onDuplicateKeyUpdateLastInsertIdColumn}{$backtickChar} = LAST_INSERT_ID({$backtickChar}{$this->onDuplicateKeyUpdateLastInsertIdColumn}{$backtickChar})";
             }
 
             for ($i = 0; $i < count($columnValues); $i++) {
@@ -837,7 +839,7 @@ class Query
                     $statementText .= ", ";
                 }
 
-                $statementText .= "`{$columnName}` = ?";
+                $statementText .= "{$backtickChar}{$columnName}{$backtickChar} = ?";
                 $this->bindParam($columnValue);
             }
         }

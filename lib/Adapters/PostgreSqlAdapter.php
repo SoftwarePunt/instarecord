@@ -9,6 +9,11 @@ use SoftwarePunt\Instarecord\DatabaseAdapter;
  */
 class PostgreSqlAdapter extends DatabaseAdapter
 {
+    public function getQueryBacktick(): string
+    {
+        return '"';
+    }
+
     public function getDsnPrefix(): string
     {
         return "pgsql";

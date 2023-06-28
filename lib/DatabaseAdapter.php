@@ -16,6 +16,14 @@ abstract class DatabaseAdapter
     const PostgreSql = PostgreSqlAdapter::class;
 
     /**
+     * Gets the string delimiter used for system identifiers when building queries.
+     */
+    public function getQueryBacktick(): string
+    {
+        return '`';
+    }
+
+    /**
      * Gets the DSN prefix (without a colon).
      * e.g. "mysql" or "pgsql".
      */
