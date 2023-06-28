@@ -3,6 +3,7 @@
 namespace SoftwarePunt\Instarecord;
 
 use SoftwarePunt\Instarecord\Adapters\MySqlAdapter;
+use SoftwarePunt\Instarecord\Adapters\PostgreSqlAdapter;
 use SoftwarePunt\Instarecord\Config\ConfigException;
 use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 
@@ -12,6 +13,7 @@ use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 abstract class DatabaseAdapter
 {
     const MySql = MySqlAdapter::class;
+    const PostgreSql = PostgreSqlAdapter::class;
 
     /**
      * Gets the DSN prefix (without a colon).
@@ -63,6 +65,7 @@ abstract class DatabaseAdapter
     public function parseDsn(string $dsn): DatabaseConfig
     {
         $dbConfig = new DatabaseConfig();
+        $dbConfig->adapter = static::class;
 
         // Extract protocol
         $parts = explode(':', $dsn, 2);

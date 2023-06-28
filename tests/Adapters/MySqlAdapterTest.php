@@ -7,7 +7,7 @@ use SoftwarePunt\Instarecord\Adapters\MySqlAdapter;
 use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 use SoftwarePunt\Instarecord\DatabaseAdapter;
 
-class MysqlAdapterTest extends TestCase
+class MySqlAdapterTest extends TestCase
 {
     public function testGenerateDsn()
     {
@@ -26,7 +26,7 @@ class MysqlAdapterTest extends TestCase
     /**
      * @depends testGenerateDsn
      */
-    public function testParseDsnMysql()
+    public function testParseDsn()
     {
         $adapter = new MySqlAdapter();
 
