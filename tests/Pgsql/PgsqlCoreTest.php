@@ -22,14 +22,13 @@ class PgsqlCoreTest extends PgsqlTestCase
 
         $connection->executeStatement('DROP TABLE IF EXISTS "users";');
         $connection->executeStatement('CREATE TABLE "users" (
-  "id" int8 NOT NULL,
+  "id" SERIAL PRIMARY KEY,
   "user_name" varchar(45) NULL,
   "email_address" varchar(45) NULL,
   "enum_value" varchar(45) NULL,
   "join_date" timestamp NULL,
   "created_at" timestamp NULL,
-  "modified_at" timestamp NULL,
-  CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+  "modified_at" timestamp NULL
 );');
     $connection->executeStatement('CREATE UNIQUE INDEX "user_email" ON "users" USING btree (
   "email_address" ASC NULLS LAST
@@ -42,6 +41,8 @@ class PgsqlCoreTest extends PgsqlTestCase
     public function testModelCrud()
     {
         $user = new User();
-        $user->save();
+        $user->userName = "Bobby Tables";
+        $this->assertTrue($user->save(), "User save should succeed");
+        $this->assertGreaterThan(0, $user->id, "User creation should succeed; auto incremented ID should be set");
     }
 }

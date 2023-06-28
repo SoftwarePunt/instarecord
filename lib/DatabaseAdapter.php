@@ -16,7 +16,13 @@ abstract class DatabaseAdapter
     const PostgreSql = PostgreSqlAdapter::class;
 
     /**
-     * Gets the string delimiter used for system identifiers when building queries.
+     * Gets the DSN prefix (without a colon).
+     * e.g. "mysql" or "pgsql".
+     */
+    public abstract function getDsnPrefix(): string;
+
+    /**
+     * Gets the string boundary char used for system identifiers when building queries.
      */
     public function getQueryBacktick(): string
     {
@@ -24,10 +30,13 @@ abstract class DatabaseAdapter
     }
 
     /**
-     * Gets the DSN prefix (without a colon).
-     * e.g. "mysql" or "pgsql".
+     * Gets whether INSERT ... RETURNING queries are supported.
+     * If true, RETURNING is used rather than LAST_INSERT_ID() to determine auto incremented values.
      */
-    public abstract function getDsnPrefix(): string;
+    public function getSupportsInsertReturning(): bool
+    {
+        return false;
+    }
 
     /**
      * Generates and returns the service DSN for this database server based on the provided config.

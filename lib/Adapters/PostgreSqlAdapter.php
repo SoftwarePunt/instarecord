@@ -9,14 +9,19 @@ use SoftwarePunt\Instarecord\DatabaseAdapter;
  */
 class PostgreSqlAdapter extends DatabaseAdapter
 {
+    public function getDsnPrefix(): string
+    {
+        return "pgsql";
+    }
+
     public function getQueryBacktick(): string
     {
         return '"';
     }
 
-    public function getDsnPrefix(): string
+    public function getSupportsInsertReturning(): bool
     {
-        return "pgsql";
+        return true;
     }
 
     protected function writeDsnPart(string &$dsn, string $component, mixed $value): void

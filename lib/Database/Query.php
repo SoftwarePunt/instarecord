@@ -76,12 +76,12 @@ class Query
     protected $onDuplicateKeyUpdateValues;
 
     /**
-     * The column name to be used with LAST_INSERT_ID()
+     * The column name to be used with LAST_INSERT_ID() or INSERT .. RETURNING.
      *
      * @default null
      * @var string|null
      */
-    protected $onDuplicateKeyUpdateLastInsertIdColumn;
+    protected $lastInsertIdColumn = 'id';
 
     /**
      * Controls the ORDER BY structure.
@@ -204,7 +204,7 @@ class Query
         $this->tableName = null;
         $this->dataValues = [];
         $this->onDuplicateKeyUpdateValues = [];
-        $this->onDuplicateKeyUpdateLastInsertIdColumn = null;
+        $this->lastInsertIdColumn = 'id';
         $this->orderBy = null;
         $this->limit = null;
         $this->offset = null;
@@ -216,6 +216,9 @@ class Query
 
         return $this;
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Statement flow API
 
     /**
      * Begins a SELECT statement.
@@ -388,105 +391,8 @@ class Query
         }
 
         $this->onDuplicateKeyUpdateValues = $values;
-        $this->onDuplicateKeyUpdateLastInsertIdColumn = $lastInsertIdColumn;
+        $this->lastInsertIdColumn = $lastInsertIdColumn;
         return $this;
-    }
-
-    /**
-     * Processes a given $statementText and a set of $parameters and its sub parameters.
-     *
-     * @param string $statementText The raw statement text / SQL to bind.
-     * @param array $params The list of parameters to be bound to the statement text.
-     * @return array A statement row, where index 0 contains the statement text and other values represent the params.
-     */
-    protected function processStatementParameters(string $statementText, array $params): array
-    {
-        // Verify parameter count to prevent (to aid the developer, really)
-        $paramCountExpected = substr_count($statementText, '?');
-        $paramCountActual = count($params);
-
-        if ($paramCountExpected !== $paramCountActual) {
-            throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\".");
-        }
-
-        // Cool, now let's get to work...
-        $finalizedRow = [$statementText];
-
-        for ($paramIdx = 0; $paramIdx < count($params); $paramIdx++) {
-            $param = $params[$paramIdx];
-
-            if (is_array($param)) {
-                $paramSubCount = count($param);
-
-                if ($paramSubCount == 0) {
-                    // Empty array, bind empty string, not sure what else to do!
-                    $whereStatement[] = '';
-                } else {
-                    // We have an array param, expand the "?" marker to multiple question marks and bind each as a
-                    // new, separate parameter to the statement.
-
-                    // Example: WHERE bla = ? AND id IN(?)
-                    // The $paramIdx will be #1 - 2nd item - so find the corresponding 2nd ? marker and modify it.
-
-                    $markerOffset = 0;
-                    $markerSkip = $paramIdx;
-                    $markerIdx = 0;
-
-                    while (true) {
-                        $markerIdx = strpos($statementText, '?', $markerOffset);
-
-                        if ($markerSkip <= 0) {
-                            break;
-                        } else {
-                            $markerOffset += $markerIdx + 1;
-                        }
-
-                        $markerSkip--;
-                    }
-
-                    // We should now have the marker position, add additional markers
-                    $extraMarkers = $paramSubCount - 1;
-
-                    if ($extraMarkers > 0) {
-                        $extraMarkersStr = "";
-
-                        for ($i = 0; $i < $extraMarkers; $i++) {
-                            $extraMarkersStr .= ", ?";
-                        }
-
-                        $statementText = substr_replace($statementText, $extraMarkersStr, $markerIdx + 1, 0);
-                        $finalizedRow[0] = $statementText;
-                    }
-
-                    // Bind each parameter
-                    foreach ($param as $subParam) {
-                        $finalizedRow[] = $this->preProcessParam($subParam);
-                    }
-                }
-            } else {
-                $finalizedRow[] = $this->preProcessParam($param);
-            }
-        }
-
-        return $finalizedRow;
-    }
-
-    /**
-     * Processes the value of a parameter, cleaning it up for the query as necessary.
-     *
-     * @param $paramValue
-     * @return mixed
-     */
-    protected function preProcessParam($paramValue)
-    {
-        if ($paramValue instanceof \DateTime) {
-            // Format DateTime to database format / UTC
-            $dt = clone $paramValue;
-            $dt->setTimezone(new DateTimeZone($this->connection->getConfig()->timezone));
-            return $dt->format(Column::DATE_TIME_FORMAT);
-        }
-
-        return $paramValue;
     }
 
     /**
@@ -686,6 +592,123 @@ class Query
     }
 
     /**
+     * Applies RETURNING to the insert statement.
+     *
+     * Not supported by MySQL.
+     *
+     * @param $returningColumn
+     * @return $this
+     */
+    public function returning($returningColumn): Query
+    {
+        if (!$this->connection->adapter->getSupportsInsertReturning())
+            throw new QueryBuilderException("INSERT .. RETURNING is not supported by the current adapter");
+
+        $this->lastInsertIdColumn = $returningColumn;
+        return $this;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Parameter logic
+
+    /**
+     * Processes a given $statementText and a set of $parameters and its sub parameters.
+     *
+     * @param string $statementText The raw statement text / SQL to bind.
+     * @param array $params The list of parameters to be bound to the statement text.
+     * @return array A statement row, where index 0 contains the statement text and other values represent the params.
+     */
+    protected function processStatementParameters(string $statementText, array $params): array
+    {
+        // Verify parameter count to prevent (to aid the developer, really)
+        $paramCountExpected = substr_count($statementText, '?');
+        $paramCountActual = count($params);
+
+        if ($paramCountExpected !== $paramCountActual) {
+            throw new QueryBuilderException("Query parameter error: Expected {$paramCountExpected} bound parameters, but got {$paramCountActual} for statement \"{$statementText}\".");
+        }
+
+        // Cool, now let's get to work...
+        $finalizedRow = [$statementText];
+
+        for ($paramIdx = 0; $paramIdx < count($params); $paramIdx++) {
+            $param = $params[$paramIdx];
+
+            if (is_array($param)) {
+                $paramSubCount = count($param);
+
+                if ($paramSubCount == 0) {
+                    // Empty array, bind empty string, not sure what else to do!
+                    $whereStatement[] = '';
+                } else {
+                    // We have an array param, expand the "?" marker to multiple question marks and bind each as a
+                    // new, separate parameter to the statement.
+
+                    // Example: WHERE bla = ? AND id IN(?)
+                    // The $paramIdx will be #1 - 2nd item - so find the corresponding 2nd ? marker and modify it.
+
+                    $markerOffset = 0;
+                    $markerSkip = $paramIdx;
+                    $markerIdx = 0;
+
+                    while (true) {
+                        $markerIdx = strpos($statementText, '?', $markerOffset);
+
+                        if ($markerSkip <= 0) {
+                            break;
+                        } else {
+                            $markerOffset += $markerIdx + 1;
+                        }
+
+                        $markerSkip--;
+                    }
+
+                    // We should now have the marker position, add additional markers
+                    $extraMarkers = $paramSubCount - 1;
+
+                    if ($extraMarkers > 0) {
+                        $extraMarkersStr = "";
+
+                        for ($i = 0; $i < $extraMarkers; $i++) {
+                            $extraMarkersStr .= ", ?";
+                        }
+
+                        $statementText = substr_replace($statementText, $extraMarkersStr, $markerIdx + 1, 0);
+                        $finalizedRow[0] = $statementText;
+                    }
+
+                    // Bind each parameter
+                    foreach ($param as $subParam) {
+                        $finalizedRow[] = $this->preProcessParam($subParam);
+                    }
+                }
+            } else {
+                $finalizedRow[] = $this->preProcessParam($param);
+            }
+        }
+
+        return $finalizedRow;
+    }
+
+    /**
+     * Processes the value of a parameter, cleaning it up for the query as necessary.
+     *
+     * @param $paramValue
+     * @return mixed
+     */
+    protected function preProcessParam($paramValue)
+    {
+        if ($paramValue instanceof \DateTime) {
+            // Format DateTime to database format / UTC
+            $dt = clone $paramValue;
+            $dt->setTimezone(new DateTimeZone($this->connection->getConfig()->timezone));
+            return $dt->format(Column::DATE_TIME_FORMAT);
+        }
+
+        return $paramValue;
+    }
+
+    /**
      * Binds a query parameter.
      *
      * @param mixed $param
@@ -696,6 +719,9 @@ class Query
         $this->parameters[] = $param;
         return $this;
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Statement generation
 
     /**
      * Test / debug function.
@@ -822,20 +848,21 @@ class Query
 
         // ON DUPLICATE KEY UPDATE
         if ($this->statementType == self::QUERY_TYPE_INSERT && !empty($this->onDuplicateKeyUpdateValues)) {
+            // TODO Postgres support <https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT>
             $columnIndexes = array_keys($this->onDuplicateKeyUpdateValues);
             $columnValues = array_values($this->onDuplicateKeyUpdateValues);
 
             $statementText .= " ON DUPLICATE KEY UPDATE ";
 
-            if ($this->onDuplicateKeyUpdateLastInsertIdColumn) {
-                $statementText .= "{$backtickChar}{$this->onDuplicateKeyUpdateLastInsertIdColumn}{$backtickChar} = LAST_INSERT_ID({$backtickChar}{$this->onDuplicateKeyUpdateLastInsertIdColumn}{$backtickChar})";
+            if ($this->lastInsertIdColumn) {
+                $statementText .= "{$backtickChar}{$this->lastInsertIdColumn}{$backtickChar} = LAST_INSERT_ID({$backtickChar}{$this->lastInsertIdColumn}{$backtickChar})";
             }
 
             for ($i = 0; $i < count($columnValues); $i++) {
                 $columnName = $columnIndexes[$i];
                 $columnValue = $columnValues[$i];
 
-                if ($i > 0 || $this->onDuplicateKeyUpdateLastInsertIdColumn) {
+                if ($i > 0 || $this->lastInsertIdColumn) {
                     $statementText .= ", ";
                 }
 
@@ -922,6 +949,11 @@ class Query
             $statementText .= " OFFSET {$this->offset}";
         }
 
+        // Apply INSERT .. RETURNING
+        if ($this->statementType === self::QUERY_TYPE_INSERT && $this->connection->adapter->getSupportsInsertReturning()) {
+            $statementText .= " RETURNING {$backtickChar}{$this->lastInsertIdColumn}{$backtickChar}";
+        }
+
         $statementText .= ';';
         return $statementText;
     }
@@ -962,6 +994,13 @@ class Query
      */
     public function executeInsert(): ?int
     {
+        if ($this->connection->adapter->getSupportsInsertReturning()) {
+            // Executed with .. RETURNING, read return value
+            $statement = $this->executeStatement();
+            return $statement->fetchColumn();
+        }
+
+        // Execute without read, use LAST_INSERT_ID() to retrieve incremented value
         $this->execute();
         return $this->connection->lastInsertId();
     }

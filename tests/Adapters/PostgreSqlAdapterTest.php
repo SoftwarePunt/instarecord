@@ -58,11 +58,12 @@ class PostgreSqlAdapterTest extends TestCase
         $config->host = null;
         $config->port = null;
         $config->database = 'dbname123';
+        $config->charset = 'UTF8';
 
         $dsnGenerated = $adapter->createDsn($config);
         $configParsed = $adapter->parseDsn($dsnGenerated);
 
-        $this->assertEquals("pgsql:unix_socket=/tmp/example/unix.sock;dbname=dbname123;options='--client_encoding=utf8mb4'", $dsnGenerated);
+        $this->assertEquals("pgsql:unix_socket=/tmp/example/unix.sock;dbname=dbname123;options='--client_encoding=UTF8'", $dsnGenerated);
         $this->assertNotSame($config, $configParsed);
         $this->assertEquals($config, $configParsed);
     }
