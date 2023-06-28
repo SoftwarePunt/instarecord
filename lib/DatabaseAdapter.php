@@ -31,30 +31,28 @@ abstract class DatabaseAdapter
         $dsn = $this->getDsnPrefix() . ':';
 
         if ($config->unix_socket) {
-            $dsn .= "unix_socket={$config->unix_socket};";
+            $this->writeDsnPart($dsn, "unix_socket", $config->unix_socket);
         } else {
-            if ($config->host) {
-                if ($config->host === "localhost") {
-                    $dsn .= "host=127.0.0.1;";
-                } else {
-                    $dsn .= "host={$config->host};";
-                }
-            }
-
-            if ($config->port) {
-                $dsn .= "port={$config->port};";
-            }
+            if ($config->host)
+                $this->writeDsnPart($dsn, "host", $config->host);
+            if ($config->port)
+                $this->writeDsnPart($dsn, "port", $config->port);
         }
 
-        if ($config->database) {
-            $dsn .= "dbname={$config->database};";
-        }
-
-        if ($config->charset) {
-            $dsn .= "charset={$config->charset};";
-        }
+        if ($config->database)
+            $this->writeDsnPart($dsn, "dbname", $config->database);
+        if ($config->charset)
+            $this->writeDsnPart($dsn, "charset", $config->charset);
 
         return rtrim($dsn, ';');
+    }
+
+    protected function writeDsnPart(string &$dsn, string $component, mixed $value): void
+    {
+        if ($component === "host" && $value === "localhost")
+            $value = "127.0.0.1";
+
+        $dsn .= "{$component}={$value};";
     }
 
     /**
@@ -103,6 +101,17 @@ abstract class DatabaseAdapter
                     break;
                 case "charset";
                     $dbConfig->charset = $componentValue;
+                    break;
+                case "options":
+                    $optionsRaw = trim($componentValue, " \t\n\r\0\x0B'\"");
+                    $keyValue = explode('=', $optionsRaw, 2);
+                    if (count($keyValue) === 2) {
+                        $key = $keyValue[0];
+                        $value = $keyValue[1];
+                        if ($key === "--client_encoding") {
+                            $dbConfig->charset = $value;
+                        }
+                    }
                     break;
             }
         }

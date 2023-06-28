@@ -19,7 +19,7 @@ class PostgreSqlAdapterTest extends TestCase
         $config->database = 'dbname123';
         $config->charset = 'utf16';
         
-        $this->assertEquals("pgsql:host=1.2.3.4;dbname=dbname123;charset=utf16", $adapter->createDsn($config));
+        $this->assertEquals("pgsql:host=1.2.3.4;dbname=dbname123;options='--client_encoding=utf16'", $adapter->createDsn($config));
     }
 
     /**
@@ -40,7 +40,7 @@ class PostgreSqlAdapterTest extends TestCase
         $dsnGenerated = $adapter->createDsn($config);
         $configParsed = $adapter->parseDsn($dsnGenerated);
 
-        $this->assertEquals("pgsql:host=1.2.3.4;port=1337;dbname=dbname123;charset=utf16", $dsnGenerated);
+        $this->assertEquals("pgsql:host=1.2.3.4;port=1337;dbname=dbname123;options='--client_encoding=utf16'", $dsnGenerated);
         $this->assertNotSame($config, $configParsed);
         $this->assertEquals($config, $configParsed);
     }
@@ -62,7 +62,7 @@ class PostgreSqlAdapterTest extends TestCase
         $dsnGenerated = $adapter->createDsn($config);
         $configParsed = $adapter->parseDsn($dsnGenerated);
 
-        $this->assertEquals("pgsql:unix_socket=/tmp/example/unix.sock;dbname=dbname123;charset=utf8mb4", $dsnGenerated);
+        $this->assertEquals("pgsql:unix_socket=/tmp/example/unix.sock;dbname=dbname123;options='--client_encoding=utf8mb4'", $dsnGenerated);
         $this->assertNotSame($config, $configParsed);
         $this->assertEquals($config, $configParsed);
     }
@@ -107,6 +107,6 @@ class PostgreSqlAdapterTest extends TestCase
         $config->database = 'dbname123';
         $config->charset = 'utf16';
 
-        $this->assertEquals("pgsql:host=127.0.0.1;dbname=dbname123;charset=utf16", $adapter->createDsn($config));
+        $this->assertEquals("pgsql:host=127.0.0.1;dbname=dbname123;options='--client_encoding=utf16'", $adapter->createDsn($config));
     }
 }
