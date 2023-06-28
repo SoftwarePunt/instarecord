@@ -1,6 +1,6 @@
 {
   "name": "softwarepunt/instarecord",
-  "description": "ActiveRecord Database ORM layer for MySQL",
+  "description": "ActiveRecord Database ORM layer for MySQL and PostgreSQL",
   "type": "library",
   "license": "MIT",
   "authors": [
