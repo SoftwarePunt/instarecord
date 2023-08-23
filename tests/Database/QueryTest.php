@@ -318,6 +318,29 @@ class QueryTest extends TestCase
         $this->assertEquals('DELETE FROM fruits WHERE (type = ?) AND (color IN (?, ?)) AND (tastes_nice = 1);', $queryString);
     }
 
+    public function testWhereWithMultipleINs()
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $query = $query->delete()
+            ->from('fruits')
+            ->where('color = ? OR (color IN (?)) OR (color IN (?))',
+                'pink', ['red', 'blue', 'orange'], ['blurple', 'black']);
+
+        $queryString = $query->createStatementText();
+
+        $this->assertEquals('DELETE FROM fruits WHERE (color = ? OR (color IN (?, ?, ?)) OR (color IN (?, ?)));', $queryString);
+
+        $this->assertEquals([
+            'pink',
+            'red',
+            'blue',
+            'orange',
+            'blurple',
+            'black'
+        ], $query->getBoundParametersForGeneratedStatement());
+    }
+
     public function testHaving()
     {
         $query = new Query(new Connection(new DatabaseConfig()));

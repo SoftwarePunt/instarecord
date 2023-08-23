@@ -437,10 +437,9 @@ class Query
 
                         if ($markerSkip <= 0) {
                             break;
-                        } else {
-                            $markerOffset += $markerIdx + 1;
                         }
 
+                        $markerOffset = $markerIdx + 1;
                         $markerSkip--;
                     }
 
@@ -451,11 +450,10 @@ class Query
                         $extraMarkersStr = "";
 
                         for ($i = 0; $i < $extraMarkers; $i++) {
-                            $extraMarkersStr .= ", ?";
+                            $extraMarkersStr .= ", #_TEMP_MARKER_#";
                         }
 
                         $statementText = substr_replace($statementText, $extraMarkersStr, $markerIdx + 1, 0);
-                        $finalizedRow[0] = $statementText;
                     }
 
                     // Bind each parameter
@@ -467,6 +465,9 @@ class Query
                 $finalizedRow[] = $this->preProcessParam($param);
             }
         }
+
+        $statementText = str_replace('#_TEMP_MARKER_#', '?', $statementText);
+        $finalizedRow[0] = $statementText;
 
         return $finalizedRow;
     }
