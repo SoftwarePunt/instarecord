@@ -37,7 +37,7 @@ class ModelTest extends TestCase
         $this->assertEquals($values['userName'], $user->getPropertyValues()['userName']);
     }
     
-    public function testGetDirtyProperties()
+    public function testGetSetDirtyProperties()
     {
         $values = [
             'id' => 123,
@@ -45,14 +45,28 @@ class ModelTest extends TestCase
         ];
 
         $user = new User($values);
-        
+
+        // Initial state; should be clean
         $this->assertEmpty($user->getDirtyProperties());
         $this->assertFalse($user->isDirty());
-        
-        $user->userName = 'Jan';
+        $this->assertFalse($user->getPropertyIsDirty("userName"));
 
+        // Modify individual property; should become dirty
+        $user->userName = 'Jan';
         $this->assertEquals(['userName' => 'Jan'], $user->getDirtyProperties());
+        $this->assertTrue($user->getPropertyIsDirty("userName"));
+        $this->assertFalse($user->getPropertyIsDirty("id"));
         $this->assertTrue($user->isDirty());
+
+        // Manually flag as clean; should become clean
+        $user->setPropertyIsDirty("userName", false);
+        $this->assertEmpty($user->getDirtyProperties());
+        $this->assertFalse($user->getPropertyIsDirty("userName"));
+
+        // Manually flag as clean; should become dirty again
+        $user->setPropertyIsDirty("userName", true);
+        $this->assertEquals(['userName' => 'Jan'], $user->getDirtyProperties());
+        $this->assertTrue($user->getPropertyIsDirty("userName"));
     }
     
     public function testGetDirtyColumns()
