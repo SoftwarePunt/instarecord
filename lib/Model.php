@@ -2,7 +2,6 @@
 
 namespace SoftwarePunt\Instarecord;
 
-use SoftwarePunt\Instarecord\Config\ModelConfig;
 use SoftwarePunt\Instarecord\Database\AutoApplicator;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\ModelQuery;
@@ -241,6 +240,37 @@ class Model
         }
 
         return $propertiesDiff;
+    }
+
+    /**
+     * Gets whether a property with a given $propName is dirty (modified).
+     *
+     * @param string $propName
+     * @return bool
+     */
+    public function getPropertyIsDirty(string $propName): bool
+    {
+        return isset($this->getDirtyProperties()[$propName]);
+    }
+
+    /**
+     * Marks a property with a given $propName as dirty or clean.
+     * This can stage or unstage the property for subsequent inserts/updates.
+     *
+     * @param string $propName
+     * @param bool $dirtyFlag If true, mark as dirty (stage for write). If false, mark as clean (unstage for write).
+     */
+    public function setPropertyIsDirty(string $propName, bool $dirtyFlag): void
+    {
+        if (!property_exists($this, $propName))
+            throw new \InvalidArgumentException("Property does not exist: {$propName}");
+
+        if ($dirtyFlag)
+            // Mark dirty: force a change vs. the current value
+            $this->_trackedModelValues[$propName] = strval($this->$propName) . "_dirty";
+        else
+            // Mark clean: set the last known value to the current value
+            $this->_trackedModelValues[$propName] = $this->$propName;
     }
 
     /**
