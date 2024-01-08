@@ -179,6 +179,11 @@ class Query
     protected $rawUpdate;
 
     /**
+     * The locking mode to apply to the query.
+     */
+    protected ?string $lockingMode;
+
+    /**
      * Constructs a new, blank query.
      *
      * @param Connection $connection The connection to perform the query on.
@@ -213,6 +218,7 @@ class Query
         $this->havingStatements = [];
         $this->rawUpdateMode = false;
         $this->rawUpdate = null;
+        $this->lockingMode = null;
 
         return $this;
     }
@@ -687,6 +693,30 @@ class Query
     }
 
     /**
+     * Applies a FOR UPDATE to the statement.
+     * Replaces other locking modes.
+     *
+     * @return Query|$this
+     */
+    public function forUpdate(): Query
+    {
+        $this->lockingMode = "FOR UPDATE";
+        return $this;
+    }
+
+    /**
+     * Applies a LOCK IN SHARE MODE to the statement.
+     * Replaces other locking modes.
+     *
+     * @return Query|$this
+     */
+    public function lockInShareMode(): Query
+    {
+        $this->lockingMode = "LOCK IN SHARE MODE";
+        return $this;
+    }
+
+    /**
      * Binds a query parameter.
      *
      * @param mixed $param
@@ -919,6 +949,11 @@ class Query
         // Apply OFFSET
         if ($this->offset) {
             $statementText .= " OFFSET {$this->offset}";
+        }
+
+        // Apply locking mode (LOCK IN SHARE MODE / FOR UPDATE)
+        if ($this->lockingMode) {
+            $statementText .= " {$this->lockingMode}";
         }
 
         $statementText .= ';';

@@ -404,6 +404,25 @@ class QueryTest extends TestCase
         $this->assertEquals('SELECT * FROM orders RIGHT JOIN payments ON (payments.order_id = orders.id);', $queryString);
     }
 
+    public function testLockingModeQuery(): void
+    {
+        $query = new Query(new Connection(new DatabaseConfig()));
+
+        $queryString = $query->select('*')
+            ->from('bank_accounts')
+            ->where('id = ?', 1234)
+            ->forUpdate()
+            ->createStatementText();
+        $this->assertEquals('SELECT * FROM bank_accounts WHERE (id = ?) FOR UPDATE;', $queryString);
+
+        $queryString = $query->lockInShareMode()
+            ->createStatementText();
+        $this->assertEquals('SELECT * FROM bank_accounts WHERE (id = ?) LOCK IN SHARE MODE;', $queryString);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Results tests
+
     /**
      * @runInSeparateProcess
      */
