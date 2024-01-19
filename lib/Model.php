@@ -166,7 +166,6 @@ class Model
 
     /**
      * Gets a key/value list of all columns and their values.
-     * This involves the translation of
      *
      * @return array An array containing property values, indexed by property name.
      */
@@ -178,12 +177,18 @@ class Model
         foreach ($properties as $propertyName => $propertyValue) {
             $columnInfo = $this->getColumnForPropertyName($propertyName);
 
-            if ($columnInfo) {
-                $columnName = $columnInfo->getColumnName();
-                $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
+            if (!$columnInfo)
+                // Custom property, not part of the table
+                continue;
 
-                $columns[$columnName] = $columnValue;
-            }
+            if ($columnInfo->getIsManyRelationship())
+                // "Many" relationships are not columns in our table
+                continue;
+
+            $columnName = $columnInfo->getColumnName();
+            $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
+
+            $columns[$columnName] = $columnValue;
         }
 
         return $columns;

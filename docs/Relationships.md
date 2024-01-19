@@ -14,14 +14,14 @@ You can define a one-to-one relationship by adding a field with an `Relation` at
 <?php
 
 use SoftwarePunt\Instarecord\Model;
-use SoftwarePunt\Instarecord\Attributes\Relation;
+use SoftwarePunt\Instarecord\Attributes\Relationship;
 
 class User extends Model
 {
     public int $id;
     public string $name;
 
-    #[Relation(Profile::class)]
+    #[Relationship(Profile::class)]
     public Profile $profile;
 }
 ```
@@ -37,7 +37,7 @@ You can define a one-to-many relationship by adding a field with an `Relation` a
 <?php
 
 use SoftwarePunt\Instarecord\Model;
-use SoftwarePunt\Instarecord\Attributes\Relation;
+use SoftwarePunt\Instarecord\Attributes\Relationship;
 
 class User extends Model
 {
@@ -47,7 +47,7 @@ class User extends Model
     /**
      * @var Post[] 
      */
-    #[Relation(Post::class)]
+    #[Relationship(Post::class)]
     public array $posts;
 }
 ```

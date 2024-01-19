@@ -19,20 +19,20 @@ You can define foreign keys by adding a field with an `Relation` attribute:
 <?php
 
 use SoftwarePunt\Instarecord\Model;
-use SoftwarePunt\Instarecord\Attributes\Relation;
+use SoftwarePunt\Instarecord\Attributes\Relationship;
 
 class User extends Model
 {
     public int $id;
     public string $name;
 
-    #[Relation(Organization::class)]
+    #[Relationship(Organization::class)]
     public Organisation $organization;
 
     /**
      * @var Post[] 
      */
-    #[Relation(Post::class)]
+    #[Relationship(Post::class)]
     public array $posts;
 }
 ```
