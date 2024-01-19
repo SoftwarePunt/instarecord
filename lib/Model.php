@@ -32,12 +32,13 @@ class Model
      * Initializes a new instance of this model which can be inserted into the database.
      *
      * @param array|null $initialValues Optionally, an array of initial property values to set on the model.
+     * @param bool $loadRelationships If true, automatically load defined relationships (causing additional queries).
      */
-    public function __construct(?array $initialValues = [])
+    public function __construct(?array $initialValues = [], bool $loadRelationships = true)
     {
         $this->_tableInfo = Table::getTableInfo(get_class($this));
 
-        $this->setInitialValues($initialValues);
+        $this->setInitialValues($initialValues, $loadRelationships);
         $this->markAllPropertiesClean();
     }
 
@@ -70,9 +71,10 @@ class Model
     /**
      * Applies a set of initial values as properties on this model.
      *
-     * @param array $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
+     * @param array|null $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
+     * @param bool $loadRelationships If true, automatically load defined relationships (causing additional queries).
      */
-    protected function setInitialValues(?array $initialValues): void
+    protected function setInitialValues(?array $initialValues, bool $loadRelationships = true): void
     {
         foreach ($this->getTableInfo()->getColumns() as $column) {
             $propertyName = $column->getPropertyName();
@@ -85,7 +87,7 @@ class Model
         }
 
         if ($initialValues) {
-            $this->setColumnValues($initialValues);
+            $this->setColumnValues($initialValues, $loadRelationships);
         }
     }
 
@@ -198,8 +200,9 @@ class Model
      * Applies a set of database values to this instance.
      *
      * @param array $values
+     * @param bool $loadRelationships If true, automatically load defined relationships (causing additional queries).
      */
-    public function setColumnValues(array $values): void
+    public function setColumnValues(array $values, bool $loadRelationships = false): void
     {
         foreach ($values as $nameInArray => $valueInArray) {
             // Can we find the column by its name?
@@ -217,7 +220,7 @@ class Model
 
             // Set the value, parsing it where needed
             $propertyName = $columnInfo->getPropertyName();
-            $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
+            $propertyValue = $columnInfo->parseDatabaseValue($valueInArray, $loadRelationships);
 
             // [php-7.4]: Only assign default value if it's not null, or if null is explicitly allowed
             if (($propertyValue !== null) || ($columnInfo->getIsNullable() && $propertyValue === null)) {
@@ -768,38 +771,5 @@ class Model
         }
 
         return $anyChanges;
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // Relationships
-
-    public function loadRelationships(): void
-    {
-        foreach ($this->_tableInfo->getColumns() as $column) {
-            if ($column->getIsRelationship()) {
-                $this->loadRelationship($column);
-            }
-        }
-    }
-
-    public function loadRelationship(Column $column): void
-    {
-
-
-        $propName = $column->getPropertyName();
-
-        if ($column->getIsOneRelationship()) {
-            // We need to load a single object
-            $this->$propName = $targetRef::fetch($this->$propName);
-        } else if ($column->getIsManyRelationship()) {
-            // We need to load an array of objects
-        }
-    }
-
-    public function loadRelationshipByColumn(string $columnName): void
-    {
-        $this->loadRelationship(
-            $this->getColumnByName($columnName)
-        );
     }
 }

@@ -99,6 +99,22 @@ class Table
     }
 
     /**
+     * Gets columns with a defined relationship.
+     *
+     * @return Column[]
+     */
+    public function getRelationshipColumns(): array
+    {
+        $columns = [];
+        foreach ($this->getColumns() as $column) {
+            if ($column->getIsRelationship()) {
+                $columns[$column->getColumnName()] = $column;
+            }
+        }
+        return $columns;
+    }
+
+    /**
      * Gets column information by property name.
      *
      * @param string $propertyName

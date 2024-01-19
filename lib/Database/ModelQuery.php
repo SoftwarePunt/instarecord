@@ -5,6 +5,7 @@ namespace SoftwarePunt\Instarecord\Database;
 use SoftwarePunt\Instarecord\Model;
 use SoftwarePunt\Instarecord\Models\IReadOnlyModel;
 use SoftwarePunt\Instarecord\Models\ModelAccessException;
+use SoftwarePunt\Instarecord\Relationships\RelationshipBatcher;
 
 /**
  * A model-specific query.
@@ -71,13 +72,9 @@ class ModelQuery extends Query
     public function queryAllModels(): array
     {
         $rows = $this->queryAllRows();
-        $models = [];
-
-        foreach ($rows as $row) {
-            $models[] = new $this->modelName($row);
-        }
-
-        return $models;
+        // Wrap in batch loader for relationships (if any) to optimize queries
+        $relationshipBatcher = new RelationshipBatcher($this->referenceModel, $rows);
+        return $relationshipBatcher->loadAllModels();
     }
 
     /**

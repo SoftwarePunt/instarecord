@@ -39,6 +39,6 @@ Coming soon because we can do better (WIP).
 ### Eager loading by default
 When you query a model, or collection of models, all relationships are loaded automatically. This is called **eager loading**.
 
-This will cause extra queries to be executed, and can be quite inefficient if you don't need the relationships or have a lot of data.
+Eager loading will always cause extra queries to be executed, and can be quite inefficient if you don't need the relationships or have a lot of data.
 
-Additionally, Instarecord does not currently batch these queries so it's quite awful for performance (WIP).
+If you use `Model::all()` or `ModelQuery::queryAllModels()`, Instarecord will batch the queries to load all relationships at once.

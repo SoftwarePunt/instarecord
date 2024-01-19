@@ -50,5 +50,13 @@ class RelationshipTest extends TestCase
             ->querySingleModel();
         $this->assertEquals($plane1->airline->id, $plane1Reload->airline->id,
             "Expected airline to be loaded and set automatically");
+
+        // Test load with query all optimizations in place
+        $allPlanesInDb = TestPlane::query()
+            ->queryAllModels();
+        $this->assertCount(2, $allPlanesInDb, "Expected 2 planes to be loaded");
+        foreach ($allPlanesInDb as $plane) {
+            $this->assertEquals($airline->id, $plane->airline->id, "Expected airline to be loaded and set automatically");
+        }
     }
 }

@@ -475,9 +475,10 @@ class Column
      * Parses a value from the database to PHP format according to this column's formatting rules.
      *
      * @param string|null $input Database value, string retrieved from data row
+     * @param bool $loadRelationships If true, automatically load defined relationships (causing additional queries).
      * @return mixed PHP value
      */
-    public function parseDatabaseValue(?string $input): mixed
+    public function parseDatabaseValue(?string $input, bool $loadRelationships = false): mixed
     {
         if ($input === null) {
             return null;
@@ -542,7 +543,11 @@ class Column
         }
 
         if ($this->getIsOneRelationship()) {
-            return $this->getRelationshipReference()::fetch($input);
+            if ($loadRelationships) {
+                return $this->getRelationshipReference()::fetch($input);
+            } else {
+                return null;
+            }
         }
 
         return strval($input);
