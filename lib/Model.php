@@ -769,4 +769,37 @@ class Model
 
         return $anyChanges;
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Relationships
+
+    public function loadRelationships(): void
+    {
+        foreach ($this->_tableInfo->getColumns() as $column) {
+            if ($column->getIsRelationship()) {
+                $this->loadRelationship($column);
+            }
+        }
+    }
+
+    public function loadRelationship(Column $column): void
+    {
+
+
+        $propName = $column->getPropertyName();
+
+        if ($column->getIsOneRelationship()) {
+            // We need to load a single object
+            $this->$propName = $targetRef::fetch($this->$propName);
+        } else if ($column->getIsManyRelationship()) {
+            // We need to load an array of objects
+        }
+    }
+
+    public function loadRelationshipByColumn(string $columnName): void
+    {
+        $this->loadRelationship(
+            $this->getColumnByName($columnName)
+        );
+    }
 }

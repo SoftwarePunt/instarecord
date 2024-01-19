@@ -13,7 +13,7 @@ class RelationshipTest extends TestCase
     /**
      * @runInSeparateProcess
      */
-    public function testRelationshipWrite()
+    public function testRelationshipWriteAndRead()
     {
         Instarecord::config(new TestDatabaseConfig());
 
@@ -43,5 +43,12 @@ class RelationshipTest extends TestCase
         foreach ($rows as $row) {
             $this->assertSame($airline->id, $row["airline_id"], "Expected airline ID to be set correctly on created rows");
         }
+
+        // Query a plane model and ensure the airline is loaded
+        $plane1Reload = TestPlane::query()
+            ->where("id = ?", $plane1->id)
+            ->querySingleModel();
+        $this->assertEquals($plane1->airline->id, $plane1Reload->airline->id,
+            "Expected airline to be loaded and set automatically");
     }
 }

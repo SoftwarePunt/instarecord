@@ -137,9 +137,9 @@ class Table
     }
 
     /**
-     * @var array
+     * @var Table[]
      */
-    public static $tableInfoCache = [];
+    public static array $tableInfoCache = [];
 
     /**
      * @param string $modelClassName
@@ -150,7 +150,6 @@ class Table
         if (!isset(self::$tableInfoCache[$modelClassName])) {
             self::$tableInfoCache[$modelClassName] = new Table($modelClassName);
         }
-
         return self::$tableInfoCache[$modelClassName];
     }
 

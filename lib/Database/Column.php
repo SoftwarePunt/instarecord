@@ -164,6 +164,7 @@ class Column
                         if ($relationshipAttr) {
                             $this->dataType = self::TYPE_RELATIONSHIP_MANY;
                             $this->columnName = $relationshipAttr->columnName ?? ($this->columnName . "_id");
+                            $this->relationshipTarget = $relationshipAttr->modelClass;
                         } else {
                             throw new ColumnDefinitionException("Array properties are not supported without a relationship attribute: {$rfProp->getName()}");
                         }
@@ -184,6 +185,7 @@ class Column
                                 if ($relationshipAttr) {
                                     $this->dataType = self::TYPE_RELATIONSHIP_ONE;
                                     $this->columnName = $relationshipAttr->columnName ?? ($this->columnName . "_id");
+                                    $this->relationshipTarget = $relationshipAttr->modelClass;
                                     break;
                                 }
                                 if ($classImplements = class_implements($phpTypeStr)) {
@@ -338,11 +340,42 @@ class Column
     }
 
     /**
+     * Gets whether this column is a virtual relationship column, specifically a one-to-one relationship.
+     */
+    public function getIsOneRelationship(): bool
+    {
+        return $this->dataType === self::TYPE_RELATIONSHIP_ONE;
+    }
+
+    /**
      * Gets whether this column is a virtual relationship column, specifically an array of foreign objects.
      */
     public function getIsManyRelationship(): bool
     {
         return $this->dataType === self::TYPE_RELATIONSHIP_MANY;
+    }
+
+    /**
+     * Gets the target class for the relationship, if this is a relationship column.
+     */
+    public function getRelationshipClass(): ?string
+    {
+        return $this->relationshipTarget;
+    }
+
+    public function getRelationshipReference(): Model
+    {
+        $targetClass = $this->relationshipTarget;
+        if (!$targetClass) {
+            throw new \LogicException("Attempted to get a relationship reference for a column that has no defined relationship: {$this->columnName}");
+        }
+
+        $targetRef = new $targetClass();
+        if (!($targetRef instanceof Model)) {
+            throw new \LogicException("Attempted to load a relationship that is not a model: {$targetClass}");
+        }
+
+        return $targetRef;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -508,9 +541,8 @@ class Column
             return floatval($input);
         }
 
-        if ($this->getIsRelationship()) {
-            // Relationships are applied after the fact, so we don't need to do anything here
-            return null;
+        if ($this->getIsOneRelationship()) {
+            return $this->getRelationshipReference()::fetch($input);
         }
 
         return strval($input);
