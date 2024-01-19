@@ -10,9 +10,6 @@ use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class RelationshipTest extends TestCase
 {
-    /**
-     * @runInSeparateProcess
-     */
     public function testRelationshipWriteAndRead()
     {
         Instarecord::config(new TestDatabaseConfig());

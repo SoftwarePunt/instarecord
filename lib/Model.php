@@ -183,10 +183,6 @@ class Model
                 // Custom property, not part of the table
                 continue;
 
-            if ($columnInfo->getIsManyRelationship())
-                // "Many" relationships are not columns in our table
-                continue;
-
             $columnName = $columnInfo->getColumnName();
             $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
 

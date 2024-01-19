@@ -23,8 +23,7 @@ class Column
     const TYPE_DECIMAL = "decimal";
     const TYPE_ENUM = "enum";
     const TYPE_SERIALIZED_OBJECT = "serialized";
-    const TYPE_RELATIONSHIP_ONE = "rel_one";
-    const TYPE_RELATIONSHIP_MANY = "rel_many";
+    const TYPE_RELATIONSHIP = "relationship";
 
     const DATE_TIME_FORMAT = "Y-m-d H:i:s";
     const DEFAULT_TIMEZONE = "UTC";
@@ -138,12 +137,6 @@ class Column
             // May be null in test scenarios, leave non-nullable string default
             return;
 
-        // Check relationship attribute
-        /**
-         * @var $relationshipAttr Relationship|null
-         */
-        $relationshipAttr = ($rfProp->getAttributes(Relationship::class)[0] ?? null)?->newInstance();
-
         // Check property type
         if ($phpType = $rfProp->getType()) {
             if ($phpTypeStr = $phpType->getName()) {
@@ -161,14 +154,7 @@ class Column
                         $this->dataType = self::TYPE_STRING;
                         break;
                     case "array":
-                        if ($relationshipAttr) {
-                            $this->dataType = self::TYPE_RELATIONSHIP_MANY;
-                            $this->columnName = $relationshipAttr->columnName ?? ($this->columnName . "_id");
-                            $this->relationshipTarget = $relationshipAttr->modelClass;
-                        } else {
-                            throw new ColumnDefinitionException("Array properties are not supported without a relationship attribute: {$rfProp->getName()}");
-                        }
-                        break;
+                        throw new ColumnDefinitionException("Array properties are not supported: {$rfProp->getName()}");
                     default:
                         if (enum_exists($phpTypeStr)) {
                             $this->dataType = self::TYPE_ENUM;
@@ -179,28 +165,26 @@ class Column
                             break;
                         } else if (class_exists($phpTypeStr)) {
                             if ($phpTypeStr === "DateTime" || $phpTypeStr === "\DateTime") {
+                                // DateTime handling
                                 $this->dataType = self::TYPE_DATE_TIME;
                                 break;
-                            } else {
-                                if ($relationshipAttr) {
-                                    $this->dataType = self::TYPE_RELATIONSHIP_ONE;
-                                    $this->columnName = $relationshipAttr->columnName ?? ($this->columnName . "_id");
-                                    $this->relationshipTarget = $relationshipAttr->modelClass;
+                            } else if (($classParents = class_parents($phpTypeStr)) && in_array('SoftwarePunt\Instarecord\Model', $classParents)) {
+                                // Object reference to another model: One-to-one relationship
+                                $this->dataType = self::TYPE_RELATIONSHIP;
+                                $this->columnName = $this->columnName . "_id";
+                                $this->relationshipTarget = $phpTypeStr;
+                                break;
+                            } else if (($classImplements = class_implements($phpTypeStr)) && in_array('SoftwarePunt\Instarecord\Serialization\IDatabaseSerializable', $classImplements)) {
+                                // Object reference to a serializable object
+                                $this->dataType = self::TYPE_SERIALIZED_OBJECT;
+                                try {
+                                    $this->referenceType = new $phpTypeStr();
                                     break;
+                                } catch (Exception $ex) {
+                                    throw new ColumnDefinitionException("Objects that implement IDatabaseSerializable must have a default constructor that does not throw errors, in: {$phpTypeStr}, got: {$ex->getMessage()}");
                                 }
-                                if ($classImplements = class_implements($phpTypeStr)) {
-                                    if (in_array('SoftwarePunt\Instarecord\Serialization\IDatabaseSerializable', $classImplements)) {
-                                        $this->dataType = self::TYPE_SERIALIZED_OBJECT;
-                                        try {
-                                            $this->referenceType = new $phpTypeStr();
-                                            break;
-                                        } catch (Exception $ex) {
-                                            throw new ColumnDefinitionException("Objects that implement IDatabaseSerializable must have a default constructor that does not throw errors, in: {$phpTypeStr}, got: {$ex->getMessage()}");
-                                        }
-                                    }
-                                }
-                                throw new ColumnDefinitionException("Object property types must implement IDatabaseSerializable or have a Relationship attribute, in: {$rfProp->getName()} of type {$phpTypeStr}");
                             }
+                            throw new ColumnDefinitionException("Referenced object is not a Model and not IDatabaseSerializable - not supported by Instarecord, in: {$rfProp->getName()} of type {$phpTypeStr}");
                         }
                         throw new ColumnDefinitionException("Unsupported property type encountered: {$phpTypeStr}");
                 } // End of type switch
@@ -335,24 +319,7 @@ class Column
      */
     public function getIsRelationship(): bool
     {
-        return $this->dataType === self::TYPE_RELATIONSHIP_ONE
-            || $this->dataType === self::TYPE_RELATIONSHIP_MANY;
-    }
-
-    /**
-     * Gets whether this column is a virtual relationship column, specifically a one-to-one relationship.
-     */
-    public function getIsOneRelationship(): bool
-    {
-        return $this->dataType === self::TYPE_RELATIONSHIP_ONE;
-    }
-
-    /**
-     * Gets whether this column is a virtual relationship column, specifically an array of foreign objects.
-     */
-    public function getIsManyRelationship(): bool
-    {
-        return $this->dataType === self::TYPE_RELATIONSHIP_MANY;
+        return $this->dataType === self::TYPE_RELATIONSHIP;
     }
 
     /**
@@ -461,7 +428,7 @@ class Column
             return null;
         }
 
-        if ($this->dataType === self::TYPE_RELATIONSHIP_ONE) {
+        if ($this->dataType === self::TYPE_RELATIONSHIP) {
             /**
              * @var $input Model
              */
@@ -542,7 +509,7 @@ class Column
             return floatval($input);
         }
 
-        if ($this->getIsOneRelationship()) {
+        if ($this->getIsRelationship()) {
             if ($loadRelationships) {
                 return $this->getRelationshipReference()::fetch($input);
             } else {

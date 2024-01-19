@@ -1,5 +1,7 @@
 # Relationships
-You can define relationships between models using the `Relationship` attribute pointing to another model.
+You can define relationships between models to enable automatic loading of related data.
+
+It's an optional feature; you can use Instarecord without relationships if you want to. This will give you greater control over the queries you execute, and can be more efficient if you don't need the related data.
 
 ## Defining relationships
 Relationships can generally be categorized into two types:
@@ -7,32 +9,30 @@ Relationships can generally be categorized into two types:
  - **One-to-one**: A single object of type `A` is related to a single object of type `B`. For example, a `User` has a single `Profile`.
  - **One-to-many**: A single object of type `A` is related to multiple objects of type `B`. For example, a `User` has many `Posts`.
 
+**Many-to-many** relationships are implicitly supported; simply define a model that represents the connecting table and define two one-to-many relationships.
+
 ### One-to-one
-You can define a one-to-one relationship by adding a field with an `Relationship` attribute:
+You can define an X-to-one relationship by simply adding a field that references another model:
 
 ```php
 <?php
 
 use SoftwarePunt\Instarecord\Model;
-use SoftwarePunt\Instarecord\Relationships\Relationship;
 
 class User extends Model
 {
     public int $id;
-    
     public string $name;
-    
-    #[Relationship(Profile::class)]
-    public Profile $profile;
+    public Profile $profile; // profile_id
 }
 ```
 
-Because this is **a single object**, it is recognized as a one-way relationship. That means the following:
- - A backing column named `profile_id` will be expected in the users table (if you use migrations, this will be created automatically).
- - When you query this model, Instarecord can automatically load and populate the `profile` field.
+The backing column will be determined automatically. In this example, the `profile` property will be backed by a column named `profile_id`. 
+
+Once you've defined the relationship, eager loading will be used automatically. In this example, when you query a `User`, the related `Profile` will be loaded and populated automatically.
 
 ### One-to-many
-Coming soon because we can do better (WIP).
+...coming soon...
 
 ## Loading relationships
 
@@ -41,4 +41,4 @@ When you query a model, or collection of models, all relationships are loaded au
 
 Eager loading will always cause extra queries to be executed, and can be quite inefficient if you don't need the relationships or have a lot of data.
 
-If you use `Model::all()` or `ModelQuery::queryAllModels()`, Instarecord will batch the queries to load all relationships at once.
+If you use `queryAllModels()`, Instarecord will batch the queries to load all relationships at once. If you `fetch()` or otherwise load a single model, Instarecord will load the relationships one-by-one.
