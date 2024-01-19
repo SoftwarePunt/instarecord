@@ -8,7 +8,7 @@ use SoftwarePunt\Instarecord\Models\IReadOnlyModel;
 /**
  * @table users
  */
-class ReadOnlyUser extends Model implements IReadOnlyModel
+class TestReadOnlyUser extends Model implements IReadOnlyModel
 {
     private int $secretNotWritable;
     public int $id;

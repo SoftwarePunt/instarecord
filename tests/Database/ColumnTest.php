@@ -6,7 +6,7 @@ use Minime\Annotations\AnnotationsBag;
 use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\Table;
-use Softwarepunt\Instarecord\Tests\Samples\EnumSample;
+use Softwarepunt\Instarecord\Tests\Samples\TestEnum;
 
 class ColumnTest extends TestCase
 {
@@ -22,7 +22,7 @@ class ColumnTest extends TestCase
 
     public function testGeneratesDefaultColumnNames()
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestUser');
         $column = new Column($table, 'myPropName', null);
 
         $this->assertEquals('my_prop_name', $column->getColumnName(), "If no custom @columnn annotation is set, default column conventions should be assumed");
@@ -30,7 +30,7 @@ class ColumnTest extends TestCase
     
     public function testUnderstandsNullables()
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\NullableTest');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestNullable');
         
         $this->assertFalse($table->getColumnByPropertyName('stringNonNullable')->getIsNullable());
         $this->assertTrue($table->getColumnByPropertyName('stringNullableThroughType')->getIsNullable());
@@ -38,11 +38,11 @@ class ColumnTest extends TestCase
 
     public function testReadsDefaultValues()
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\DefaultsTest');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestDefaults');
 
         $this->assertEquals("hello1", $table->getColumnByPropertyName('strNullableWithDefault')->getDefaultValue());
         $this->assertEquals("hello2", $table->getColumnByPropertyName('strNonNullableWithDefault')->getDefaultValue());
         $this->assertEquals(null, $table->getColumnByPropertyName('strDefaultNullValue')->getDefaultValue());
-        $this->assertEquals(EnumSample::Three, $table->getColumnByPropertyName('enumWithDefault')->getDefaultValue());
+        $this->assertEquals(TestEnum::Three, $table->getColumnByPropertyName('enumWithDefault')->getDefaultValue());
     }
 }

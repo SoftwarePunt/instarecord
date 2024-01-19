@@ -4,7 +4,7 @@ namespace Softwarepunt\Instarecord\Tests\Database;
 
 use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Instarecord;
-use SoftwarePunt\Instarecord\Tests\Samples\User;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class TimezoneTest extends TestCase
@@ -22,12 +22,12 @@ class TimezoneTest extends TestCase
 
         $jan1st = new \DateTime("2023-01-01 00:00:00");
 
-        $user = new User();
+        $user = new TestUser();
         $user->userName = "TimeZoneTest";
         $user->joinDate = $jan1st;
         $user->save();
 
-        $userRefetch = User::fetch($user->id);
+        $userRefetch = TestUser::fetch($user->id);
 
         $this->assertSame(
             "2023-01-01 00:00:00",
@@ -49,7 +49,7 @@ class TimezoneTest extends TestCase
 
         $jan1st = new \DateTime("2023-01-01 00:00:00");
 
-        $query = User::query()->where('join_date = ?', $jan1st);
+        $query = TestUser::query()->where('join_date = ?', $jan1st);
 
         $queryString = $query->createStatementText();
         $queryParams = $query->getBoundParametersForGeneratedStatement();
@@ -73,7 +73,7 @@ class TimezoneTest extends TestCase
 
         $jan1st = new \DateTime("2023-01-01 00:00:00");
 
-        $query = User::query()->where('join_date = ?', $jan1st);
+        $query = TestUser::query()->where('join_date = ?', $jan1st);
 
         $queryString = $query->createStatementText();
         $queryParams = $query->getBoundParametersForGeneratedStatement();
@@ -97,7 +97,7 @@ class TimezoneTest extends TestCase
 
         $jan1st = new \DateTime("2023-01-01 00:00:00");
 
-        $query = User::query()->where('join_date = ?', $jan1st);
+        $query = TestUser::query()->where('join_date = ?', $jan1st);
 
         $queryString = $query->createStatementText();
         $queryParams = $query->getBoundParametersForGeneratedStatement();

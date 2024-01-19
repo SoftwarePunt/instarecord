@@ -4,9 +4,9 @@ namespace SoftwarePunt\Instarecord\Tests\Samples;
 
 use SoftwarePunt\Instarecord\Model;
 
-class NullableTest extends Model
+class TestAutoColumn extends Model
 {
     public int $id;
-    public string $stringNonNullable;
-    public ?string $stringNullableThroughType;
+    public \DateTime $createdAt;
+    public \DateTime $modifiedAt;
 }

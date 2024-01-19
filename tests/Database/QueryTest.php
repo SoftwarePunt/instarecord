@@ -7,7 +7,7 @@ use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 use SoftwarePunt\Instarecord\Database\Connection;
 use SoftwarePunt\Instarecord\Database\Query;
 use SoftwarePunt\Instarecord\Instarecord;
-use SoftwarePunt\Instarecord\Tests\Samples\User;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class QueryTest extends TestCase
@@ -434,11 +434,11 @@ class QueryTest extends TestCase
 
         $query = new Query(Instarecord::connection());
 
-        $testUserA = new User();
+        $testUserA = new TestUser();
         $testUserA->userName = 'ArrayGuyOne';
         $testUserA->save();
 
-        $testUserB = new User();
+        $testUserB = new TestUser();
         $testUserB->userName = 'ArrayGuyTwo';
         $testUserB->save();
 
@@ -616,7 +616,7 @@ class QueryTest extends TestCase
 
         Instarecord::config($config);
 
-        $testUser = new User();
+        $testUser = new TestUser();
         $testUser->userName = 'HenkTheSingleGuy';
         $testUser->save();
 
@@ -639,11 +639,11 @@ class QueryTest extends TestCase
 
         Instarecord::config($config);
 
-        $testUserA = new User();
+        $testUserA = new TestUser();
         $testUserA->userName = 'ArrItemOneSVA';
         $testUserA->save();
 
-        $testUserB = new User();
+        $testUserB = new TestUser();
         $testUserB->userName = 'ArrItemTwoSVA';
         $testUserB->save();
 
@@ -668,11 +668,11 @@ class QueryTest extends TestCase
 
         Instarecord::config($config);
 
-        $testUserA = new User();
+        $testUserA = new TestUser();
         $testUserA->userName = 'ArrItemOneKVA';
         $testUserA->save();
 
-        $testUserB = new User();
+        $testUserB = new TestUser();
         $testUserB->userName = 'ArrItemTwoKVA';
         $testUserB->save();
 

@@ -4,7 +4,7 @@ namespace SoftwarePunt\Instarecord\Tests\Samples;
 
 use SoftwarePunt\Instarecord\Model;
 
-class User extends Model
+class TestUser extends Model
 {
     // -----------------------------------------------------------------------------------------------------------------
     // Actual columns
@@ -12,7 +12,7 @@ class User extends Model
     public int $id;
     public string $userName;
     public \DateTime $joinDate;
-    public EnumSample $enumValue;
+    public TestEnum $enumValue;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Not columns
@@ -32,5 +32,13 @@ class User extends Model
     public function getIsAutoIncrement(): bool
     {
         return $this->useAutoIncrement;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Table name
+
+    public function getTableName(): string
+    {
+        return "users";
     }
 }
