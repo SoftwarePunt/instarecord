@@ -14,17 +14,13 @@ class ModelQuery extends Query
 {
     /**
      * The fully qualified class name of the model.
-     *
-     * @var string
      */
-    protected $modelName;
+    protected string $modelName;
 
     /**
      * A blank reference for the model we are managing.
-     *
-     * @var Model
      */
-    protected $referenceModel;
+    protected Model $referenceModel;
 
     /**
      * Constructs a new model query.

@@ -11,8 +11,8 @@ Relationships can generally be categorized into two types:
 
 **Many-to-many** relationships are implicitly supported; simply define a model that represents the connecting table and define two one-to-many relationships.
 
-### One-to-one
-You can define an X-to-one relationship by simply adding a field that references another model:
+## One-to-one
+You can define a one-to-one relationship by simply adding a field that references another model:
 
 ```php
 <?php
@@ -23,7 +23,7 @@ class User extends Model
 {
     public int $id;
     public string $name;
-    public Profile $profile; // profile_id
+    public Profile $profile; // will be backed by `profile_id`
 }
 ```
 
@@ -31,14 +31,31 @@ The backing column will be determined automatically. In this example, the `profi
 
 Once you've defined the relationship, eager loading will be used automatically. In this example, when you query a `User`, the related `Profile` will be loaded and populated automatically.
 
-### One-to-many
-...coming soon...
-
-## Loading relationships
-
-### Eager loading by default
-When you query a model, or collection of models, all relationships are loaded automatically. This is called **eager loading**.
+### Eager loading
+When you query a model (or collection of models) with a one-to-one relationship, these are loaded automatically. This is called **eager loading**.
 
 Eager loading will always cause extra queries to be executed, and can be quite inefficient if you don't need the relationships or have a lot of data.
 
 If you use `queryAllModels()`, Instarecord will batch the queries to load all relationships at once. If you `fetch()` or otherwise load a single model, Instarecord will load the relationships one-by-one.
+
+## One-to-many
+A `ManyRelationship` utility is provided that allows you to more easily work with one-to-many relationships. It provides a cached, lazy-loaded wrapper around the collection that can handle the boring queries for you.
+
+```php
+<?php
+
+use SoftwarePunt\Instarecord\Model;
+
+class User extends Model
+{
+    public int $id;
+    public string $name;
+    
+    public function posts(): ManyRelationship
+    {
+        return $this->hasMany(Post::class);
+    }
+}
+```
+
+Rather than defining a property, you define a method that returns a `ManyRelationship` instance. This instance will be cached and reused for the lifetime of the model.

@@ -3,6 +3,7 @@
 namespace SoftwarePunt\Instarecord\Tests\Samples;
 
 use SoftwarePunt\Instarecord\Model;
+use SoftwarePunt\Instarecord\Relationships\HasManyRelationship;
 
 class TestAirline extends Model
 {
@@ -13,5 +14,10 @@ class TestAirline extends Model
     public function getTableName(): string
     {
         return "airlines";
+    }
+
+    public function planes(): HasManyRelationship
+    {
+        return $this->hasMany(TestPlane::class);
     }
 }

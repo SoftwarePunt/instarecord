@@ -7,6 +7,8 @@ use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\ModelQuery;
 use SoftwarePunt\Instarecord\Database\Table;
 use SoftwarePunt\Instarecord\Models\ModelLogicException;
+use SoftwarePunt\Instarecord\Relationships\HasManyRelationship;
+use SoftwarePunt\Instarecord\Utils\TextTransforms;
 
 /**
  * The base class for all Softwarepunt models.
@@ -767,5 +769,36 @@ class Model
         }
 
         return $anyChanges;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Relationships
+
+    /**
+     * @var HasManyRelationship[]
+     */
+    private array $hasManyRelationships = [];
+
+    /**
+     * Helper method to create or retrieve a "has many" relationship for this model instance.
+     *
+     * @param string $targetClass
+     * @param string|null $foreignKey
+     * @return HasManyRelationship
+     */
+    public function hasMany(string $targetClass, ?string $foreignKey = null): HasManyRelationship
+    {
+        if (!$foreignKey) {
+            $tableName = $this->getTableName();
+            $singular = TextTransforms::singularize($tableName);
+            $foreignKey = "{$singular}_id"; // e.g. if we are User, this would be "user_id"
+        }
+
+        $instanceKey = "{$targetClass}::{$foreignKey}";
+
+        if (!isset($this->hasManyRelationships[$instanceKey])) {
+            $this->hasManyRelationships[$instanceKey] = new HasManyRelationship($this, $targetClass, $foreignKey);
+        }
+        return $this->hasManyRelationships[$instanceKey];
     }
 }
