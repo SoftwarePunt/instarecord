@@ -60,6 +60,8 @@ class User extends Model
 
 Rather than defining a property, you define a method that returns a `ManyRelationship` instance. This instance will be cached and reused for the lifetime of the model.
 
+You can optionally specify a foreign key column name as the second parameter to `hasMany()`. Otherwise, it is automatically derived from the singularized host table name with an `_id` suffix (so, in this example, `user_id`).
+
 ### Querying
 You can use the `query()` method on the relationship to get a query builder for the related model:
 
