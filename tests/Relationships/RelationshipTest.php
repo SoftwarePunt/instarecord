@@ -112,12 +112,39 @@ class RelationshipTest extends TestCase
         $this->assertSame($plane2, $partialMany->all()[$plane2->id],
             "Expected original, cached relationship to be returned from addLoaded() call");
 
+        // Has many relationship: uncached & cached fetch test
+        $partialMany->reset();
+        $fetchPlane1 = $partialMany->fetch($plane1->id);
+        $fetchPlane2 = $partialMany->fetch($plane2->id);
+        $this->assertNotNull($fetchPlane1, "Expected fetch() to return plane 1");
+        $this->assertNotNull($fetchPlane2, "Expected fetch() to return plane 2");
+        $fetchPlane1b = $partialMany->fetch($plane1->id);
+        $fetchPlane2b = $partialMany->fetch($plane2->id);
+        $this->assertSame($fetchPlane1, $fetchPlane1b,
+            "Expected cached fetch() to return the same model instance as uncached fetch()");
+        $this->assertSame($fetchPlane2, $fetchPlane2b,
+            "Expected cached fetch() to return the same model instance as uncached fetch()");
+
         // Has many relationship: result hook + cached fetch test
         $hookedMany = $airline->planes();
         $hookedMany->reset();
-        $hookedPlane1 = $hookedMany->query()->where('id = ?', $plane1->id)->querySingleModel();
+        $hookedPlanes = $hookedMany->query()->queryAllModels();
+        $hookedPlane1 = null;
+        $hookedPlane2 = null;
+        foreach ($hookedPlanes as $hookedPlane) {
+            if ($hookedPlane->id === $plane1->id) {
+                $hookedPlane1 = $hookedPlane;
+            } else if ($hookedPlane->id === $plane2->id) {
+                $hookedPlane2 = $hookedPlane;
+            }
+        }
+        $this->assertNotNull($hookedPlane1, "queryAllModels should have returned plane 1");
+        $this->assertNotNull($hookedPlane2, "queryAllModels should have returned plane 2");
         $fetchPlane1 = $hookedMany->fetch($plane1->id);
         $this->assertSame($hookedPlane1, $fetchPlane1,
-            "Expected cached fetch() to return the same model instance as hooked query()->querySingleModel()");
+            "Expected cached fetch() to return the same model instance as hooked query()->queryAllModels()");
+        $fetchPlane2 = $hookedMany->fetch($plane2->id);
+        $this->assertSame($hookedPlane2, $fetchPlane2,
+            "Expected cached fetch() to return the same model instance as hooked query()->queryAllModels()");
     }
 }

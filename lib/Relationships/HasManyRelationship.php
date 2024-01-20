@@ -113,9 +113,17 @@ class HasManyRelationship
             return $this->loadedModels[$fkValue];
         }
 
-        return $this->query()
-            ->andWhere("{$this->foreignKeyColumn} = ?", $fkValue)
+        $pkName = $this->referenceModel->getPrimaryKeyColumnName();
+
+        $result = $this->query()
+            ->andWhere("`{$pkName}` = ?", $fkValue)
             ->querySingleModel();
+
+        if ($result) {
+            $this->loadedModels[$fkValue] = $result;
+        }
+
+        return $result;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
