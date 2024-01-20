@@ -58,10 +58,12 @@ class HasManyRelationship
         $query = $this->referenceModel::query()
             ->where("{$this->foreignKeyColumn} = ?", $pkVal);
 
-        $query->addResultHook(function (Model $model) {
-            $pkVal = $model->getPrimaryKeyValue();
-            $this->loadedModels[$pkVal] = $model;
-        });
+        if ($hookResults) {
+            $query->addResultHook(function (Model $model) {
+                $pkVal = $model->getPrimaryKeyValue();
+                $this->loadedModels[$pkVal] = $model;
+            });
+        }
 
         return $query;
     }
