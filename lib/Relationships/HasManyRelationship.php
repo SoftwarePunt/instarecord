@@ -45,17 +45,25 @@ class HasManyRelationship
     /**
      * Begins a query for this relationship, with a predefined WHERE clause for the foreign key.
      *
+     * @param bool $hookResults If true, the query results will be hooked into the relationship cache.
      * @return ModelQuery
      */
-    public function query(): ModelQuery
+    public function query(bool $hookResults = true): ModelQuery
     {
         $pkVal = $this->getPrimaryKeyValue();
 
         if (empty($pkVal))
             throw new \InvalidArgumentException("Cannot query relationship without having primary key set");
 
-        return $this->referenceModel::query()
+        $query = $this->referenceModel::query()
             ->where("{$this->foreignKeyColumn} = ?", $pkVal);
+
+        $query->addResultHook(function (Model $model) {
+            $pkVal = $model->getPrimaryKeyValue();
+            $this->loadedModels[$pkVal] = $model;
+        });
+
+        return $query;
     }
 
     /**
@@ -88,6 +96,24 @@ class HasManyRelationship
 
         $this->isFullyLoaded = true;
         return $this->loadedModels;
+    }
+
+    /**
+     * Gets a single model in this relationship by its primary key.
+     * Retrieves from cache if already loaded.
+     *
+     * @param mixed $fkValue
+     * @return Model|null
+     */
+    public function fetch(mixed $fkValue): ?Model
+    {
+        if (isset($this->loadedModels[$fkValue])) {
+            return $this->loadedModels[$fkValue];
+        }
+
+        return $this->query()
+            ->andWhere("{$this->foreignKeyColumn} = ?", $fkValue)
+            ->querySingleModel();
     }
 
     // -----------------------------------------------------------------------------------------------------------------

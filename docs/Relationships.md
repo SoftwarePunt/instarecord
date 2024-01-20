@@ -59,3 +59,46 @@ class User extends Model
 ```
 
 Rather than defining a property, you define a method that returns a `ManyRelationship` instance. This instance will be cached and reused for the lifetime of the model.
+
+### Querying
+You can use the `query()` method on the relationship to get a query builder for the related model:
+
+```php
+$user->posts()->query(); // ModelQuery<Post>
+```
+
+By default, the query results will be hooked. This means when your query loads any models, they are automatically added to the relationship's cache. 
+
+### Fetch all
+You can use the `all()` method on the relationship to get an array of all results:
+
+```php
+$user->posts()->all(); // Post[]
+```
+
+This may cause a large query, although only records that are not already cached will be loaded. 
+
+This list will be cached on the relationship, so subsequent calls will not cause additional queries to be executed.
+
+### Fetch one
+You can use the `fetch()` method on the relationship to get a single result:
+
+```php
+$user->posts()->fetch(123); // Post|null
+```
+
+If the post is already cached (e.g. by an earlier `all()` call or query), 
+
+### Cache management
+You can invalidate and clear the cache for a relationship by calling `reset()`:
+
+```php
+$user->posts()->reset();
+```
+
+You can also manually add items to the cache:
+
+```php
+$user->posts()->addLoaded($post);
+$user->posts()->addLoadedArray($posts);
+```

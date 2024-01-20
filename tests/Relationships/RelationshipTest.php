@@ -111,5 +111,13 @@ class RelationshipTest extends TestCase
             "Expected 2 planes to be loaded after reset(), addLoaded() and all()");
         $this->assertSame($plane2, $partialMany->all()[$plane2->id],
             "Expected original, cached relationship to be returned from addLoaded() call");
+
+        // Has many relationship: result hook + cached fetch test
+        $hookedMany = $airline->planes();
+        $hookedMany->reset();
+        $hookedPlane1 = $hookedMany->query()->where('id = ?', $plane1->id)->querySingleModel();
+        $fetchPlane1 = $hookedMany->fetch($plane1->id);
+        $this->assertSame($hookedPlane1, $fetchPlane1,
+            "Expected cached fetch() to return the same model instance as hooked query()->querySingleModel()");
     }
 }
