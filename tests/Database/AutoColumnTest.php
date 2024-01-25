@@ -5,7 +5,7 @@ namespace SoftwarePunt\Instarecord\Tests\Database;
 use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Table;
 use SoftwarePunt\Instarecord\Instarecord;
-use SoftwarePunt\Instarecord\Tests\Samples\UserAutoTest;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUserAuto;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class AutoColumnTest extends TestCase
@@ -15,7 +15,7 @@ class AutoColumnTest extends TestCase
      */
     public function testAutoModeDetermination()
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\AutoColumnTest');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestAutoColumn');
 
         $this->assertEquals("created", $table->getColumnByPropertyName("createdAt")->getAutoMode());
         $this->assertEquals("modified", $table->getColumnByPropertyName("modifiedAt")->getAutoMode());
@@ -27,7 +27,7 @@ class AutoColumnTest extends TestCase
      */
     public function testAutoModeRequiresCompatibleType()
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\AutoColumnTestBadAuto');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestAutoColumnBadAuto');
         $this->assertNull($table->getColumnByPropertyName("createdAt")->getAutoMode());
     }
 
@@ -38,7 +38,7 @@ class AutoColumnTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        $uat = new UserAutoTest();
+        $uat = new TestUserAuto();
 
         try {
             $uat->userName = "Newly Created";
@@ -57,7 +57,7 @@ class AutoColumnTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        $uat = new UserAutoTest();
+        $uat = new TestUserAuto();
 
         try {
             $testDt = new \DateTime("1970-01-02 03:04:05");
@@ -79,7 +79,7 @@ class AutoColumnTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        $uat = new UserAutoTest();
+        $uat = new TestUserAuto();
 
         try {
             $uat->userName = "Newly Created";
@@ -98,7 +98,7 @@ class AutoColumnTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        $uat = new UserAutoTest();
+        $uat = new TestUserAuto();
 
         try {
             $uat->userName = "Newly Created";

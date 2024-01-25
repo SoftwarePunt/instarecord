@@ -69,5 +69,21 @@ $pdo->exec('CREATE TABLE `'  . $dsnConfig->database . '`.`users` (
   `modified_at` DATETIME NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `user_name_UNIQUE` (`user_name` ASC));');
+$pdo->exec('DROP TABLE IF EXISTS `'  . $dsnConfig->database . '`.`planes`;');
+$pdo->exec('DROP TABLE IF EXISTS `'  . $dsnConfig->database . '`.`airlines`;');
+$pdo->exec('CREATE TABLE `'  . $dsnConfig->database . '`.`airlines` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `iata_code` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `iata_code_UNIQUE` (`iata_code` ASC));');
+$pdo->exec('CREATE TABLE `'  . $dsnConfig->database . '`.`planes` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `airline_id` int NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `registration` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `registration_UNIQUE`(`registration`),
+  CONSTRAINT `plane_airline` FOREIGN KEY (`airline_id`) REFERENCES `'  . $dsnConfig->database . '`.`airlines` (`id`) ON DELETE CASCADE ON UPDATE CASCADE);');
 
 unset($pdo);

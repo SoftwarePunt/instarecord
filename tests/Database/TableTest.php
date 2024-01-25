@@ -10,6 +10,7 @@ class TableTest extends TestCase
     public function testDefaultTableNameGeneration()
     {
         $this->assertEquals("users", Table::getDefaultTableName("User"));
+        $this->assertEquals("test_users", Table::getDefaultTableName("TestUser"));
         $this->assertEquals("my_table_classes", Table::getDefaultTableName("MyTableClass"));
         $this->assertEquals("my_table_classes", Table::getDefaultTableName("myTableClass"));
         $this->assertEquals("my_table_classes", Table::getDefaultTableName("My\\Qualified\\Namespaced\\MyTableClass"));
@@ -33,7 +34,7 @@ class TableTest extends TestCase
 
     public function testExtractsIndexedColumnList()
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestUser');
         $columns = $table->getColumns();
 
         $this->assertNotEmpty($columns, 'Expected a non-empty columns list');
@@ -46,7 +47,7 @@ class TableTest extends TestCase
      */
     public function testMemoryCachesColumnList()
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestUser');
         $columns = $table->getColumns();
         $columns2 = $table->getColumns();
 

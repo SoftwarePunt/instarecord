@@ -4,7 +4,7 @@ namespace SoftwarePunt\Instarecord\Tests\Samples;
 
 use SoftwarePunt\Instarecord\Serialization\IDatabaseSerializable;
 
-class DummySerializableType implements IDatabaseSerializable
+class TestDummySerializableType implements IDatabaseSerializable
 {
     private string $value = "";
 

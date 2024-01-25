@@ -4,8 +4,8 @@ namespace SoftwarePunt\Instarecord\Tests\Models;
 
 use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Instarecord;
-use SoftwarePunt\Instarecord\Tests\Samples\ReadOnlyUser;
-use SoftwarePunt\Instarecord\Tests\Samples\User;
+use SoftwarePunt\Instarecord\Tests\Samples\TestReadOnlyUser;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class ReadOnlyModelTest extends TestCase
@@ -17,7 +17,7 @@ class ReadOnlyModelTest extends TestCase
 
         Instarecord::config(new TestDatabaseConfig());
 
-        $rou = new ReadOnlyUser();
+        $rou = new TestReadOnlyUser();
         $rou->userName = "NewTest";
         $rou->create();
     }
@@ -26,12 +26,12 @@ class ReadOnlyModelTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        $normieUser = new User();
+        $normieUser = new TestUser();
         $normieUser->userName = "RejectMe";
         $normieUser->save();
 
         try {
-            $rou = ReadOnlyUser::fetch($normieUser->id);
+            $rou = TestReadOnlyUser::fetch($normieUser->id);
 
             $this->assertTrue($rou->update()); // no changes should still pass safely
 
@@ -49,12 +49,12 @@ class ReadOnlyModelTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        $normieUser = new User();
+        $normieUser = new TestUser();
         $normieUser->userName = "RejectMe";
         $normieUser->save();
 
         try {
-            $rou = ReadOnlyUser::fetch($normieUser->id);
+            $rou = TestReadOnlyUser::fetch($normieUser->id);
 
             $this->expectException("SoftwarePunt\Instarecord\Models\ModelAccessException");
             $this->expectExceptionMessage("read only model");

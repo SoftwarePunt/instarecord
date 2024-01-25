@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Connection;
 use SoftwarePunt\Instarecord\Database\Query;
 use SoftwarePunt\Instarecord\Instarecord;
-use SoftwarePunt\Instarecord\Tests\Samples\User;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class QueryPaginatorTest extends TestCase
@@ -18,13 +18,13 @@ class QueryPaginatorTest extends TestCase
 
         Instarecord::config($config);
 
-        $userQuery = User::query()
+        $userQuery = TestUser::query()
             ->delete();
     }
 
     public static function tearDownAfterClass(): void
     {
-        $userQuery = User::query()
+        $userQuery = TestUser::query()
             ->delete();
     }
 
@@ -43,7 +43,7 @@ class QueryPaginatorTest extends TestCase
     public function testPaginateCalculation()
     {
         // Create dummy user that will be excluded from our query
-        $user = new User();
+        $user = new TestUser();
         $user->userName = "dummy-for-paginator";
         $user->save();
 
@@ -51,7 +51,7 @@ class QueryPaginatorTest extends TestCase
         $firstUser = null;
 
         for ($i = 0; $i < 10; $i++) {
-            $user = new User();
+            $user = new TestUser();
             $user->userName = "paginate-{$i}";
             $user->save();
 
@@ -61,10 +61,10 @@ class QueryPaginatorTest extends TestCase
         }
 
         // Sanity check
-        $this->assertEquals(11, User::query()->count()->querySingleValue());
+        $this->assertEquals(11, TestUser::query()->count()->querySingleValue());
 
         // Create paginator
-        $paginator = User::query()
+        $paginator = TestUser::query()
             ->where('user_name LIKE "paginate-%"')
             ->orderBy('user_name DESC')
             ->paginate();
@@ -101,7 +101,7 @@ class QueryPaginatorTest extends TestCase
 
     public function testPaginateCalculationWithZeroResults()
     {
-        $paginator = User::query()
+        $paginator = TestUser::query()
             ->where('id < 0')
             ->paginate();
 

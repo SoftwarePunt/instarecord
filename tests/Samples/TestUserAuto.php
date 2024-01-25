@@ -7,7 +7,7 @@ use SoftwarePunt\Instarecord\Model;
 /**
  * @table users
  */
-class UserAutoTest extends Model
+class TestUserAuto extends Model
 {
     private int $secretNotWritable;
 

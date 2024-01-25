@@ -7,14 +7,14 @@ use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\Table;
 use SoftwarePunt\Instarecord\Instarecord;
-use SoftwarePunt\Instarecord\Tests\Samples\DummySerializableType;
-use Softwarepunt\Instarecord\Tests\Samples\EnumSample;
+use SoftwarePunt\Instarecord\Tests\Samples\TestDummySerializableType;
+use Softwarepunt\Instarecord\Tests\Samples\TestEnum;
 
 class DataFormattingTest extends TestCase
 {
     private function _createTestColumn(array $opts)
     {
-        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\User');
+        $table = new Table('SoftwarePunt\\Instarecord\\Tests\\Samples\\TestUser');
         $column = new Column($table, 'testColumn', null);
 
         if (!empty($opts['var'])) {
@@ -248,11 +248,11 @@ class DataFormattingTest extends TestCase
         $column = $this->_createTestColumn([
             'var' => Column::TYPE_SERIALIZED_OBJECT,
             'nullable' => true,
-            'reftype' => new DummySerializableType()
+            'reftype' => new TestDummySerializableType()
         ]);
 
         $this->assertSame(null, $column->parseDatabaseValue(null));
-        $this->assertEquals($obj = new DummySerializableType("test 123"), $column->parseDatabaseValue("test 123"));
+        $this->assertEquals($obj = new TestDummySerializableType("test 123"), $column->parseDatabaseValue("test 123"));
     }
 
     public function testEnum()
@@ -260,11 +260,11 @@ class DataFormattingTest extends TestCase
         $column = $this->_createTestColumn([
             'var' => Column::TYPE_ENUM,
             'nullable' => true,
-            'enumtype' => EnumSample::class
+            'enumtype' => TestEnum::class
         ]);
 
         $this->assertSame(null, $column->parseDatabaseValue(null));
-        $this->assertSame("three", $column->formatDatabaseValue(EnumSample::Three));
-        $this->assertEquals(EnumSample::Two, $column->parseDatabaseValue("two"));
+        $this->assertSame("three", $column->formatDatabaseValue(TestEnum::Three));
+        $this->assertEquals(TestEnum::Two, $column->parseDatabaseValue("two"));
     }
 }

@@ -5,17 +5,17 @@ namespace SoftwarePunt\Instarecord\Tests;
 use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Instarecord;
-use SoftwarePunt\Instarecord\Tests\Samples\DummySerializableType;
-use Softwarepunt\Instarecord\Tests\Samples\EnumSample;
+use SoftwarePunt\Instarecord\Tests\Samples\TestDummySerializableType;
+use Softwarepunt\Instarecord\Tests\Samples\TestEnum;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUserWithSerialized;
-use SoftwarePunt\Instarecord\Tests\Samples\User;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
 class ModelTest extends TestCase
 {
     public function testConstructWithDefaults()
     {
-        $user = new User([
+        $user = new TestUser([
             'id' => 123,
             'userName' => 'Henk'
         ]);
@@ -31,7 +31,7 @@ class ModelTest extends TestCase
             'userName' => 'Henk'
         ];
         
-        $user = new User($values);
+        $user = new TestUser($values);
         
         $this->assertEquals($values['id'], $user->getPropertyValues()['id']);
         $this->assertEquals($values['userName'], $user->getPropertyValues()['userName']);
@@ -44,7 +44,7 @@ class ModelTest extends TestCase
             'userName' => 'Henk'
         ];
 
-        $user = new User($values);
+        $user = new TestUser($values);
 
         // Initial state; should be clean
         $this->assertEmpty($user->getDirtyProperties());
@@ -76,7 +76,7 @@ class ModelTest extends TestCase
             'user_name' => 'Henk'
         ];
 
-        $user = new User($values);
+        $user = new TestUser($values);
 
         $this->assertEmpty($user->getDirtyColumns(), 'Dirty columns should initially be empty');
 
@@ -92,7 +92,7 @@ class ModelTest extends TestCase
             'userName' => 'Henk'
         ];
 
-        $user = new User($values);
+        $user = new TestUser($values);
 
         $this->assertEmpty($user->getDirtyProperties());
         
@@ -111,7 +111,7 @@ class ModelTest extends TestCase
             'userName' => 'Henk'
         ];
 
-        $user = new User($values);
+        $user = new TestUser($values);
 
         $user->markAllPropertiesDirty();
 
@@ -124,7 +124,7 @@ class ModelTest extends TestCase
     
     public function testGetPropertyNames()
     {
-        $sampleUserModel = new User();
+        $sampleUserModel = new TestUser();
         $propertyList = $sampleUserModel->getPropertyNames();
         
         $this->assertNotEmpty($propertyList, 'A property list should not be empty');
@@ -135,7 +135,7 @@ class ModelTest extends TestCase
     
     public function testGetColumnNames()
     {
-        $sampleUserModel = new User();
+        $sampleUserModel = new TestUser();
         $propertyList = $sampleUserModel->getColumnNames();
 
         $this->assertNotEmpty($propertyList, 'A property list should not be empty');
@@ -146,27 +146,27 @@ class ModelTest extends TestCase
 
     public function testGetColumnNameForPropertyName()
     {
-        $sampleUserModel = new User();
+        $sampleUserModel = new TestUser();
         $this->assertEquals('id', $sampleUserModel->getColumnNameForPropertyName('id'));
         $this->assertEquals('user_name', $sampleUserModel->getColumnNameForPropertyName('userName'));
     }
 
     public function testGetPropertyNameForColumnName()
     {
-        $sampleUserModel = new User();
+        $sampleUserModel = new TestUser();
         $this->assertEquals('id', $sampleUserModel->getPropertyNameForColumnName('id'));
         $this->assertEquals('userName', $sampleUserModel->getPropertyNameForColumnName('user_name'));
     }
     
     public function testGetTableName()
     {
-        $sampleUserModel = new User();
+        $sampleUserModel = new TestUser();
         $this->assertEquals('users', $sampleUserModel->getTableName());
     }
 
     public function testSetColumnValues()
     {
-        $user = new User();
+        $user = new TestUser();
         $user->setColumnValues([
             'id' => 5,
             'user_name' => 'Bob'
@@ -179,7 +179,7 @@ class ModelTest extends TestCase
 
     public function testGetAndSetColumnValues()
     {
-        $user = new User();
+        $user = new TestUser();
 
         $testSet = [
             'id' => 5,
@@ -196,7 +196,7 @@ class ModelTest extends TestCase
 
     public function testGetPropertyValuesWithColumnNames()
     {
-        $user = new User();
+        $user = new TestUser();
 
         $testDate = new \DateTime();
         $testDate->setDate(1978, 1, 2);
@@ -224,7 +224,7 @@ class ModelTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "my-test-user-one";
         
         $this->assertTrue($newUser->create(), 'Creating a new record should return TRUE');
@@ -240,14 +240,14 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
 
         // Determine what the next auto increment number would be (max+1)
-        $nextUserId = intval(User::query()
+        $nextUserId = intval(TestUser::query()
             ->select('id')
             ->orderBy('id DESC')
             ->limit(1)
             ->querySingleValue()) + 1;
 
         // Create user without auto increment
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->id = $nextUserId;
         $newUser->setUseAutoIncrement(false);
         $newUser->userName = "non-auto-incremented";
@@ -268,7 +268,7 @@ class ModelTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
         
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "my-test-user-two";
 
         $this->assertTrue($newUser->save(), 'Creating a new record should return TRUE (via save)');
@@ -281,22 +281,22 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
 
         // Create new user
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "reload-user";
-        $newUser->enumValue = EnumSample::One;
+        $newUser->enumValue = TestEnum::One;
         $this->assertTrue($newUser->save(), "New user save should succeed");
         $this->assertNotEmpty($newUser->id, "New user save should set PK value");
 
         // Update user by query
-        User::query()
+        TestUser::query()
             ->update()
-            ->set('`enum_value` = ?', EnumSample::Two->value)
+            ->set('`enum_value` = ?', TestEnum::Two->value)
             ->where('id = ?', $newUser->id)
             ->execute();
 
         // Reload user
         $this->assertTrue($newUser->reload(), "Reload should succeed");
-        $this->assertEquals(EnumSample::Two, $newUser->enumValue, "Reloaded data should be applied");
+        $this->assertEquals(TestEnum::Two, $newUser->enumValue, "Reloaded data should be applied");
 
         // Delete & reload user
         $newUser->delete();
@@ -312,7 +312,7 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
 
         // 1. Insert user
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "my-test-user-three";
         $newUser->save();
         
@@ -338,17 +338,17 @@ class ModelTest extends TestCase
         // NB: "userName" has a unique index
 
         // 1. Upsert initial
-        $user1 = new User();
+        $user1 = new TestUser();
         $user1->userName = "mr-upsert";
-        $user1->enumValue = EnumSample::One;
+        $user1->enumValue = TestEnum::One;
 
         $this->assertTrue($user1->upsert(), "upsert() should succeed on create");
         $this->assertNotNull($user1->id, "upsert() should cause auto incremented PK value to be set on create");
 
         // 2. Upsert update
-        $user2 = new User();
+        $user2 = new TestUser();
         $user2->userName = "mr-upsert";
-        $user2->enumValue = EnumSample::Two;
+        $user2->enumValue = TestEnum::Two;
         $user2->upsert();
 
         $this->assertTrue($user2->upsert(), "upsert() should succeed on update");
@@ -356,13 +356,13 @@ class ModelTest extends TestCase
 
         // 3. Refetch to ensure data was updated
         /**
-         * @var $userRefetched User|null
+         * @var $userRefetched TestUser|null
          */
-        $userRefetched = User::query()
+        $userRefetched = TestUser::query()
             ->where('user_name = ?', "mr-upsert")
             ->querySingleModel();
 
-        $this->assertSame($userRefetched->enumValue, $user2->enumValue, "User record should be updated in database after upsert()");
+        $this->assertSame($userRefetched->enumValue, $user2->enumValue, "TestUser record should be updated in database after upsert()");
     }
 
     /**
@@ -373,7 +373,7 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
         
         // 1. Insert user
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "will-be-deleted";
         $newUser->save();
         
@@ -381,7 +381,7 @@ class ModelTest extends TestCase
         $this->assertTrue($newUser->delete(), 'Delete should return true');
         
         // 3. Insert the user again, noting that no "duplicate key" exceptions are raised
-        $newUser2 = new User();
+        $newUser2 = new TestUser();
         $newUser2->userName = "will-be-deleted";
         $newUser2->save(); 
     }
@@ -391,12 +391,12 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
         
         // 1. Insert user
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "imma-be-fetched-please";
         $newUser->save();
         
         // 2. Fetch user
-        $fetchUser = User::fetch($newUser->id);
+        $fetchUser = TestUser::fetch($newUser->id);
         
         $this->assertEquals($newUser->id, $fetchUser->id, 'Fetch should return a single user object based on the primary key');
         $this->assertEquals('imma-be-fetched-please', $fetchUser->userName, 'Columns should be translated: userName should be filled with user_name value');
@@ -407,19 +407,19 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
 
         // 1. Insert user
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "imma-be-listfetched-please";
         $newUser->save();
 
         // 2. Fetch user list
-        $fetchUserList = User::all();
+        $fetchUserList = TestUser::all();
 
         $this->assertNotEmpty($fetchUserList, 'Expected nonempty user list');
 
         $containsOurItem = false;
         
         foreach ($fetchUserList as $fetchUserListItem) {
-            $this->assertInstanceOf("SoftwarePunt\\Instarecord\\Tests\\Samples\\User", $fetchUserListItem, 'Expected a list of user models');
+            $this->assertInstanceOf("SoftwarePunt\\Instarecord\\Tests\\Samples\\TestUser", $fetchUserListItem, 'Expected a list of user models');
             
             if ($fetchUserListItem->id == $newUser->id) {
                 $containsOurItem = true;
@@ -431,22 +431,22 @@ class ModelTest extends TestCase
     
     public function testModelQueryUsesTableAndSelectAsDefaults()
     {
-        $allUsersViaQuery = User::query()->queryAllModels();
-        $allUsersViaAll = User::all();
+        $allUsersViaQuery = TestUser::query()->queryAllModels();
+        $allUsersViaAll = TestUser::all();
         
         $this->assertEquals($allUsersViaQuery, $allUsersViaAll);
     }
 
     public function testModelQueryAllWithIndexedWithPrimaryKey()
     {
-        $allUsersViaQuery = User::query()->queryAllModelsIndexed();
+        $allUsersViaQuery = TestUser::query()->queryAllModelsIndexed();
 
         // -------------------------------------------------------------------------------------------------------------
 
         /**
-         * @var $allUsersViaAll User[]
+         * @var $allUsersViaAll TestUser[]
          */
-        $allUsersViaAll = User::all();
+        $allUsersViaAll = TestUser::all();
 
         $userIds = [];
 
@@ -472,14 +472,14 @@ class ModelTest extends TestCase
 
     public function testModelQueryAllWithIndexedWithCustomKey()
     {
-        $allUsersViaQuery = User::query()->queryAllModelsIndexed("userName");
+        $allUsersViaQuery = TestUser::query()->queryAllModelsIndexed("userName");
 
         // -------------------------------------------------------------------------------------------------------------
 
         /**
-         * @var $allUsersViaAll User[]
+         * @var $allUsersViaAll TestUser[]
          */
-        $allUsersViaAll = User::all();
+        $allUsersViaAll = TestUser::all();
 
         $userNames = [];
 
@@ -508,19 +508,19 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
 
         // Insert user with a formatted DateTime as their name, because why not
-        $newUser = new User();
+        $newUser = new TestUser();
         $testFormatStr = '1970-11-12 01:03:04';
         $newUser->joinDate = new \DateTime($testFormatStr);
-        $newUser->enumValue = EnumSample::Two;
+        $newUser->enumValue = TestEnum::Two;
         $newUser->save();
         
         // The fact no errors have occurred is a good first step: it means we inserted valid data.
         // Now re-fetch into a new model, and ensure that we get a nice datetime object parsed from the db.
-        $refetchedUser = User::fetch($newUser->id);
+        $refetchedUser = TestUser::fetch($newUser->id);
         
         $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
         $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
-        $this->assertEquals(EnumSample::Two, $refetchedUser->enumValue, 'Database enum value should have been parsed correctly');
+        $this->assertEquals(TestEnum::Two, $refetchedUser->enumValue, 'Database enum value should have been parsed correctly');
     }
 
     public function testModelUpdatesFormattedValues()
@@ -528,7 +528,7 @@ class ModelTest extends TestCase
         Instarecord::config(new TestDatabaseConfig());
 
         // Create initial user
-        $newUser = new User();
+        $newUser = new TestUser();
         $newUser->userName = "testModelUpdatesFormattedValues";
         $newUser->save();
         
@@ -539,7 +539,7 @@ class ModelTest extends TestCase
 
         // The fact no errors have occurred is a good first step: it means we updated the record with valid data.
         // Now re-fetch into a new model, and ensure that we get a nice datetime object parsed from the db.
-        $refetchedUser = User::fetch($newUser->id);
+        $refetchedUser = TestUser::fetch($newUser->id);
 
         $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
         $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
@@ -549,12 +549,12 @@ class ModelTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
         
-        $this->assertNull(User::fetch(123123123));
+        $this->assertNull(TestUser::fetch(123123123));
     }
     
     public function testDefaultValuesForNonNullableDataTypes()
     {
-        $newUser = new User();
+        $newUser = new TestUser();
         
         $this->assertEquals('', $newUser->userName, "Non-nullable strings should be set to EMPTY STRING by default");
         $this->assertEquals(0, $newUser->id, "Non-nullable integers should be set to NULL by default");
@@ -563,7 +563,7 @@ class ModelTest extends TestCase
     
     public function testFetchPkVal()
     {
-        $newUser = new User();
+        $newUser = new TestUser();
         
         $this->assertEquals(0, $newUser->getPrimaryKeyValue());
         
@@ -574,14 +574,14 @@ class ModelTest extends TestCase
 
     public function testFetchExisting()
     {
-        $existingJohn = new User();
+        $existingJohn = new TestUser();
         $existingJohn->userName = 'John Is Real';
 
         $fetchResultOne = $existingJohn->fetchExisting();
 
         $existingJohn->save();
 
-        $matchingJohn = new User();
+        $matchingJohn = new TestUser();
         $matchingJohn->userName = 'John Is Real';
 
         $fetchResultTwo = $matchingJohn->fetchExisting();
@@ -595,13 +595,13 @@ class ModelTest extends TestCase
         $someDt = new \DateTime('now');
 
         // Create the initial record, which we'll be trying to "become"
-        $existingJohn = new User();
+        $existingJohn = new TestUser();
         $existingJohn->userName = 'John Is The OG';
         $existingJohn->joinDate = $someDt;
         $existingJohn->save();
 
         // Try a failing scenario
-        $matchingJohn = new User();
+        $matchingJohn = new TestUser();
         $matchingJohn->userName = 'Mike Is The OG No Match Here';
         $matchingJohn->joinDate = $someDt;
 
@@ -609,7 +609,7 @@ class ModelTest extends TestCase
         $this->assertEmpty($matchingJohn->id, 'tryBecomeExisting() should not set a PK ID if it returns false');
 
         // Try a winning scenario
-        $matchingJohn = new User();
+        $matchingJohn = new TestUser();
         $matchingJohn->userName = 'John Is The OG';
         $matchingJohn->joinDate = $someDt;
 
@@ -623,19 +623,19 @@ class ModelTest extends TestCase
         $user = new TestUserWithSerialized();
         $this->assertNull($user->userName, "By default, a nullable serialized type should have a NULL value");
 
-        $user->userName = new DummySerializableType("Mr. Hands");
+        $user->userName = new TestDummySerializableType("Mr. Hands");
         $this->assertTrue($user->save(), "Saving a serializable object value should succeed");
 
-        $user = User::fetch($user->id);
+        $user = TestUser::fetch($user->id);
         $this->assertSame("Mr. Hands", $user->userName, "Reading a serialized value as string should work");
 
         $user = TestUserWithSerialized::fetch($user->id);
-        $this->assertEquals(new DummySerializableType("Mr. Hands"), $user->userName, "Reading a serialized object from database should work");
+        $this->assertEquals(new TestDummySerializableType("Mr. Hands"), $user->userName, "Reading a serialized object from database should work");
     }
 
     public function testTrySave()
     {
-        $user = new User();
+        $user = new TestUser();
 
         $exceptionThrown = false;
         try {

@@ -7,6 +7,8 @@ use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\ModelQuery;
 use SoftwarePunt\Instarecord\Database\Table;
 use SoftwarePunt\Instarecord\Models\ModelLogicException;
+use SoftwarePunt\Instarecord\Relationships\HasManyRelationship;
+use SoftwarePunt\Instarecord\Utils\TextTransforms;
 
 /**
  * The base class for all Softwarepunt models.
@@ -32,12 +34,13 @@ class Model
      * Initializes a new instance of this model which can be inserted into the database.
      *
      * @param array|null $initialValues Optionally, an array of initial property values to set on the model.
+     * @param bool $loadRelationships If true, automatically load defined relationships (causing additional queries).
      */
-    public function __construct(?array $initialValues = [])
+    public function __construct(?array $initialValues = [], bool $loadRelationships = true)
     {
         $this->_tableInfo = Table::getTableInfo(get_class($this));
 
-        $this->setInitialValues($initialValues);
+        $this->setInitialValues($initialValues, $loadRelationships);
         $this->markAllPropertiesClean();
     }
 
@@ -70,9 +73,10 @@ class Model
     /**
      * Applies a set of initial values as properties on this model.
      *
-     * @param array $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
+     * @param array|null $initialValues A list of properties and their values, or columns and their values, or a mix thereof.
+     * @param bool $loadRelationships If true, automatically load defined relationships (causing additional queries).
      */
-    protected function setInitialValues(?array $initialValues): void
+    protected function setInitialValues(?array $initialValues, bool $loadRelationships = true): void
     {
         foreach ($this->getTableInfo()->getColumns() as $column) {
             $propertyName = $column->getPropertyName();
@@ -85,7 +89,7 @@ class Model
         }
 
         if ($initialValues) {
-            $this->setColumnValues($initialValues);
+            $this->setColumnValues($initialValues, $loadRelationships);
         }
     }
 
@@ -166,7 +170,6 @@ class Model
 
     /**
      * Gets a key/value list of all columns and their values.
-     * This involves the translation of
      *
      * @return array An array containing property values, indexed by property name.
      */
@@ -178,12 +181,14 @@ class Model
         foreach ($properties as $propertyName => $propertyValue) {
             $columnInfo = $this->getColumnForPropertyName($propertyName);
 
-            if ($columnInfo) {
-                $columnName = $columnInfo->getColumnName();
-                $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
+            if (!$columnInfo)
+                // Custom property, not part of the table
+                continue;
 
-                $columns[$columnName] = $columnValue;
-            }
+            $columnName = $columnInfo->getColumnName();
+            $columnValue = $columnInfo->formatDatabaseValue($propertyValue);
+
+            $columns[$columnName] = $columnValue;
         }
 
         return $columns;
@@ -193,8 +198,9 @@ class Model
      * Applies a set of database values to this instance.
      *
      * @param array $values
+     * @param bool $loadRelationships If true, automatically load defined relationships (causing additional queries).
      */
-    public function setColumnValues(array $values): void
+    public function setColumnValues(array $values, bool $loadRelationships = false): void
     {
         foreach ($values as $nameInArray => $valueInArray) {
             // Can we find the column by its name?
@@ -212,7 +218,7 @@ class Model
 
             // Set the value, parsing it where needed
             $propertyName = $columnInfo->getPropertyName();
-            $propertyValue = $columnInfo->parseDatabaseValue($valueInArray);
+            $propertyValue = $columnInfo->parseDatabaseValue($valueInArray, $loadRelationships);
 
             // [php-7.4]: Only assign default value if it's not null, or if null is explicitly allowed
             if (($propertyValue !== null) || ($columnInfo->getIsNullable() && $propertyValue === null)) {
@@ -763,5 +769,36 @@ class Model
         }
 
         return $anyChanges;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Relationships
+
+    /**
+     * @var HasManyRelationship[]
+     */
+    private array $hasManyRelationships = [];
+
+    /**
+     * Helper method to create or retrieve a "has many" relationship for this model instance.
+     *
+     * @param string $targetClass
+     * @param string|null $foreignKey
+     * @return HasManyRelationship
+     */
+    public function hasMany(string $targetClass, ?string $foreignKey = null): HasManyRelationship
+    {
+        if (!$foreignKey) {
+            $tableName = $this->getTableName();
+            $singular = TextTransforms::singularize($tableName);
+            $foreignKey = "{$singular}_id"; // e.g. if we are User, this would be "user_id"
+        }
+
+        $instanceKey = "{$targetClass}::{$foreignKey}";
+
+        if (!isset($this->hasManyRelationships[$instanceKey])) {
+            $this->hasManyRelationships[$instanceKey] = new HasManyRelationship($this, $targetClass, $foreignKey);
+        }
+        return $this->hasManyRelationships[$instanceKey];
     }
 }

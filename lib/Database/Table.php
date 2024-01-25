@@ -99,6 +99,22 @@ class Table
     }
 
     /**
+     * Gets columns with a defined relationship.
+     *
+     * @return Column[]
+     */
+    public function getRelationshipColumns(): array
+    {
+        $columns = [];
+        foreach ($this->getColumns() as $column) {
+            if ($column->getIsRelationship()) {
+                $columns[$column->getColumnName()] = $column;
+            }
+        }
+        return $columns;
+    }
+
+    /**
      * Gets column information by property name.
      *
      * @param string $propertyName
@@ -137,9 +153,9 @@ class Table
     }
 
     /**
-     * @var array
+     * @var Table[]
      */
-    public static $tableInfoCache = [];
+    public static array $tableInfoCache = [];
 
     /**
      * @param string $modelClassName
@@ -150,7 +166,6 @@ class Table
         if (!isset(self::$tableInfoCache[$modelClassName])) {
             self::$tableInfoCache[$modelClassName] = new Table($modelClassName);
         }
-
         return self::$tableInfoCache[$modelClassName];
     }
 

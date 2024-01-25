@@ -5,6 +5,7 @@ namespace SoftwarePunt\Instarecord\Database;
 use SoftwarePunt\Instarecord\Model;
 use SoftwarePunt\Instarecord\Models\IReadOnlyModel;
 use SoftwarePunt\Instarecord\Models\ModelAccessException;
+use SoftwarePunt\Instarecord\Relationships\RelationshipBatcher;
 
 /**
  * A model-specific query.
@@ -13,17 +14,18 @@ class ModelQuery extends Query
 {
     /**
      * The fully qualified class name of the model.
-     *
-     * @var string
      */
-    protected $modelName;
+    protected string $modelName;
 
     /**
      * A blank reference for the model we are managing.
-     *
-     * @var Model
      */
-    protected $referenceModel;
+    protected Model $referenceModel;
+
+    /**
+     * @var callable[] An array of callbacks to invoke when a model is loaded.
+     */
+    protected array $resultHooks = [];
 
     /**
      * Constructs a new model query.
@@ -41,6 +43,7 @@ class ModelQuery extends Query
 
         $this->modelName = $modelName;
         $this->referenceModel = new $modelName;
+        $this->resultHooks = [];
 
         if (!$this->referenceModel instanceof Model) {
             throw new DatabaseException("ModelQuery: Invalid model class, does not extend from Model: {$modelName}");
@@ -49,6 +52,9 @@ class ModelQuery extends Query
         // Preset the table name for this query
         $this->from($this->referenceModel->getTableName());
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Query - Wheres
 
     /**
      * Adds a WHERE constraint to match the primary key in the given model instance.
@@ -63,6 +69,9 @@ class ModelQuery extends Query
         return $this;
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // Query - Executes
+
     /**
      * Queries all rows and returns them as an array of model instances.
      *
@@ -71,10 +80,16 @@ class ModelQuery extends Query
     public function queryAllModels(): array
     {
         $rows = $this->queryAllRows();
-        $models = [];
 
-        foreach ($rows as $row) {
-            $models[] = new $this->modelName($row);
+        // Wrap in batch loader for relationships (if any) to optimize queries
+        $relationshipBatcher = new RelationshipBatcher($this->referenceModel, $rows);
+        $models = $relationshipBatcher->loadAllModels();
+
+        // Fire result hooks
+        if (!empty($this->resultHooks)) {
+            foreach ($models as $model) {
+                $this->fireResultHook($model);
+            }
         }
 
         return $models;
@@ -88,20 +103,14 @@ class ModelQuery extends Query
      */
     public function queryAllModelsIndexed(?string $indexKey = null): array
     {
-        $rows = $this->queryAllRows();
-        $models = [];
+        $models = $this->queryAllModels();
+        $indexed = [];
 
-        foreach ($rows as $row) {
-            /**
-             * @var Model $instance
-             */
-            $instance = new $this->modelName($row);
-
-            $models[$indexKey ? $instance->$indexKey :
-                $instance->getPrimaryKeyValue()] = $instance;
+        foreach ($models as $model) {
+            $indexed[$indexKey ? $model->$indexKey : $model->getPrimaryKeyValue()] = $model;
         }
 
-        return $models;
+        return $indexed;
     }
 
     /**
@@ -117,8 +126,13 @@ class ModelQuery extends Query
             return null;
         }
         
-        return new $this->modelName($row);
+        $model = new $this->modelName($row);
+        $this->fireResultHook($model);
+        return $model;
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Util
 
     /**
      * @throws ModelAccessException
@@ -148,5 +162,20 @@ class ModelQuery extends Query
     {
         $this->verifyAccess();
         return parent::createStatementText();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Result hooks
+
+    public function addResultHook(callable $callback): void
+    {
+        $this->resultHooks[] = $callback;
+    }
+
+    public function fireResultHook(Model $model): void
+    {
+        foreach ($this->resultHooks as $hook) {
+            $hook($model);
+        }
     }
 }
