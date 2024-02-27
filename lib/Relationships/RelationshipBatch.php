@@ -76,7 +76,11 @@ class RelationshipBatch
              * @var $model Model
              */
             $modelPk = $model->getPrimaryKeyValue();
-            $backingFk = $this->modelPkToFk[$modelPk];
+            $backingFk = $this->modelPkToFk[$modelPk] ?? null;
+
+            if (empty($backingFk))
+                continue;
+
             $fkResult = $results[$backingFk] ?? null;
 
             $model->$propName = $fkResult;
