@@ -3,9 +3,11 @@
 namespace SoftwarePunt\Instarecord\Database;
 
 use Minime\Annotations\Reader;
+use SoftwarePunt\Instarecord\Attributes\FriendlyName;
 use SoftwarePunt\Instarecord\Config\ConfigException;
 use SoftwarePunt\Instarecord\Reflection\ReflectionModel;
 use SoftwarePunt\Instarecord\Utils\TextTransforms;
+use SoftwarePunt\Instarecord\Validation\ValidationAttribute;
 
 /**
  * Represents a database table, which backs a model.
