@@ -115,8 +115,6 @@ $matchingCars = Car::query()
 ```php
 <?php
 
-use SoftwarePunt\Instarecord\Database;use SoftwarePunt\Instarecord\Instarecord;
-
 $carsPerYear = Instarecord::query()
     ->select('year, COUNT(*) as count')
     ->from('cars')
