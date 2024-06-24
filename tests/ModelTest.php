@@ -7,6 +7,7 @@ use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Tests\Samples\TestDummySerializableType;
 use Softwarepunt\Instarecord\Tests\Samples\TestEnum;
+use SoftwarePunt\Instarecord\Tests\Samples\TestUserAuto;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUserWithSerialized;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
@@ -160,7 +161,13 @@ class ModelTest extends TestCase
     
     public function testGetTableName()
     {
-        $sampleUserModel = new TestUser();
+        $sampleUserModel = new TestUser(); // has getTableName() implemented
+        $this->assertEquals('users', $sampleUserModel->getTableName());
+    }
+
+    public function testGetTableNameFromAttribute()
+    {
+        $sampleUserModel = new TestUserAuto(); // has #[TableName] attribute
         $this->assertEquals('users', $sampleUserModel->getTableName());
     }
 

@@ -3,9 +3,11 @@
 namespace SoftwarePunt\Instarecord\Database;
 
 use Minime\Annotations\Reader;
+use SoftwarePunt\Instarecord\Attributes\FriendlyName;
 use SoftwarePunt\Instarecord\Config\ConfigException;
 use SoftwarePunt\Instarecord\Reflection\ReflectionModel;
 use SoftwarePunt\Instarecord\Utils\TextTransforms;
+use SoftwarePunt\Instarecord\Validation\ValidationAttribute;
 
 /**
  * Represents a database table, which backs a model.
@@ -152,6 +154,18 @@ class Table
         return null;
     }
 
+    public function getTableName(): string
+    {
+        if ($this->reflectionModel->nameOverride) {
+            return $this->reflectionModel->nameOverride;
+        } else {
+            return Column::getDefaultColumnName($this->modelClassNameNoNamespace);
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Static utils
+
     /**
      * @var Table[]
      */
@@ -170,17 +184,12 @@ class Table
     }
 
     /**
-     * Gets the "default" table name.
-     *
-     * @param string $className
-     * @return mixed|string
+     * Gets the default table name, derived from the model class name.
      */
-    public static function getDefaultTableName(string $className)
+    public static function getDefaultTableName(string $className): string
     {
         $tableName = TextTransforms::removeNamespaceFromClassName($className);
         $tableName = TextTransforms::pluralize($tableName);
-        $tableName = Column::getDefaultColumnName($tableName);
-
-        return $tableName;
+        return Column::getDefaultColumnName($tableName);
     }
 }

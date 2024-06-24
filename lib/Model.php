@@ -9,6 +9,8 @@ use SoftwarePunt\Instarecord\Database\Table;
 use SoftwarePunt\Instarecord\Models\ModelLogicException;
 use SoftwarePunt\Instarecord\Relationships\HasManyRelationship;
 use SoftwarePunt\Instarecord\Utils\TextTransforms;
+use SoftwarePunt\Instarecord\Validation\ModelValidator;
+use SoftwarePunt\Instarecord\Validation\ValidationResults;
 
 /**
  * The base class for all Softwarepunt models.
@@ -54,7 +56,7 @@ class Model
      */
     public function getTableName(): string
     {
-        return Table::getDefaultTableName(get_class($this));
+        return $this->getTableInfo()->getTableName();
     }
 
     /**
@@ -800,5 +802,14 @@ class Model
             $this->hasManyRelationships[$instanceKey] = new HasManyRelationship($this, $targetClass, $foreignKey);
         }
         return $this->hasManyRelationships[$instanceKey];
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Validation
+
+    public function validate(): ValidationResults
+    {
+        $validator = new ModelValidator($this);
+        return $validator->validate();
     }
 }

@@ -5,11 +5,13 @@ namespace SoftwarePunt\Instarecord\Database;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use SoftwarePunt\Instarecord\Attributes\FriendlyName;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Model;
 use SoftwarePunt\Instarecord\Relationships\Relationship;
 use SoftwarePunt\Instarecord\Serialization\IDatabaseSerializable;
 use SoftwarePunt\Instarecord\Tests\Samples\TestAirline;
+use SoftwarePunt\Instarecord\Validation\ValidationAttribute;
 
 /**
  * Represents a Column within a Table.
@@ -86,6 +88,19 @@ class Column
      * @see Column::AUTO_MODE_*
      */
     protected ?string $autoMode;
+
+    /**
+     * Validator attribute instances for this column.
+     *
+     * @var ValidationAttribute[]
+     */
+    protected array $validators;
+
+    /**
+     * User-friendly name for this column/property, if specified.
+     * Used for error messages and any other user-facing text.
+     */
+    protected ?string $friendlyName;
 
     /**
      * The timezone to use for parsing/formatting date/time/datetime values.
@@ -193,6 +208,24 @@ class Column
                 }
             }
         }
+
+        $this->applyAttributeData($rfProp);
+    }
+
+    protected function applyAttributeData(\ReflectionProperty $rfProp)
+    {
+        $this->validators = [];
+        $this->friendlyName = null;
+
+        foreach ($rfProp->getAttributes() as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if ($instance instanceof ValidationAttribute) {
+                $this->validators[] = $instance;
+            } else if ($instance instanceof FriendlyName) {
+                $this->friendlyName = $instance->name;
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -233,6 +266,19 @@ class Column
     public function getPropertyName(): string
     {
         return $this->propertyName;
+    }
+
+    /**
+     * Gets the user-friendly name for this column/property.
+     * Derived from the property name if no friendly name was set.
+     */
+    public function getFriendlyName(): string
+    {
+        if ($this->friendlyName)
+            return $this->friendlyName;
+
+        // Fallback: camelCase -> Camel Case
+        return ucwords(implode(' ', preg_split('/(?=[A-Z])/', $this->getPropertyName())));
     }
 
     /**
@@ -343,6 +389,14 @@ class Column
         }
 
         return $targetRef;
+    }
+
+    /**
+     * @return ValidationAttribute[]
+     */
+    public function getValidators(): array
+    {
+        return $this->validators;
     }
 
     // -----------------------------------------------------------------------------------------------------------------

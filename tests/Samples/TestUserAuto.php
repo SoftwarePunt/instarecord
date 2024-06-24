@@ -2,11 +2,10 @@
 
 namespace SoftwarePunt\Instarecord\Tests\Samples;
 
+use SoftwarePunt\Instarecord\Attributes\TableName;
 use SoftwarePunt\Instarecord\Model;
 
-/**
- * @table users
- */
+#[TableName("users")]
 class TestUserAuto extends Model
 {
     private int $secretNotWritable;
@@ -20,9 +19,4 @@ class TestUserAuto extends Model
     public \DateTime $modifiedAt;
 
     public \DateTime $createdAt;
-
-    public function getTableName(): string
-    {
-        return "users";
-    }
 }
