@@ -105,7 +105,7 @@ You can easily build and run custom queries, and get results in various ways - f
 $matchingCars = Car::query()
     ->where('make = ?', 'Toyota')
     ->andWhere('year > ?', 2000)
-    ->orderBy('year', 'DESC')
+    ->orderBy('year DESC')
     ->limit(10)
     ->queryAllModels(); // Car[]
 ```
