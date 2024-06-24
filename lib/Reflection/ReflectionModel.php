@@ -5,6 +5,7 @@ namespace SoftwarePunt\Instarecord\Reflection;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
+use SoftwarePunt\Instarecord\Attributes\TableName;
 use SoftwarePunt\Instarecord\Config\ConfigException;
 use SoftwarePunt\Instarecord\Model;
 
@@ -36,6 +37,11 @@ class ReflectionModel
     protected array $defaultValues;
 
     /**
+     * @var string|null
+     */
+    public readonly ?string $nameOverride;
+
+    /**
      * ReflectionModel constructor.
      *
      * @param Model $model
@@ -60,6 +66,14 @@ class ReflectionModel
         // Index default values
         foreach ($this->rfClass->getDefaultProperties() as $name => $value) {
             $this->defaultValues[$name] = $value;
+        }
+
+        // Get class attributes
+        $attributes = $this->rfClass->getAttributes();
+        foreach ($attributes as $attribute) {
+            if ($attribute->getName() === TableName::class) {
+                $this->nameOverride = $attribute->getArguments()[0];
+            }
         }
     }
 

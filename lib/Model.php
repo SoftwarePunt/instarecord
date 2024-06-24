@@ -54,7 +54,7 @@ class Model
      */
     public function getTableName(): string
     {
-        return Table::getDefaultTableName(get_class($this));
+        return $this->getTableInfo()->getTableName();
     }
 
     /**

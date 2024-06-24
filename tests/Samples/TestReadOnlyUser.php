@@ -5,9 +5,6 @@ namespace SoftwarePunt\Instarecord\Tests\Samples;
 use SoftwarePunt\Instarecord\Model;
 use SoftwarePunt\Instarecord\Models\IReadOnlyModel;
 
-/**
- * @table users
- */
 class TestReadOnlyUser extends Model implements IReadOnlyModel
 {
     private int $secretNotWritable;

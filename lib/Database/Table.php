@@ -152,6 +152,18 @@ class Table
         return null;
     }
 
+    public function getTableName(): string
+    {
+        if ($this->reflectionModel->nameOverride) {
+            return $this->reflectionModel->nameOverride;
+        } else {
+            return Column::getDefaultColumnName($this->modelClassNameNoNamespace);
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Static utils
+
     /**
      * @var Table[]
      */
@@ -170,17 +182,12 @@ class Table
     }
 
     /**
-     * Gets the "default" table name.
-     *
-     * @param string $className
-     * @return mixed|string
+     * Gets the default table name, derived from the model class name.
      */
-    public static function getDefaultTableName(string $className)
+    public static function getDefaultTableName(string $className): string
     {
         $tableName = TextTransforms::removeNamespaceFromClassName($className);
         $tableName = TextTransforms::pluralize($tableName);
-        $tableName = Column::getDefaultColumnName($tableName);
-
-        return $tableName;
+        return Column::getDefaultColumnName($tableName);
     }
 }
