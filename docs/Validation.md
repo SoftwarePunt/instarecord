@@ -85,3 +85,37 @@ Requires the property to be non-null, non-empty and at least `$minLength` charac
 Requires the property to be at most `$maxLength` characters long.
 
 > {name} can't be longer than {maxLength} characters.
+
+## Custom validators
+You can easily build custom validator attributes by simply extending the `ValidationAttribute` class.
+
+```php
+<?php
+
+use Attribute;
+use SoftwarePunt\Instarecord\Validation\ValidationAttribute;
+use SoftwarePunt\Instarecord\Validation\ValidationResult;
+
+#[Attribute(Attribute::TARGET_PROPERTY)]
+class MyCustomValidator extends ValidationAttribute
+{
+    public function __construct(public string $someParam, public ?string $customError = null)
+    {
+    }
+    
+    public function validate(string $name, mixed $value): ValidationResult
+    {
+        if ($value != $this->someParam) {
+            return ValidationResult::fail($this->customError ?? "{$name} must be equal to '{$this->someParam}'.");
+        }
+        
+        return ValidationResult::pass();
+    }
+}
+```
+
+`validate()` will be called with the friendly property name (if available), and the property's current value.
+
+The validator should return a result by either calling `ValidationResult::pass()` or `ValidationResult::fail("some error")`.
+
+

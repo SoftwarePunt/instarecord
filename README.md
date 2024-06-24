@@ -27,8 +27,17 @@ echo "Created user #{$user->id}!";
 
 ## Features
 
+### 🗺️ [Object Mapping](./docs/ObjectMapping.md)
+Define your models as pure PHP classes with typed properties. Use them like regular objects.
+
+### 📦 [Easy CRUD](./docs/CRUD.md)
+Use intuitive object-oriented CRUD (create, read, update, and delete) operations on your models.
+
+### 🔎 [Query Builder](./docs/Queries.md)
+Use the query builder to quickly build and run more complex queries with prepared statements.
+
 ### 🤝 [Relationships](./docs/Relationships.md)
-Define relationships between your models and easily load them in an optimized way.
+Set up relationships between your models and easily load them in an optimized way.
 
 ### ✅ [Validation](./docs/Validation.md)
 Add constraints to your model properties and validate them with user-friendly error messages. 
