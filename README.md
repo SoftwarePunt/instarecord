@@ -5,7 +5,7 @@
 
 Instarecord makes it super easy and fun to work with MySQL databases in PHP. It's fast and intuitive, and loaded with optional features to make your life easier.
 
-# The pitch
+## The pitch
 🧙‍♂️ Define your models with typed variables, and Instarecord figures out the rest!
 
 ```php
@@ -25,24 +25,24 @@ $user->save();
 echo "Created user #{$user->id}!";
 ```
 
-# Features
+## Features
 
-## 🤝 [Relationships](./docs/Relationships.md)
+### 🤝 [Relationships](./docs/Relationships.md)
 Define relationships between your models and easily load them in an optimized way.
 
-## ✅ [Validation](./docs/Validation.md)
+### ✅ [Validation](./docs/Validation.md)
 Add constraints to your model properties and validate them with user-friendly error messages. 
 
-# Quickstart
+## Quickstart
 
-## Installation
+### Installation
 Add Instarecord to your project with [Composer](https://getcomposer.org/):
 
 ```bash
 composer require softwarepunt/instarecord
 ```
 
-## Configuration
+### Configuration
 Pass your own `DatabaseConfig` or modify the default one:
 
 ```php
@@ -59,7 +59,7 @@ $config->database = "my_database";
 $config->timezone = "UTC";
 ```  
 
-## Use models
+### Use models
 Defines your models by creating normal classes with public properties, and extending `Model`:
 
 ```php
@@ -95,10 +95,10 @@ $car->save(); // UPDATE cars SET year = 2006 WHERE id = 123
 $car->delete(); // DELETE FROM cars WHERE id = 123
 ```
 
-## Run queries
+### Run queries
 You can easily build and run custom queries, and get results in various ways - from raw data to fully populated models.
 
-### From models
+#### From models
 ```php
 <?php
 
@@ -110,7 +110,7 @@ $matchingCars = Car::query()
     ->queryAllModels(); // Car[]
 ```
 
-### Standalone
+#### Standalone
 
 ```php
 <?php
