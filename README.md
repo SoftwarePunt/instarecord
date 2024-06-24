@@ -79,8 +79,6 @@ class Car extends Model
 Now you can create, read, update, and delete records with ease:
 
 ```php
-<?php
-
 $car = new Car();
 $car->make = "Toyota";
 $car->model = "Corolla";
@@ -100,8 +98,6 @@ You can easily build and run custom queries, and get results in various ways - f
 
 #### From models
 ```php
-<?php
-
 $matchingCars = Car::query()
     ->where('make = ?', 'Toyota')
     ->andWhere('year > ?', 2000)
@@ -113,8 +109,6 @@ $matchingCars = Car::query()
 #### Standalone
 
 ```php
-<?php
-
 $carsPerYear = Instarecord::query()
     ->select('year, COUNT(*) as count')
     ->from('cars')
