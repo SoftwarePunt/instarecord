@@ -1,6 +1,7 @@
 # Instarecord
 **✨ A hyper productive ORM for PHP.**
 
+[![Packagist Version](https://img.shields.io/packagist/v/softwarepunt/instarecord?logo=packagist)](https://packagist.org/packages/softwarepunt/instarecord)
 [![PHPUnit](https://github.com/SoftwarePunt/instarecord/actions/workflows/phpunit.yml/badge.svg)](https://github.com/SoftwarePunt/instarecord/actions/workflows/phpunit.yml)
 
 Instarecord makes it super easy and fun to work with MySQL databases in PHP. It's fast and intuitive, and loaded with optional features to make your life easier.
