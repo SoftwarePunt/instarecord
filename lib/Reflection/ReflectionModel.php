@@ -75,6 +75,9 @@ class ReflectionModel
                 $this->nameOverride = $attribute->getArguments()[0];
             }
         }
+        if (!isset($this->nameOverride)) {
+            $this->nameOverride = null;
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------
