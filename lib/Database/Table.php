@@ -159,7 +159,7 @@ class Table
         if ($this->reflectionModel->nameOverride) {
             return $this->reflectionModel->nameOverride;
         } else {
-            return Column::getDefaultColumnName($this->modelClassNameNoNamespace);
+            return self::getDefaultTableName($this->modelClassNameNoNamespace);
         }
     }
 
