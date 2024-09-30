@@ -426,14 +426,22 @@ class ModelTest extends TestCase
         $containsOurItem = false;
         
         foreach ($fetchUserList as $fetchUserListItem) {
-            $this->assertInstanceOf("SoftwarePunt\\Instarecord\\Tests\\Samples\\TestUser", $fetchUserListItem, 'Expected a list of user models');
-            
+            $this->assertInstanceOf("SoftwarePunt\\Instarecord\\Tests\\Samples\\TestUser", $fetchUserListItem,
+                'Expected a list of user models');
+
             if ($fetchUserListItem->id == $newUser->id) {
                 $containsOurItem = true;
             }
         }
         
         $this->assertTrue($containsOurItem, 'Expected to find our inserted user record in the all() list');
+
+        // 3. Fetch all indexed
+        $fetchAllIndexed = TestUser::allIndexed('userName');
+
+        $this->assertNotEmpty($fetchAllIndexed, 'Expected nonempty user list');
+        $this->assertArrayHasKey('imma-be-listfetched-please', $fetchAllIndexed,
+            'Expected to find our inserted user record by name in the allIndexed() list');
     }
     
     public function testModelQueryUsesTableAndSelectAsDefaults()

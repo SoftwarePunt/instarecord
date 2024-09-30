@@ -615,6 +615,25 @@ class Model
     }
 
     /**
+     * Fetches all records in the database as a collection of model instances, indexed by a column name.
+     *
+     * @param string $columnName The column name to index the array with.
+     * @return array
+     */
+    public static function allIndexed(string $columnName = "id"): array
+    {
+        $className = get_called_class();
+        $referenceModel = new $className();
+
+        /**
+         * @var $referenceModel Model
+         */
+        return $referenceModel->query()
+            ->select('*')
+            ->queryAllModelsIndexed($columnName);
+    }
+
+    /**
      * Get table information.
      *
      * @return Table
