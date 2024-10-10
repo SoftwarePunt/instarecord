@@ -774,6 +774,15 @@ class Model
     }
 
     /**
+     * Gets whether "auto applicator" is enabled for this model.
+     * Default implementation returns true.
+     */
+    protected function getAutoApplicatorEnabled(): bool
+    {
+        return true;
+    }
+
+    /**
      * Performs any @auto hooks before committing new or changed models to the database.
      *
      * @param string $reason The change reason, e.g. "update" or "create".
@@ -781,6 +790,10 @@ class Model
      */
     protected function runAutoApplicator(string $reason): bool
     {
+        if (!$this->getAutoApplicatorEnabled()) {
+            return false;
+        }
+
         $anyChanges = false;
 
         foreach ($this->getTableInfo()->getColumns() as $column) {
