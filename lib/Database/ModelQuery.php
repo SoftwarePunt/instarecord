@@ -104,10 +104,40 @@ class ModelQuery extends Query
     public function queryAllModelsIndexed(?string $indexKey = null): array
     {
         $models = $this->queryAllModels();
+
+        if ($indexKey === null) {
+            // Default: primary key as index
+            $indexKey = $this->referenceModel->getPrimaryKeyPropertyName();
+        }
+
+        $relationship = null;
+
+        if (!isset($this->referenceModel->$indexKey)) {
+            // Validation failed: invalid index used
+            $resolved = false;
+
+            if (str_ends_with($indexKey, '_id')) {
+                // ...but it could be a relationship FK, try to resolve it
+                if ($relationship = $this->referenceModel->getTableInfo()->getRelationshipColumn($indexKey)) {
+                    $resolved = true;
+                }
+            }
+
+            if (!$resolved) {
+                throw new \LogicException("Invalid index key / column used for indexing models: {$indexKey}");
+            }
+        }
+
+        // Collect and index
         $indexed = [];
 
         foreach ($models as $model) {
-            $indexed[$indexKey ? $model->$indexKey : $model->getPrimaryKeyValue()] = $model;
+            if ($relationship)
+                $indexValue = $model->{$relationship->getPropertyName()}->id;
+            else
+                $indexValue = $model->$indexKey;
+
+            $indexed[$indexValue] = $model;
         }
 
         return $indexed;

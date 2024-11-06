@@ -116,6 +116,12 @@ class Table
         return $columns;
     }
 
+    public function getRelationshipColumn(string $name): ?Column
+    {
+        $columns = $this->getRelationshipColumns();
+        return $columns[$name] ?? null;
+    }
+
     /**
      * Gets column information by property name.
      *

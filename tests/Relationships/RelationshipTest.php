@@ -67,11 +67,16 @@ class RelationshipTest extends TestCase
     {
         Instarecord::config(new TestDatabaseConfig());
 
-        // Create a new airline
+        // Create new airlines
         $airline = new TestAirline();
         $airline->name = "Test Airline";
         $airline->iataCode = "TA";
         $airline->save();
+
+        $airline2 = new TestAirline();
+        $airline2->name = "Test Airline Two";
+        $airline2->iataCode = "T2";
+        $airline2->save();
 
         // Check the initial "has many" relationship state
         $initialMany = $airline->planes();
@@ -92,6 +97,12 @@ class RelationshipTest extends TestCase
         $plane2->registration = "TP-002";
         $plane2->airline = $airline;
         $plane2->save();
+
+        $plane3 = new TestPlane();
+        $plane3->name = "Test Plane 3";
+        $plane3->registration = "TP-003";
+        $plane3->airline = $airline2;
+        $plane3->save();
 
         // Retrieve the "has many" relationship
         $afterMany = $airline->planes();
@@ -146,5 +157,19 @@ class RelationshipTest extends TestCase
         $fetchPlane2 = $hookedMany->fetch($plane2->id);
         $this->assertSame($hookedPlane2, $fetchPlane2,
             "Expected cached fetch() to return the same model instance as hooked query()->queryAllModels()");
+
+        // Query indexed by a relationship
+        $indexedByAirline = TestPlane::query()
+            ->queryAllModelsIndexed('airline_id');
+
+        $this->assertCount(2, $indexedByAirline,
+            "Expected 2 planes to be indexed by airline ID (one will have been overwritten by same key)");
+        $this->assertSame($plane2->id, $indexedByAirline[$airline->id]->id,
+            "Expected plane 2 to be indexed by its airline ID of {$airline->id}");
+        $this->assertSame($plane3->id, $indexedByAirline[$airline2->id]->id,
+            "Expected plane 3 to be indexed by its airline ID of {$airline2->id}");
+
+        $this->assertSame($plane3->airline->id, $indexedByAirline[$airline2->id]->airline->id,
+            "Expected planes loaded via queryAllModelsIndexed to have their relationships loaded");
     }
 }
