@@ -381,14 +381,6 @@ class Query
      */
     public function onDuplicateKeyUpdate(array $values, ?string $lastInsertIdColumn = null): Query
     {
-        $keys = array_keys($values);
-        $firstParameterKey = array_shift($keys);
-        $valuesAreIndexedByName = is_string($firstParameterKey);
-
-        if (!$valuesAreIndexedByName) {
-            throw new QueryBuilderException("Query format error: The values in the ON DUPLICATE KEY UPDATE block MUST be indexed by column name, not by column index number.");
-        }
-
         if ($lastInsertIdColumn) {
             unset($values[$lastInsertIdColumn]);
         }
@@ -862,14 +854,22 @@ class Query
 
             for ($i = 0; $i < count($columnValues); $i++) {
                 $columnName = $columnIndexes[$i];
-                $columnValue = $columnValues[$i];
 
-                if ($i > 0 || $this->onDuplicateKeyUpdateLastInsertIdColumn) {
+                if (is_int($columnName)) {
+                    // Raw SQL statement in value
                     $statementText .= ", ";
-                }
+                    $statementText .= $columnValues[$i];
+                } else {
+                    // Associative value (bound param)
+                    $columnValue = $columnValues[$i];
 
-                $statementText .= "`{$columnName}` = ?";
-                $this->bindParam($columnValue);
+                    if ($i > 0 || $this->onDuplicateKeyUpdateLastInsertIdColumn) {
+                        $statementText .= ", ";
+                    }
+
+                    $statementText .= "`{$columnName}` = ?";
+                    $this->bindParam($columnValue);
+                }
             }
         }
 
