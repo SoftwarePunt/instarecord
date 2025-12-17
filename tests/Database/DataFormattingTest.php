@@ -8,7 +8,7 @@ use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\Table;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Tests\Samples\TestDummySerializableType;
-use Softwarepunt\Instarecord\Tests\Samples\TestEnum;
+use Softwarepunt\Instarecord\Tests\Samples\TestBackedEnum;
 
 class DataFormattingTest extends TestCase
 {
@@ -260,11 +260,11 @@ class DataFormattingTest extends TestCase
         $column = $this->_createTestColumn([
             'var' => Column::TYPE_ENUM,
             'nullable' => true,
-            'enumtype' => TestEnum::class
+            'enumtype' => TestBackedEnum::class
         ]);
 
         $this->assertSame(null, $column->parseDatabaseValue(null));
-        $this->assertSame("three", $column->formatDatabaseValue(TestEnum::Three));
-        $this->assertEquals(TestEnum::Two, $column->parseDatabaseValue("two"));
+        $this->assertSame("three", $column->formatDatabaseValue(TestBackedEnum::Three));
+        $this->assertEquals(TestBackedEnum::Two, $column->parseDatabaseValue("two"));
     }
 }

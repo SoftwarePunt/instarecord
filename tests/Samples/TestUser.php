@@ -24,7 +24,7 @@ class TestUser extends Model
     public \DateTime $joinDate;
 
     #[Required]
-    public TestEnum $enumValue;
+    public TestBackedEnum $enumValue;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Not columns

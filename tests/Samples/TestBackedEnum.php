@@ -2,7 +2,7 @@
 
 namespace Softwarepunt\Instarecord\Tests\Samples;
 
-enum TestEnum : string
+enum TestBackedEnum : string
 {
     case One = 'one';
     case Two = 'two';

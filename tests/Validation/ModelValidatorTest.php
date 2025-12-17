@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Softwarepunt\Instarecord\Tests\Samples\TestEnum;
+use Softwarepunt\Instarecord\Tests\Samples\TestBackedEnum;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
 
 class ModelValidatorTest extends TestCase
@@ -11,7 +11,7 @@ class ModelValidatorTest extends TestCase
         $sample = new TestUser();
         $sample->userName = "abc";
         $sample->joinDate = new DateTime('now');
-        $sample->enumValue = TestEnum::Three;
+        $sample->enumValue = TestBackedEnum::Three;
 
         $result = $sample->validate();
 

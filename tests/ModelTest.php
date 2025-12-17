@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Tests\Samples\TestDummySerializableType;
-use Softwarepunt\Instarecord\Tests\Samples\TestEnum;
+use Softwarepunt\Instarecord\Tests\Samples\TestBackedEnum;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUserAuto;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUserWithSerialized;
 use SoftwarePunt\Instarecord\Tests\Samples\TestUser;
@@ -290,20 +290,20 @@ class ModelTest extends TestCase
         // Create new user
         $newUser = new TestUser();
         $newUser->userName = "reload-user";
-        $newUser->enumValue = TestEnum::One;
+        $newUser->enumValue = TestBackedEnum::One;
         $this->assertTrue($newUser->save(), "New user save should succeed");
         $this->assertNotEmpty($newUser->id, "New user save should set PK value");
 
         // Update user by query
         TestUser::query()
             ->update()
-            ->set('`enum_value` = ?', TestEnum::Two->value)
+            ->set('`enum_value` = ?', TestBackedEnum::Two->value)
             ->where('id = ?', $newUser->id)
             ->execute();
 
         // Reload user
         $this->assertTrue($newUser->reload(), "Reload should succeed");
-        $this->assertEquals(TestEnum::Two, $newUser->enumValue, "Reloaded data should be applied");
+        $this->assertEquals(TestBackedEnum::Two, $newUser->enumValue, "Reloaded data should be applied");
 
         // Delete & reload user
         $newUser->delete();
@@ -347,7 +347,7 @@ class ModelTest extends TestCase
         // 1. Upsert initial
         $user1 = new TestUser();
         $user1->userName = "mr-upsert";
-        $user1->enumValue = TestEnum::One;
+        $user1->enumValue = TestBackedEnum::One;
 
         $this->assertTrue($user1->upsert(), "upsert() should succeed on create");
         $this->assertNotNull($user1->id, "upsert() should cause auto incremented PK value to be set on create");
@@ -355,7 +355,7 @@ class ModelTest extends TestCase
         // 2. Upsert update
         $user2 = new TestUser();
         $user2->userName = "mr-upsert";
-        $user2->enumValue = TestEnum::Two;
+        $user2->enumValue = TestBackedEnum::Two;
         $user2->upsert();
 
         $this->assertTrue($user2->upsert(), "upsert() should succeed on update");
@@ -526,7 +526,7 @@ class ModelTest extends TestCase
         $newUser = new TestUser();
         $testFormatStr = '1970-11-12 01:03:04';
         $newUser->joinDate = new \DateTime($testFormatStr);
-        $newUser->enumValue = TestEnum::Two;
+        $newUser->enumValue = TestBackedEnum::Two;
         $newUser->save();
         
         // The fact no errors have occurred is a good first step: it means we inserted valid data.
@@ -535,7 +535,7 @@ class ModelTest extends TestCase
         
         $this->assertInstanceOf('\DateTime', $refetchedUser->joinDate, 'Database DateTime value should have been parsed into a DateTime object');
         $this->assertEquals($testFormatStr, $refetchedUser->joinDate->format(Column::DATE_TIME_FORMAT), 'Database DateTime value should have been parsed correctly');
-        $this->assertEquals(TestEnum::Two, $refetchedUser->enumValue, 'Database enum value should have been parsed correctly');
+        $this->assertEquals(TestBackedEnum::Two, $refetchedUser->enumValue, 'Database enum value should have been parsed correctly');
     }
 
     public function testModelUpdatesFormattedValues()

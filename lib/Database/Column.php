@@ -5,6 +5,9 @@ namespace SoftwarePunt\Instarecord\Database;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use ReflectionEnum;
+use ReflectionType;
+use ReflectionUnionType;
 use SoftwarePunt\Instarecord\Attributes\FriendlyName;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Model;
@@ -154,7 +157,16 @@ class Column
 
         // Check property type
         if ($phpType = $rfProp->getType()) {
-            if ($phpTypeStr = $phpType->getName()) {
+            if ($phpType instanceof ReflectionUnionType) {
+                if ($phpType->allowsNull()) {
+                    $this->isNullable = true;
+                }
+                $phpType = self::selectTypeFromUnion($phpType);
+            }
+
+            $phpTypeStr = $phpType->getName();
+
+            if ($phpTypeStr) {
                 switch ($phpTypeStr) {
                     case "bool":
                         $this->dataType = self::TYPE_BOOLEAN;
@@ -299,21 +311,13 @@ class Column
 
         // It's not a nullable column, we ought to try and set a sensible default value based on its type, if there
         // is a suitable "empty" or "zero" value for that data type.
-        if ($this->dataType === self::TYPE_STRING) {
-            return '';
-        }
-
-        if ($this->dataType === self::TYPE_INTEGER ||
-            $this->dataType === self::TYPE_DECIMAL) {
-            return 0;
-        }
-
-        if ($this->dataType === self::TYPE_BOOLEAN) {
-            return false;
-        }
-
-        // Unable to find a suitable default, it is up to the developer to set an appropriate value before insertion
-        return null;
+        return match ($this->dataType) {
+            self::TYPE_STRING => '',
+            self::TYPE_INTEGER => 0,
+            self::TYPE_DECIMAL => 0.0,
+            self::TYPE_BOOLEAN => false,
+            default => null // Unable to find suitable default, up to the developer to set appropriate value
+        };
     }
 
     /**
@@ -579,12 +583,12 @@ class Column
 
     /**
      * Given a property name, normalizes it to its column name.
-     * The normalization process takes a PHP-like $columnName and converts it to a MySQL compliant "column_name".
+     * The normalization process takes a PHP-like $columnName and converts it to a database-standard "column_name".
      *
      * @param string $propertyName The property name from the code, to be converted to its column equivalent.
      * @return string
      */
-    public static function getDefaultColumnName(string $propertyName)
+    public static function getDefaultColumnName(string $propertyName): string
     {
         preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $propertyName, $matches);
 
@@ -595,5 +599,88 @@ class Column
         }
 
         return implode('_', $ret);
+    }
+
+    /**
+     * @throws ColumnDefinitionException Thrown if the union contains unsupported types.
+     */
+    public static function selectTypeFromUnion(ReflectionUnionType $unionType): ReflectionType
+    {
+        // Note the getTypes() result array is not sorted in order of declaration, but rather in a predetermined way:
+        // https://www.php.net/manual/en/reflectionuniontype.gettypes.php#128871
+
+        $types = $unionType->getTypes();
+
+        // Remove "null" entries from the union type, not relevant/suitable for selection
+        $types = array_filter($types, fn (ReflectionType $type) => $type->getName() !== "null");
+
+        // Short circuit: if there's only one non-null type left, just select that type and continue as normal
+        // Likely declaration was something like "string|null"
+        if (count($types) === 1) {
+            return reset($types);
+        }
+
+        // Pass 1: Find possible scalar types, prefer a string backing if possible
+        $scalarTypes = [];
+        $otherTypes = [];
+
+        foreach ($types as $type) {
+            $typeName = $type->getName();
+
+            if ($typeName === "string") {
+                // Short circuit: String is big strong and beautiful, and preferred over anything else
+                return $type;
+            } else if (enum_exists($typeName)) {
+                // Special case: backed enums may have string backing
+                $reflectionEnum = new ReflectionEnum($typeName);
+
+                if (!$reflectionEnum->isBacked()) {
+                    throw new ColumnDefinitionException("Only backed enums are supported for database serialization, tried to use: {$typeName}");
+                }
+
+                // Enums can only be backed by int or string
+                $backingType = $reflectionEnum->getBackingType();
+                $backingTypeName = $backingType->getName();
+
+                if ($backingTypeName === "string") {
+                    return $backingType;
+                } else if ($backingTypeName === "int") {
+                    $scalarTypes[] = $backingType;
+                } else {
+                    throw new ColumnDefinitionException("Unexpected enum backing type: {$backingTypeName}");
+                }
+            } else if ($typeName === "float" || $typeName === "int" || $typeName === "bool") {
+                $scalarTypes[] = $type;
+            } else {
+                throw new ColumnDefinitionException("Unsupported type for unions in Instarecord: {$type}");
+            }
+        }
+
+        // Pass 2: fall back to scalar types in preferntial order
+        $tFloat = null;
+        $tInt = null;
+        $tBool = null;
+
+        foreach ($scalarTypes as $scalarType) {
+            $scalarName = $scalarType->getName();
+
+            switch ($scalarName) {
+                case "float":
+                    $tFloat = $scalarType;
+                    break;
+                case "int":
+                    $tInt = $scalarType;
+                    break;
+                case "bool":
+                    $tBool = $scalarType;
+                    break;
+            }
+        }
+
+        if ($tFloat) return $tFloat;
+        if ($tInt) return $tInt;
+        if ($tBool) return $tBool;
+
+        throw new ColumnDefinitionException("Unsupported type for unions: {$type}");
     }
 }
