@@ -22,6 +22,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Setup PHP 8.4
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: ctype, curl, dom, fileinfo, ftp, gd, gettext, iconv, imagick, intl, json, libxml, mbstring, openssl, pcntl, pcre, pdo, phar, posix, simplexml, soap, tokenizer, xml, xmlreader, xmlwriter, zip, zlib, curl
+
     - name: Validate composer.json and composer.lock
       run: composer validate
 
