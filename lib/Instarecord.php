@@ -2,6 +2,8 @@
 
 namespace SoftwarePunt\Instarecord;
 
+use SoftwarePunt\Instarecord\Caching\IModelCache;
+use SoftwarePunt\Instarecord\Caching\StaticModelCache;
 use SoftwarePunt\Instarecord\Config\DatabaseConfig;
 use SoftwarePunt\Instarecord\Database\Connection;
 use SoftwarePunt\Instarecord\Database\Query;
@@ -17,6 +19,7 @@ class Instarecord
     protected readonly string $id;
     protected ?DatabaseConfig $config = null;
     protected ?Connection $connection = null;
+    protected ?IModelCache $modelCache = null;
 
     public function __construct(?string $id = null, bool $makePrimary = false)
     {
@@ -25,6 +28,8 @@ class Instarecord
         } else {
             $this->id = $id;
         }
+
+        $this->setDefaultModelCache();
 
         if (!self::$instance || $makePrimary) {
             self::$instance = $this;
@@ -174,6 +179,46 @@ class Instarecord
      */
     public static function query(): ?Query
     {
-        return self::instance()->createQuery();
+        return self::instance()?->createQuery();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Model cache
+
+    /**
+     * Sets a model cache provider for this Instarecord instance.
+     *
+     * Affects all models queried by this instance, based on their `CacheableModel` attribute.
+     */
+    public function setModelCache(?IModelCache $modelCache): void
+    {
+        $this->modelCache = $modelCache;
+    }
+
+    /**
+     * Sets the default model cache provider for this Instarecord instance.
+     * The default provider provides static caching only.
+     *
+     * Affects all models queried by this instance, based on their `CacheableModel` attribute.
+     */
+    public function setDefaultModelCache(): void
+    {
+        $this->setModelCache(new StaticModelCache());
+    }
+
+    /**
+     * Gets the model cache provider for this Instarecord instance, if any.
+     */
+    public function getModelCache(): ?IModelCache
+    {
+        return $this->modelCache;
+    }
+
+    /**
+     * Gets the model cache provider for the current Instarecord instance, if any.
+     */
+    public static function modelCache(): ?IModelCache
+    {
+        return self::instance(false)?->getModelCache();
     }
 }

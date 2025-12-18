@@ -2,6 +2,9 @@
 
 namespace SoftwarePunt\Instarecord;
 
+use ReflectionClass;
+use SoftwarePunt\Instarecord\Caching\IModelCache;
+use SoftwarePunt\Instarecord\Caching\ModelCacheMode;
 use SoftwarePunt\Instarecord\Database\AutoApplicator;
 use SoftwarePunt\Instarecord\Database\Column;
 use SoftwarePunt\Instarecord\Database\ModelQuery;
@@ -505,6 +508,10 @@ class Model
             ->delete()
             ->execute();
 
+        if ($cache = Instarecord::modelCache()) {
+            $cache->onModelDeleted($this);
+        }
+
         return true;
     }
 
@@ -523,11 +530,19 @@ class Model
     {
         $primaryKeyName = $this->getPrimaryKeyPropertyName();
 
-        if (!empty($this->$primaryKeyName)) {
-            return $this->update();
+        if (empty($this->$primaryKeyName)) {
+            // Insert
+            $result = $this->create();
+        } else {
+            // Update
+            $result = $this->update();
         }
 
-        return $this->create();
+        if ($result && $cache = Instarecord::modelCache()) {
+            $cache->onModelSaved($this);
+        }
+
+        return $result;
     }
 
     /**
@@ -576,24 +591,37 @@ class Model
      * Fetches a instance of this model by its primary key value.
      *
      * @param string|int $keyValue The primary key value to seek out.
+     * @param bool $allowCached Enables returning an instance from cache (if configured and available).
      * @return Model|$this|null Fetched model instance, or NULL if there was no result.
      */
-    public static function fetch($keyValue): ?Model
+    public static function fetch(int|string $keyValue, bool $allowCached = true): ?Model
     {
-        $keyValue = strval($keyValue);
-
         $className = get_called_class();
         $referenceModel = new $className();
+
+        $cache = Instarecord::modelCache();
+
+        if ($allowCached && $cache) {
+            if ($cacheResult = $cache->beforeModelFetch($referenceModel, $keyValue)) {
+                return $cacheResult;
+            }
+        }
 
         /**
          * @var $referenceModel Model
          */
         $primaryKeyName = $referenceModel->getPrimaryKeyColumnName();
 
-        return $referenceModel->query()
+        $result = $referenceModel->query()
             ->select('*')
             ->where("{$primaryKeyName} = ?", $keyValue)
             ->querySingleModel();
+
+        if ($result && $cache) {
+            $cache->onModelFetched($result);
+        }
+
+        return $result;
     }
 
     /**

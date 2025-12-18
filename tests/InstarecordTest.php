@@ -3,6 +3,7 @@
 namespace SoftwarePunt\Instarecord\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SoftwarePunt\Instarecord\Caching\StaticModelCache;
 use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Tests\Testing\TestDatabaseConfig;
 
@@ -100,5 +101,18 @@ class InstarecordTest extends TestCase
         $this->assertFalse($connectionObject->isOpen(), "Connection should be closed before getPdo() call");
         $this->assertInstanceOf('\PDO', $connectionObject->getPdo(), "getPdo() should return \PDO instance");
         $this->assertTrue($connectionObject->isOpen(), "getPdo() should open connection");
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDefaultModelCacheImpl(): void
+    {
+        $instarecord = Instarecord::instance();
+
+        $this->assertNotNull($instarecord->getModelCache(),
+            "A default cache provider should be set on new Instarecord instances");
+        $this->assertInstanceOf(StaticModelCache::class, $instarecord->getModelCache(),
+            "StaticModelCache (default/fallback impl) should be set on new Instarecord instances");
     }
 }

@@ -43,6 +43,9 @@ Set up relationships between your models and easily load them in an optimized wa
 ### ✅ [Validation](./docs/Validation.md)
 Add constraints to your model properties and validate them with user-friendly error messages. 
 
+### 🕑 [Caching](./docs/Caching.md)
+Use model caching features to prevent unnecessary or duplicate queries.
+
 ## Quickstart
 
 ### Installation
