@@ -2,6 +2,7 @@
 
 namespace SoftwarePunt\Instarecord\Relationships;
 
+use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Model;
 
 class RelationshipBatcher
@@ -42,9 +43,14 @@ class RelationshipBatcher
     public function loadAllModels(): array
     {
         $models = [];
+        $cache = Instarecord::modelCache();
 
         foreach ($this->rows as $row) {
             $model = new $this->modelName($row, loadRelationships: false);
+
+            if ($cache) {
+                $cache->onModelFetched($model);
+            }
 
             foreach ($this->batches as $batch) {
                 $batch->checkModel($model, $row);

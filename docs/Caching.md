@@ -21,7 +21,7 @@ class Example extends Model
 }
 ```
 
-Enabling static caching for a model enables the behaviors described below:
+**Enabling static caching for a model enables the behaviors described below:**
 
 ### Fetching by primary key
 
@@ -30,6 +30,16 @@ When fetching a model via primary key by using `fetch()`, the model is returned 
 The 2nd argument of `fetch()`, `$allowCached`, can be used to bypass cache on a case-by-case basis.
 
 If there's a cache miss or bypass, the new result is added to cache.
+
+### One-to-one relationships
+
+When a one-to-one relationship [is declared in a model](./Relationships.md#one-to-one), the relationship load will make use of the cache whenever possible.
+
+### Querying models / cache warmup
+
+When using a `ModelQuery` and performing any query that returns models, those models are cached.
+
+This can also be used to warm up the cache ahead of time.
 
 ### Deleting a model
 

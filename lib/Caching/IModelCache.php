@@ -15,7 +15,7 @@ interface IModelCache
     /**
      * Cache hook: a model is about to be fetched from the database by its primary key value.
      *
-     * @param Model $model Empty reference instance for the model being fetched.
+     * @param Model $model Empty reference instance for the model being fetched. Do not modify or keep a reference.
      * @param int|string $pkVal The primary key value being fetched.
      * @return Model|null If a cached model is available, its instance should be returned. If null, fetch will go ahead.
      */

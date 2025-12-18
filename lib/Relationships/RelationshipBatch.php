@@ -3,6 +3,7 @@
 namespace SoftwarePunt\Instarecord\Relationships;
 
 use SoftwarePunt\Instarecord\Database\Column;
+use SoftwarePunt\Instarecord\Instarecord;
 use SoftwarePunt\Instarecord\Model;
 
 class RelationshipBatch
@@ -51,9 +52,10 @@ class RelationshipBatch
      * Executes the combined/batch query, applying the results to the given models.
      *
      * @param array $models
+     * @param bool $allowCache If true, allow model results to be retrieved from cache whenever possible.
      * @return void
      */
-    public function queryAndApply(array $models): void
+    public function queryAndApply(array $models, bool $allowCache = true): void
     {
         if (empty($this->distinctFkValues))
             // Nothing to do / all nulls
@@ -63,11 +65,28 @@ class RelationshipBatch
         if (!$referenceModel instanceof Model)
             throw new \Exception("Relationship class {$this->relationshipClass} is not a Model.");
 
+        $results = [];
+        $remainingFkValues = [];
+
+        if ($allowCache && $cache = Instarecord::modelCache()) {
+            foreach ($this->distinctFkValues as $fkValue) {
+                if ($cacheResult = $cache->beforeModelFetch($referenceModel, $fkValue)) {
+                    $results[$fkValue] = $cacheResult;
+                } else {
+                    $remainingFkValues[] = $fkValue;
+                }
+            }
+        } else {
+            $remainingFkValues = $this->distinctFkValues;
+        }
+
         $referencePkColumn = $referenceModel->getPrimaryKeyColumnName();
 
-        $results = $referenceModel::query()
-            ->where("`{$referencePkColumn}` IN (?)", $this->distinctFkValues)
-            ->queryAllModelsIndexed();
+        if (!empty($remainingFkValues)) {
+            $results += $referenceModel::query()
+                ->where("`{$referencePkColumn}` IN (?)", $remainingFkValues)
+                ->queryAllModelsIndexed();
+        }
 
         $propName = $this->propertyName;
 
