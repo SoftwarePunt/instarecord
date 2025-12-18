@@ -7,45 +7,23 @@ use SoftwarePunt\Instarecord\Database\Connection;
 use SoftwarePunt\Instarecord\Database\Query;
 
 /**
- * Static core logic for Instarecord.
+ * Core wrapper and static utilities for Instarecord.
  */
 class Instarecord
 {
-    /**
-     * @var string
-     */
-    protected $id;
+    // -----------------------------------------------------------------------------------------------------------------
+    // Instance core
 
-    /**
-     * Static reference to the database connection configuration.
-     *
-     * @var DatabaseConfig
-     */
-    protected $config;
-
-    /**
-     * Static reference to the open database connection.
-     *
-     * @var Connection
-     */
-    protected $connection;
-
-    /**
-     * @var Instarecord|null
-     */
-    protected static $instance;
-
-    /**
-     * @var Instarecord[]
-     */
-    protected static $instances = [];
+    protected readonly string $id;
+    protected ?DatabaseConfig $config = null;
+    protected ?Connection $connection = null;
 
     public function __construct(?string $id = null, bool $makePrimary = false)
     {
-        $this->id = $id;
-
-        if (empty($this->id)) {
+        if (empty($id)) {
             $this->id = "default_" . rand(10000, 99999);
+        } else {
+            $this->id = $id;
         }
 
         if (!self::$instance || $makePrimary) {
@@ -64,6 +42,19 @@ class Instarecord
     {
         return $this->id;
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Static instance registry
+
+    /**
+     * Primary instarecord instance.
+     */
+    protected static ?Instarecord $instance = null;
+
+    /**
+     * @var Instarecord[]
+     */
+    protected static array $instances = [];
 
     /**
      * Returns the primary Instarecord instance.
@@ -94,10 +85,13 @@ class Instarecord
         return self::$instances[$instanceId] ?? null;
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // Config
+
     /**
      * Returns the database configuration.
      *
-     * @param $replaceConfigWith DatabaseConfig If provided, replace database config with this object.
+     * @param DatabaseConfig|null $replaceConfigWith If provided, replace database config with this object.
      * @return DatabaseConfig The active database config.
      */
     public function getOrSetConfig(?DatabaseConfig $replaceConfigWith = null): DatabaseConfig
@@ -116,13 +110,16 @@ class Instarecord
     /**
      * Returns the database configuration (on the primary instance).
      *
-     * @param $replaceConfigWith DatabaseConfig If provided, replace database config with this object.
+     * @param DatabaseConfig|null $replaceConfigWith If provided, replace database config with this object.
      * @return DatabaseConfig The active database config.
      */
     public static function config(?DatabaseConfig $replaceConfigWith = null): DatabaseConfig
     {
         return self::instance()->getOrSetConfig($replaceConfigWith);
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Connection
 
     /**
      * Returns the Instarecord database connection, creating it if not yet initialized.
@@ -156,6 +153,9 @@ class Instarecord
     {
         return self::instance()->getConnection($forceReconnect);
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Query
 
     /**
      * Creates and returns a new database query.
