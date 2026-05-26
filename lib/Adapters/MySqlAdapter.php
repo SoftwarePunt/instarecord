@@ -84,7 +84,7 @@ class MySqlAdapter extends DatabaseAdapter
                 case "dbname":
                     $dbConfig->database = $componentValue;
                     break;
-                case "charset";
+                case "charset":
                     $dbConfig->charset = $componentValue;
                     break;
             }
