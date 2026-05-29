@@ -9,10 +9,10 @@ use DateTimeZone;
  */
 class Query
 {
-    const QUERY_TYPE_SELECT = 0;
-    const QUERY_TYPE_INSERT = 1;
-    const QUERY_TYPE_UPDATE = 2;
-    const QUERY_TYPE_DELETE = 3;
+    const int QUERY_TYPE_SELECT = 0;
+    const int QUERY_TYPE_INSERT = 1;
+    const int QUERY_TYPE_UPDATE = 2;
+    const int QUERY_TYPE_DELETE = 3;
 
     /**
      * The connection on which this query is being performed.
@@ -200,7 +200,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function reset(): Query
+    public function reset(): self
     {
         $this->parameters = [];
         $this->statementType = self::QUERY_TYPE_SELECT;
@@ -230,7 +230,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function select(string $selectText = '*', ...$params): Query
+    public function select(string $selectText = '*', ...$params): self
     {
         $this->statementType = self::QUERY_TYPE_SELECT;
         $this->selectStatement = $this->processStatementParameters($selectText, $params);
@@ -243,7 +243,7 @@ class Query
      * @param string $countColumn The COUNT() parameter (unsafe value). Defaults to "*" (all rows).
      * @return Query|$this
      */
-    public function count(string $countColumn = "*"): Query
+    public function count(string $countColumn = "*"): self
     {
         $this->statementType = self::QUERY_TYPE_SELECT;
         $this->selectStatement = "COUNT({$countColumn})";
@@ -255,7 +255,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function insert(): Query
+    public function insert(): self
     {
         $this->statementType = self::QUERY_TYPE_INSERT;
         $this->insertIgnore = false;
@@ -267,7 +267,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function insertIgnore(): Query
+    public function insertIgnore(): self
     {
         $this->statementType = self::QUERY_TYPE_INSERT;
         $this->insertIgnore = true;
@@ -280,7 +280,7 @@ class Query
      * @param string|null $tableName
      * @return Query|$this
      */
-    public function update(?string $tableName = null): Query
+    public function update(?string $tableName = null): self
     {
         $this->statementType = self::QUERY_TYPE_UPDATE;
 
@@ -296,7 +296,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function delete(): Query
+    public function delete(): self
     {
         $this->statementType = self::QUERY_TYPE_DELETE;
         return $this;
@@ -308,7 +308,7 @@ class Query
      * @param string $tableName
      * @return Query|$this
      */
-    public function from(string $tableName): Query
+    public function from(string $tableName): self
     {
         $this->tableName = $tableName;
         return $this;
@@ -320,7 +320,7 @@ class Query
      * @param string $tableName
      * @return Query|$this
      */
-    public function into(string $tableName): Query
+    public function into(string $tableName): self
     {
         $this->tableName = $tableName;
         return $this;
@@ -332,7 +332,7 @@ class Query
      * @param array $values Associative array of the values to be set, optionally indexed by column names.
      * @return Query|$this
      */
-    public function values(array $values): Query
+    public function values(array $values): self
     {
         $this->dataValues = $values;
         return $this;
@@ -345,7 +345,7 @@ class Query
      * @param mixed ...$params Bound parameter list. Only for raw mode (if first param is a string).
      * @return Query|$this
      */
-    public function set($valuesOrSql, ...$params): Query
+    public function set($valuesOrSql, ...$params): self
     {
         if (is_array($valuesOrSql)) {
             $keys = array_keys($valuesOrSql);
@@ -379,7 +379,7 @@ class Query
      * @param string|null $lastInsertIdColumn Column name to use for LAST_INSERT_ID() in case of update result.
      * @return Query|$this
      */
-    public function onDuplicateKeyUpdate(array $values, ?string $lastInsertIdColumn = null): Query
+    public function onDuplicateKeyUpdate(array $values, ?string $lastInsertIdColumn = null): self
     {
         if ($lastInsertIdColumn) {
             unset($values[$lastInsertIdColumn]);
@@ -495,7 +495,7 @@ class Query
      * @param array $params
      * @return Query
      */
-    protected function _join(string $statementText, array $params): Query
+    protected function _join(string $statementText, array $params): self
     {
         // Register the JOIN statement data as another row
         $joinStatement = $this->processStatementParameters($statementText, $params);
@@ -511,7 +511,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function innerJoin(string $statementText, ...$params): Query
+    public function innerJoin(string $statementText, ...$params): self
     {
         return $this->_join("INNER JOIN {$statementText}", $params);
     }
@@ -524,7 +524,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function leftJoin(string $statementText, ...$params): Query
+    public function leftJoin(string $statementText, ...$params): self
     {
         return $this->_join("LEFT JOIN {$statementText}", $params);
     }
@@ -537,7 +537,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function rightJoin(string $statementText, ...$params): Query
+    public function rightJoin(string $statementText, ...$params): self
     {
         return $this->_join("RIGHT JOIN {$statementText}", $params);
     }
@@ -553,7 +553,7 @@ class Query
      * @see andWhere()
      * @return Query|$this
      */
-    public function where(string $statementText, ...$params): Query
+    public function where(string $statementText, ...$params): self
     {
         // Register the WHERE statement data as the ONLY row
         $whereStatement = $this->processStatementParameters($statementText, $params);
@@ -572,7 +572,7 @@ class Query
      * @see where()
      * @return Query|$this
      */
-    public function andWhere(string $statementText, ...$params): Query
+    public function andWhere(string $statementText, ...$params): self
     {
         // Register the WHERE statement data as a new row
         $whereStatement = $this->processStatementParameters($statementText, $params);
@@ -591,7 +591,7 @@ class Query
      * @see andHaving()
      * @return Query|$this
      */
-    public function having(string $statementText, ...$params): Query
+    public function having(string $statementText, ...$params): self
     {
         // Register the HAVING statement data as the ONLY row
         $havingStatement = $this->processStatementParameters($statementText, $params);
@@ -610,7 +610,7 @@ class Query
      * @see having()
      * @return Query|$this
      */
-    public function andHaving(string $statementText, ...$params): Query
+    public function andHaving(string $statementText, ...$params): self
     {
         // Register the HAVING statement data as a new row
         $havingStatement = $this->processStatementParameters($statementText, $params);
@@ -625,7 +625,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function orderBy(?string $statementText, ...$params): Query
+    public function orderBy(?string $statementText, ...$params): self
     {
         if (empty($statementText)) {
             $this->orderBy = null;
@@ -649,7 +649,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function groupBy(string $statementText, ...$params): Query
+    public function groupBy(string $statementText, ...$params): self
     {
         // Process parameters and set GROUP BY data
         $statementRow = $this->processStatementParameters($statementText, $params);
@@ -666,7 +666,7 @@ class Query
      * @param int|null $limit Set limit to a number, or set to NULL or ZERO to make this query limitless.
      * @return Query|$this
      */
-    public function limit(?int $limit): Query
+    public function limit(?int $limit): self
     {
         $this->limit = ($limit && $limit > 0) ? $limit : null;
         return $this;
@@ -678,7 +678,7 @@ class Query
      * @param int|null $offset Set offset amount to a number, or set to NULL or ZERO to not apply an offset.
      * @return Query|$this
      */
-    public function offset(?int $offset): Query
+    public function offset(?int $offset): self
     {
         $this->offset = ($offset && $offset > 0) ? $offset : null;
         return $this;
@@ -690,7 +690,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function forUpdate(): Query
+    public function forUpdate(): self
     {
         $this->lockingMode = "FOR UPDATE";
         return $this;
@@ -702,7 +702,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function lockInShareMode(): Query
+    public function lockInShareMode(): self
     {
         $this->lockingMode = "LOCK IN SHARE MODE";
         return $this;
@@ -714,7 +714,7 @@ class Query
      * @param mixed $param
      * @return Query|$this
      */
-    private function bindParam($param): Query
+    private function bindParam($param): self
     {
         $this->parameters[] = $param;
         return $this;
