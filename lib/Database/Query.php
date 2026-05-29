@@ -200,7 +200,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function reset(): self
+    public function reset(): static
     {
         $this->parameters = [];
         $this->statementType = self::QUERY_TYPE_SELECT;
@@ -230,7 +230,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function select(string $selectText = '*', ...$params): self
+    public function select(string $selectText = '*', ...$params): static
     {
         $this->statementType = self::QUERY_TYPE_SELECT;
         $this->selectStatement = $this->processStatementParameters($selectText, $params);
@@ -243,7 +243,7 @@ class Query
      * @param string $countColumn The COUNT() parameter (unsafe value). Defaults to "*" (all rows).
      * @return Query|$this
      */
-    public function count(string $countColumn = "*"): self
+    public function count(string $countColumn = "*"): static
     {
         $this->statementType = self::QUERY_TYPE_SELECT;
         $this->selectStatement = "COUNT({$countColumn})";
@@ -255,7 +255,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function insert(): self
+    public function insert(): static
     {
         $this->statementType = self::QUERY_TYPE_INSERT;
         $this->insertIgnore = false;
@@ -267,7 +267,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function insertIgnore(): self
+    public function insertIgnore(): static
     {
         $this->statementType = self::QUERY_TYPE_INSERT;
         $this->insertIgnore = true;
@@ -280,7 +280,7 @@ class Query
      * @param string|null $tableName
      * @return Query|$this
      */
-    public function update(?string $tableName = null): self
+    public function update(?string $tableName = null): static
     {
         $this->statementType = self::QUERY_TYPE_UPDATE;
 
@@ -296,7 +296,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function delete(): self
+    public function delete(): static
     {
         $this->statementType = self::QUERY_TYPE_DELETE;
         return $this;
@@ -308,7 +308,7 @@ class Query
      * @param string $tableName
      * @return Query|$this
      */
-    public function from(string $tableName): self
+    public function from(string $tableName): static
     {
         $this->tableName = $tableName;
         return $this;
@@ -320,7 +320,7 @@ class Query
      * @param string $tableName
      * @return Query|$this
      */
-    public function into(string $tableName): self
+    public function into(string $tableName): static
     {
         $this->tableName = $tableName;
         return $this;
@@ -332,7 +332,7 @@ class Query
      * @param array $values Associative array of the values to be set, optionally indexed by column names.
      * @return Query|$this
      */
-    public function values(array $values): self
+    public function values(array $values): static
     {
         $this->dataValues = $values;
         return $this;
@@ -345,7 +345,7 @@ class Query
      * @param mixed ...$params Bound parameter list. Only for raw mode (if first param is a string).
      * @return Query|$this
      */
-    public function set($valuesOrSql, ...$params): self
+    public function set($valuesOrSql, ...$params): static
     {
         if (is_array($valuesOrSql)) {
             $keys = array_keys($valuesOrSql);
@@ -379,7 +379,7 @@ class Query
      * @param string|null $lastInsertIdColumn Column name to use for LAST_INSERT_ID() in case of update result.
      * @return Query|$this
      */
-    public function onDuplicateKeyUpdate(array $values, ?string $lastInsertIdColumn = null): self
+    public function onDuplicateKeyUpdate(array $values, ?string $lastInsertIdColumn = null): static
     {
         if ($lastInsertIdColumn) {
             unset($values[$lastInsertIdColumn]);
@@ -495,7 +495,7 @@ class Query
      * @param array $params
      * @return Query
      */
-    protected function _join(string $statementText, array $params): self
+    protected function _join(string $statementText, array $params): static
     {
         // Register the JOIN statement data as another row
         $joinStatement = $this->processStatementParameters($statementText, $params);
@@ -511,7 +511,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function innerJoin(string $statementText, ...$params): self
+    public function innerJoin(string $statementText, ...$params): static
     {
         return $this->_join("INNER JOIN {$statementText}", $params);
     }
@@ -524,7 +524,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function leftJoin(string $statementText, ...$params): self
+    public function leftJoin(string $statementText, ...$params): static
     {
         return $this->_join("LEFT JOIN {$statementText}", $params);
     }
@@ -537,7 +537,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function rightJoin(string $statementText, ...$params): self
+    public function rightJoin(string $statementText, ...$params): static
     {
         return $this->_join("RIGHT JOIN {$statementText}", $params);
     }
@@ -553,7 +553,7 @@ class Query
      * @see andWhere()
      * @return Query|$this
      */
-    public function where(string $statementText, ...$params): self
+    public function where(string $statementText, ...$params): static
     {
         // Register the WHERE statement data as the ONLY row
         $whereStatement = $this->processStatementParameters($statementText, $params);
@@ -572,7 +572,7 @@ class Query
      * @see where()
      * @return Query|$this
      */
-    public function andWhere(string $statementText, ...$params): self
+    public function andWhere(string $statementText, ...$params): static
     {
         // Register the WHERE statement data as a new row
         $whereStatement = $this->processStatementParameters($statementText, $params);
@@ -591,7 +591,7 @@ class Query
      * @see andHaving()
      * @return Query|$this
      */
-    public function having(string $statementText, ...$params): self
+    public function having(string $statementText, ...$params): static
     {
         // Register the HAVING statement data as the ONLY row
         $havingStatement = $this->processStatementParameters($statementText, $params);
@@ -610,7 +610,7 @@ class Query
      * @see having()
      * @return Query|$this
      */
-    public function andHaving(string $statementText, ...$params): self
+    public function andHaving(string $statementText, ...$params): static
     {
         // Register the HAVING statement data as a new row
         $havingStatement = $this->processStatementParameters($statementText, $params);
@@ -625,7 +625,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function orderBy(?string $statementText, ...$params): self
+    public function orderBy(?string $statementText, ...$params): static
     {
         if (empty($statementText)) {
             $this->orderBy = null;
@@ -649,7 +649,7 @@ class Query
      * @param mixed ...$params Bound parameter list.
      * @return Query|$this
      */
-    public function groupBy(string $statementText, ...$params): self
+    public function groupBy(string $statementText, ...$params): static
     {
         // Process parameters and set GROUP BY data
         $statementRow = $this->processStatementParameters($statementText, $params);
@@ -666,7 +666,7 @@ class Query
      * @param int|null $limit Set limit to a number, or set to NULL or ZERO to make this query limitless.
      * @return Query|$this
      */
-    public function limit(?int $limit): self
+    public function limit(?int $limit): static
     {
         $this->limit = ($limit && $limit > 0) ? $limit : null;
         return $this;
@@ -678,7 +678,7 @@ class Query
      * @param int|null $offset Set offset amount to a number, or set to NULL or ZERO to not apply an offset.
      * @return Query|$this
      */
-    public function offset(?int $offset): self
+    public function offset(?int $offset): static
     {
         $this->offset = ($offset && $offset > 0) ? $offset : null;
         return $this;
@@ -690,7 +690,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function forUpdate(): self
+    public function forUpdate(): static
     {
         $this->lockingMode = "FOR UPDATE";
         return $this;
@@ -702,7 +702,7 @@ class Query
      *
      * @return Query|$this
      */
-    public function lockInShareMode(): self
+    public function lockInShareMode(): static
     {
         $this->lockingMode = "LOCK IN SHARE MODE";
         return $this;
@@ -714,7 +714,7 @@ class Query
      * @param mixed $param
      * @return Query|$this
      */
-    private function bindParam($param): self
+    private function bindParam($param): static
     {
         $this->parameters[] = $param;
         return $this;
