@@ -62,7 +62,7 @@ class ModelQuery extends Query
      * @param Model $instance
      * @return ModelQuery|$this
      */
-    public function wherePrimaryKeyMatches(Model $instance): ModelQuery
+    public function wherePrimaryKeyMatches(Model $instance): static
     {
         $columnName = $this->referenceModel->getPrimaryKeyPropertyName();
         $this->where("{$columnName} = ?", $instance->$columnName);
