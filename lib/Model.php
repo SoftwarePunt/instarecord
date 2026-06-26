@@ -627,7 +627,7 @@ class Model
     /**
      * Fetches all records in the database as a collection of model instances.
      *
-     * @return array
+     * @return static[]
      */
     public static function all(): array
     {
