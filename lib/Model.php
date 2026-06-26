@@ -646,7 +646,7 @@ class Model
      * Fetches all records in the database as a collection of model instances, indexed by a column name.
      *
      * @param string $columnName The column name to index the array with.
-     * @return array
+     * @return array<mixed, static>
      */
     public static function allIndexed(string $columnName = "id"): array
     {
