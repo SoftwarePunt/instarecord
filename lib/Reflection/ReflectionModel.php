@@ -2,6 +2,7 @@
 
 namespace SoftwarePunt\Instarecord\Reflection;
 
+use PropertyHookType;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
@@ -55,13 +56,27 @@ class ReflectionModel
         $this->rfPublicProps = [];
         $this->defaultValues = [];
 
-        // Filter reflection properties to public, non-static ones only (these are our target properties)
+        // Filter reflection properties
         $allProps = $this->rfClass->getProperties(ReflectionProperty::IS_PUBLIC);
-        foreach ($allProps as $rfProp) {
-            if ($rfProp->isPublic() && !$rfProp->isStatic()) {
-                $this->rfPublicProps[] = $rfProp;
+        $this->rfPublicProps = array_filter($allProps, function (ReflectionProperty $rfProp) {
+            if ($rfProp->isReadOnly()) {
+                // Ignore readonly properties
+                return false;
             }
-        }
+            if ($rfProp->isStatic()) {
+                // Ignore static properties
+                return false;
+            }
+            if (!$rfProp->isPublic()) {
+                // Only target public properties
+                return false;
+            }
+            if ($rfProp->hasHook(PropertyHookType::Get) && $rfProp->hasHook(PropertyHookType::Set)) {
+                // Ignore properties with a getter but no setter (effectively read only)
+                return false;
+            }
+            return true;
+        });
 
         // Index default values
         foreach ($this->rfClass->getDefaultProperties() as $name => $value) {
