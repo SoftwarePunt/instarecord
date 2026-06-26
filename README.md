@@ -6,6 +6,8 @@
 
 Instarecord makes it super easy and fun to work with MySQL databases in PHP. It's fast and intuitive, and loaded with optional features to make your life easier.
 
+The latest version requires PHP 8.4+
+
 ## The pitch
 🧙‍♂️ Define your models with typed variables, and Instarecord figures out the rest!
 
