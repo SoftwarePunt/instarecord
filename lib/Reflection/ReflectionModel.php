@@ -71,7 +71,7 @@ class ReflectionModel
                 // Only target public properties
                 return false;
             }
-            if ($rfProp->hasHook(PropertyHookType::Get) && $rfProp->hasHook(PropertyHookType::Set)) {
+            if ($rfProp->hasHook(PropertyHookType::Get) && !$rfProp->hasHook(PropertyHookType::Set)) {
                 // Ignore properties with a getter but no setter (effectively read only)
                 return false;
             }
